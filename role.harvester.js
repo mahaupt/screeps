@@ -30,10 +30,18 @@ var roleHarvester = {
                     creep.moveTo(targets[0]);
                 }
             } else {
-                //upgrade if everything full
-                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller);
-                }
+	            //maybe build construction sites
+                var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+	    		if(targets.length > 0) {
+	    			if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+	    				creep.moveTo(targets[0]);
+	    			}
+	    		} else {
+	    		    //upgrade if no construction site
+	    		    if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+	                    creep.moveTo(creep.room.controller);
+	                }
+	    		}
             }
         }
 	}
