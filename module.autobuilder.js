@@ -11,9 +11,46 @@ var moduleAutobuilder = {
 		    extensions_max = 5;
 	    }
 	    
-	    //todo: build missing strutures
+	    //build missing strutures
+	    if (extensions_num < extensions_max)
+	    {
+		    var spawns = creep.room.find(FIND_STRUCTURES, {
+	            filter: (structure) => {
+	                return structure.structureType == STRUCTURE_SPAWN;
+	            }
+	        });
+	        
+	        //build around spawn 0
+	        if (spawns.length > 0)
+	        {
+		        var buildPos = getFreePosNextTo(room, spawns[0].pos);
+		        room.createConstructionSite(buildPos, STRUCTURE_EXTENSION);
+	        }
+	    }
     }, 
     
+    
+    getFreePosNextTo: function(room, pos)
+    {
+	    for (var r=2; r<10; r++) {
+		    for (var i=1; i <= 4; i++)
+		    {
+			    var dx = 0;
+			    var dy = 0;
+			    if (i==1) dx =  1*r;
+			    if (i==2) dx = -1*r;
+			    if (i==3) dy =  1*r;
+			    if (i==4) dy = -1*r;
+			    
+			    var target = room.lookAt(pos.x+dx, pos.y+dy);
+			    if (target.length == 0)
+			    {
+				    return new RoomPosition(pos.x+dx, pos.y+dy, room.name);
+			    }
+		    }
+		}
+	    
+    }
     
     
     getTotalStructures: function(room, type) {

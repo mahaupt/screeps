@@ -22,7 +22,6 @@ var roleRenewSelf = {
         {
 	        //recycle self to build better creep
 	        var recycleSelf = false;
-
 	        if (creep.room.energyCapacityAvailable > 75*(creep.body.length+3))
 	        {
 		        recycleSelf=true;
