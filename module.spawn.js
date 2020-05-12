@@ -12,6 +12,10 @@ var moduleSpawn = {
         {
 	        spawnBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         }
+        if (spawn.room.energyAvailable >= 600)
+        {
+	        spawnBody = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        }
         
         if (harvesterCount < 4)
         {

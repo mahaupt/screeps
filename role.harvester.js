@@ -16,7 +16,7 @@ var roleHarvester = {
             }
         }
         else {
-            //carry energy to spawn
+            //carry energy to Structures
             var targets = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_EXTENSION ||

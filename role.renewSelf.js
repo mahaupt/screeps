@@ -5,11 +5,20 @@ var roleRenewSelf = {
 		//go back to spawn
         var targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
+                return (structure.structureType == STRUCTURE_EXTENSION ||
+                    structure.structureType == STRUCTURE_SPAWN ||
+                    structure.structureType == STRUCTURE_TOWER) &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            }
+        });
+        var spawns = creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
                 return structure.structureType == STRUCTURE_SPAWN;
             }
         });
         
-        if (targets.length > 0)
+        
+        if (spawns.length > 0)
         {
 	        //recycle self to build better creep
 	        var recycleSelf = false;
@@ -20,7 +29,7 @@ var roleRenewSelf = {
 	        }
 	        
 	        
-	        if (creep.store[RESOURCE_ENERGY] > 0 && targets[0].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 	                creep.moveTo(targets[0]);
 	            }
@@ -28,14 +37,14 @@ var roleRenewSelf = {
 		        //renew self vs recycle self
 		        if (recycleSelf)
 		        {
-			        if (targets[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
+			        if (spawns[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
-				        creep.moveTo(targets[0]);
+				        creep.moveTo(spawns[0]);
 			        }
 		        } else {
-			        if (targets[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
+			        if (spawns[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
-				        creep.moveTo(targets[0]);
+				        creep.moveTo(spawns[0]);
 			        }
 		        }
 		    }
