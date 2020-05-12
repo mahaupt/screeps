@@ -11,17 +11,34 @@ var roleRenewSelf = {
         
         if (targets.length > 0)
         {
-	        if (creep.store[RESOURCE_ENERGY] > 0 && targets[0].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(targets[0]);
-	            }
-	        } else {
-		        if (Game.spawn[targets[0]].renewCreep(creep) == ERR_NOT_IN_RANGE)
+	        //recycle self to build better creep
+	        var recycleSelf = false;
+	        var freeEnergyCapacity = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
+	        if (creep.room.energyCapacityAvailable > 75*(creep.body.length+3) && (freeEnergyCapacity >= 75*creep.body.length))
+	        {
+		        recycleSelf=true;
+	        }
+	        
+	        
+	        //renew self vs recycle self
+	        if (recycleSelf)
+	        {
+		        if (Game.spawn[targets[0]].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 		        {
 			        creep.moveTo(targets[0]);
 		        }
+	        } else {
+		        if (creep.store[RESOURCE_ENERGY] > 0 && targets[0].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+			        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+		                creep.moveTo(targets[0]);
+		            }
+		        } else {
+			        if (Game.spawn[targets[0]].renewCreep(creep) == ERR_NOT_IN_RANGE)
+			        {
+				        creep.moveTo(targets[0]);
+			        }
+		        }
 	        }
-            
         }
         
         //renew successful or energy empty
