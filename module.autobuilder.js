@@ -1,6 +1,6 @@
 var moduleAutobuilder = {
     run: function(room) {
-	    if (Game.time % 200 != 0) return;
+	    if (Game.time % 51 != 0) return;
 	    
 	    var spawn_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_SPAWN);
 	    var spawn_max = 1;
@@ -33,14 +33,18 @@ var moduleAutobuilder = {
     getFreePosNextTo: function(room, pos)
     {
 	    for (var r=2; r<10; r++) {
-		    for (var i=1; i <= 4; i++)
+		    for (var i=1; i <= 8; i++)
 		    {
 			    var dx = 0;
 			    var dy = 0;
-			    if (i==1) dx =  1*r;
-			    if (i==2) dx = -1*r;
-			    if (i==3) dy =  1*r;
-			    if (i==4) dy = -1*r;
+			    if (i==1) { dx =  1*r; dy =  1*r; }
+			    if (i==2) { dx =  1*r; dy =  0; }
+			    if (i==3) { dx =  1*r; dy = -1*r; }
+			    if (i==4) { dx =  0  ; dy =  1*r; }
+			    if (i==5) { dx =  0  ; dy = -1*r; }
+			    if (i==6) { dx = -1*r; dy =  1*r; }
+			    if (i==7) { dx = -1*r; dy =  0; }
+			    if (i==8) { dx = -1*r; dy = -1*r; }
 			    
 			    var target = room.lookAt(pos.x+dx, pos.y+dy);
 			    if (target[0]['type'] == 'terrain')
