@@ -15,15 +15,15 @@ var moduleSpawn = {
         
         if (harvesterCount < 4)
         {
-            spawn.spawnCreep(spawnBody, 'Harvester'+Game.time, { memory: {role: 'harvester'}});
+            spawn.spawnCreep(spawnBody, 'Harvester'+Game.time, { memory: {role: 'harvester', renewSelf: false}});
         }
         if (upgraderCount < 1)
         {
-            spawn.spawnCreep(spawnBody, 'Upgrader'+Game.time, { memory: {role: 'upgrader'}});
+            spawn.spawnCreep(spawnBody, 'Upgrader'+Game.time, { memory: {role: 'upgrader', renewSelf: false}});
         }
         if (builderCount < 4)
         {
-            spawn.spawnCreep(spawnBody, 'Builder'+Game.time, { memory: {role: 'builder'}});
+            spawn.spawnCreep(spawnBody, 'Builder'+Game.time, { memory: {role: 'builder', renewSelf: false}});
         }
         
         
