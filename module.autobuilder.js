@@ -43,9 +43,12 @@ var moduleAutobuilder = {
 			    if (i==4) dy = -1*r;
 			    
 			    var target = room.lookAt(pos.x+dx, pos.y+dy);
-			    if (target.length == 0)
+			    if (target[0]['type'] == 'terrain')
 			    {
-				    return new RoomPosition(pos.x+dx, pos.y+dy, room.name);
+				    if (target[0]['terrain'] == 'plain')
+					{
+				    	return new RoomPosition(pos.x+dx, pos.y+dy, room.name);
+				    }
 			    }
 		    }
 		}
