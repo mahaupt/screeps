@@ -14,7 +14,7 @@ var moduleAutobuilder = {
 	    //build missing strutures
 	    if (extensions_num < extensions_max)
 	    {
-		    var spawns = creep.room.find(FIND_STRUCTURES, {
+		    var spawns = room.find(FIND_STRUCTURES, {
 	            filter: (structure) => {
 	                return structure.structureType == STRUCTURE_SPAWN;
 	            }
@@ -23,7 +23,7 @@ var moduleAutobuilder = {
 	        //build around spawn 0
 	        if (spawns.length > 0)
 	        {
-		        var buildPos = getFreePosNextTo(room, spawns[0].pos);
+		        var buildPos = moduleAutobuilder.getFreePosNextTo(room, spawns[0].pos);
 		        room.createConstructionSite(buildPos, STRUCTURE_EXTENSION);
 	        }
 	    }
