@@ -50,7 +50,7 @@ var moduleAutobuilder = {
 		    }
 		}
 	    
-    }
+    }, 
     
     
     getTotalStructures: function(room, type) {
