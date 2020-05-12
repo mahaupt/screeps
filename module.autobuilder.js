@@ -23,8 +23,8 @@ var moduleAutobuilder = {
 	        //build around spawn 0
 	        if (spawns.length > 0)
 	        {
-		        var buildPos = moduleAutobuilder.getFreePosNextTo(room, spawns[0].pos);
-		        room.createConstructionSite(buildPos, STRUCTURE_EXTENSION);
+		        //var buildPos = moduleAutobuilder.getFreePosNextTo(room, spawns[0].pos);
+		        //room.createConstructionSite(buildPos, STRUCTURE_EXTENSION);
 	        }
 	    }
     }, 
