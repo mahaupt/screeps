@@ -17,7 +17,7 @@ var moduleSpawn = {
 	        spawnBody = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         }
         
-        if (harvesterCount < 4)
+        if (harvesterCount < 3)
         {
             spawn.spawnCreep(spawnBody, 'Harvester'+Game.time, { memory: {role: 'harvester', renewSelf: false}});
         }
@@ -25,7 +25,7 @@ var moduleSpawn = {
         {
             spawn.spawnCreep(spawnBody, 'Upgrader'+Game.time, { memory: {role: 'upgrader', renewSelf: false}});
         }
-        if (builderCount < 4)
+        if (builderCount < 3)
         {
             spawn.spawnCreep(spawnBody, 'Builder'+Game.time, { memory: {role: 'builder', renewSelf: false}});
         }
