@@ -32,4 +32,4 @@ var roleRenewSelf = {
 	}
 }
 
-module.exports = roleBuilder;
+module.exports = roleRenewSelf;
