@@ -1,25 +1,30 @@
 var moduleAutobuilder = {
     run: function(room) {
-	    if (Game.time % 100 != 0) return;
+	    if (Game.time % 200 != 0) return;
 	    
-	    //build spawn
+	    var spawn_num = getTotalStructures(room, STRUCTURE_SPAWN);
+	    var spawn_max = 1;
 	    
-	    // build 5 extensions
-	    if (room.controller.level >= 2)
-	    {
-		    var build = room.find(FIND_MY_STRUCTURES, {
-				    filter: { structureType: STRUCTURE_EXTENSION }
-				});
-			var constr = room.find(FIND_MY_CONSTRUCTION_SITES, {
-				    filter: { structureType: STRUCTURE_EXTENSION }
-				});
-			var extensions = build.length + constr.length;
-			
-		    if (extensions < 5)
-		    {
-			    //rooms.createConstructionSite(10, 15, STRUCTURE_EXTENSION);
-		    }
+	    var extensions_num = getTotalStructures(room, STRUCTURE_EXTENSION);
+	    var extensions_max = 0;
+	    if (room.controller.level >= 2) {
+		    extensions_max = 5;
 	    }
+	    
+	    //todo: build missing strutures
+    }
+    
+    
+    
+    getTotalStructures: function(room, type) {
+	    var structures = room.find(FIND_MY_STRUCTURES, {
+			    filter: { structureType: type }
+			});
+		var constr = room.find(FIND_MY_CONSTRUCTION_SITES, {
+			    filter: { structureType: type }
+			});
+			
+		return structures.length + constr.length;
     }
 }
 

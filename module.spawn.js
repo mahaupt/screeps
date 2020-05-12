@@ -13,7 +13,7 @@ var moduleSpawn = {
 	        spawnBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         }
         
-        if (harvesterCount < 2)
+        if (harvesterCount < 4)
         {
             spawn.spawnCreep(spawnBody, 'Harvester'+Game.time, { memory: {role: 'harvester'}});
         }
