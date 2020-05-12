@@ -14,7 +14,7 @@ var roleRenewSelf = {
 	        //recycle self to build better creep
 	        var recycleSelf = false;
 	        var freeEnergyCapacity = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
-	        if (creep.room.energyCapacityAvailable > 75*(creep.body.length+3) && (freeEnergyCapacity >= 75*creep.body.length))
+	        if (creep.room.energyCapacityAvailable > 75*(creep.body.length+3))
 	        {
 		        recycleSelf=true;
 	        }
@@ -23,7 +23,7 @@ var roleRenewSelf = {
 	        //renew self vs recycle self
 	        if (recycleSelf)
 	        {
-		        if (Game.spawn[targets[0]].recycleCreep(creep) == ERR_NOT_IN_RANGE)
+		        if (targets[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 		        {
 			        creep.moveTo(targets[0]);
 		        }
@@ -33,7 +33,7 @@ var roleRenewSelf = {
 		                creep.moveTo(targets[0]);
 		            }
 		        } else {
-			        if (Game.spawn[targets[0]].renewCreep(creep) == ERR_NOT_IN_RANGE)
+			        if (targets[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
 				        creep.moveTo(targets[0]);
 			        }
