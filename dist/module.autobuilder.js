@@ -38,7 +38,7 @@ var moduleAutobuilder = {
 	    //build extensions
 	    if (extensions_num < extensions_max)
 	    {
-		    moduleAutobuilder.buildExtensions();
+		    moduleAutobuilder.buildExtensions(room);
 	    }
     },
     

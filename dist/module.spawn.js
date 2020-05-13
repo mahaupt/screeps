@@ -2,6 +2,7 @@ var moduleSpawn = {
     run: function(spawn) {
         if (Game.time % 10 != 0) return;
         
+        var sourceCount = spawn.room.find(FIND_SOURCES).length;
         var counts = _.countBy(Game.creeps, 'memory.role');
         var harvesterCount = counts['harvester'] || 0;
         var upgraderCount = counts['upgrader'] || 0;
@@ -14,7 +15,7 @@ var moduleSpawn = {
 	        spawnBody.push(WORK, CARRY, MOVE);
         }
         
-        if (harvesterCount < 3)
+        if (harvesterCount < sourceCount)
         {
             spawn.spawnCreep(spawnBody, 'Harvester'+Game.time, { memory: {role: 'harvester', renewSelf: false}});
         } else
@@ -22,7 +23,7 @@ var moduleSpawn = {
         {
             spawn.spawnCreep(spawnBody, 'Upgrader'+Game.time, { memory: {role: 'upgrader', renewSelf: false}});
         } else 
-        if (builderCount < 3)
+        if (builderCount < 4)
         {
             spawn.spawnCreep(spawnBody, 'Builder'+Game.time, { memory: {role: 'builder', renewSelf: false}});
         }
