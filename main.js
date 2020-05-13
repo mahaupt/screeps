@@ -4,10 +4,12 @@ var roleBuilder = require('role.builder');
 var roleRenewSelf = require('role.renewSelf');
 var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
+var moduleDefense = require('module.defense');
 
 module.exports.loop = function () {
     moduleSpawn.run(Game.spawns['Spawn1']);
     moduleAutobuilder.run(Game.spawns['Spawn1'].room);
+    moduleDefense(Game.spawns['Spawn1'].room);
 
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
