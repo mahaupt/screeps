@@ -20,6 +20,25 @@ var moduleDefense = {
 	            tower.attack(closestHostile);
 	        }
 		}
+		
+		
+		//auto safemode
+		var hostiles = room.find(FIND_HOSTILE_CREEPS);
+		if (hostiles.length > 0)
+		{
+			if (!room.controller.safeMode) {
+				if (room.controller.activateSafeMode() == OK)
+				{
+					Game.notify("Hostiles detected! Safe mode activated!");
+					console.log("Hostiles detected! Safe mode activated!");
+				} else {
+					Game.notify("Hostiles detected! Safe mode failed!");
+					console.log("Hostiles detected! Safe mode failed!");
+				}
+			}
+			
+			
+		}
 	}
 }
 

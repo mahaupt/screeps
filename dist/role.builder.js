@@ -23,8 +23,8 @@ var roleBuilder = {
 	        if (!source) { delete creep.memory.source; return; }
 	        
 	        if (source instanceof Source) {
-		        if(creep.harvest(s) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(s);
+		        if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
+	                creep.moveTo(source);
 	            }
 	        }
 	        else
