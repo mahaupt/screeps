@@ -124,7 +124,6 @@ var roleHarvester = {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_CONTAINER;
 	        }});
-	    console.log(containers.length);
 		
 		if (containers.length > 0)
 		{
