@@ -18,7 +18,7 @@ var roleHarvester = {
 		    if (!roleHarvester.pickOwnSource(creep))
 		    {
 			    console.log("Creep " + creep.name + " didn't find any source");
-				Game.notity("Creep " + creep.name + " didn't find any source");
+				Game.notify("Creep " + creep.name + " didn't find any source");
 		    }
 	    }
 	    
@@ -45,12 +45,27 @@ var roleHarvester = {
 	            var c = Game.getObjectById(creep.memory.container);
 	            if (!c) { delete creep.memory.container; return; }
 	            
-	            if (c.pos.isEqualTo(creep.pos)) {
-	                creep.drop(RESOURCE_ENERGY);
-	                creep.say("dropping");
-	            } else {
-		            creep.moveTo(c);
-		        }
+	            
+	            if (c.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+	            
+		            //repair vs drop
+		            if (c.hits < c.hitsMax) {
+			            if (creep.repair(c) == ERR_NOT_IN_RANGE) {
+				            creep.moveTo(c);
+			            }
+			        } else {
+			            if (c.pos.isEqualTo(creep.pos)) {
+					        creep.drop(RESOURCE_ENERGY);
+							creep.say("dropping");
+			            } else {
+				            creep.moveTo(c);
+				        }
+				    }
+				    
+				} else {
+					creep.say("MC full!");
+					roleHarvester.carryEnergyBackToBase(creep);
+				}
 	            
             } else {
 	            roleHarvester.pickOwnContainer(creep);
@@ -93,24 +108,33 @@ var roleHarvester = {
 		var sources = creep.room.find(FIND_SOURCES);
 		
 		//find new unoccupied source
+		var sourcePicked = {};
 		for (var source of sources)
 		{
-			var alreadyPicked = false;
+			sourcePicked[source.id] = 0;
 			
 			for (var i in Memory.creeps)
 			{
 				if (Memory.creeps[i].source == source.id)
 				{
-					alreadyPicked = true;
+					sourcePicked[source.id]++;
 				}
 			}
-			
-			//source is not yet occupied by creep
-			if (!alreadyPicked)
-			{
-				creep.memory.source = source.id;
-				return true;
+		}
+		
+		var min_picked = 9999;
+		var min_id = false;
+		for(var sid in sourcePicked)
+		{
+			if (min_picked > sourcePicked[sid]) {
+				min_id = sid;
+				min_picked = sourcePicked[sid];
 			}
+		}
+		
+		if (min_id) {
+			creep.memory.source = min_id;
+			return true;
 		}
 		
 		return false;
@@ -120,7 +144,7 @@ var roleHarvester = {
 		//search containers
 		if (!creep.memory.source) return false;
 		var s = Game.getObjectById(creep.memory.source);
-		var containers = s.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+		var containers = s.pos.findInRange(FIND_STRUCTURES, 2, {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_CONTAINER;
 	        }});

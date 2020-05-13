@@ -2,9 +2,12 @@ var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleRenewSelf = require('role.renewSelf');
+var roleHauler = require('role.hauler');
+
 var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
+
 
 module.exports.loop = function () {
     moduleSpawn.run(Game.spawns['Spawn1']);
@@ -22,6 +25,8 @@ module.exports.loop = function () {
             roleUpgrader.run(creep);
         } else if(creep.memory.role == 'builder') {
             roleBuilder.run(creep);
+        } else if(creep.memory.role == 'hauler') {
+	        roleHauler.run(creep);
         }
         
         if (creep.ticksToLive <= 100)
