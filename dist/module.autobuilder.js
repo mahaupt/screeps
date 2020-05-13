@@ -44,7 +44,7 @@ var moduleAutobuilder = {
     
     
     buildExtensions: function(room) {
-	    var spawns = room.find(FIND_STRUCTURES, {
+	    var spawns = room.find(FIND_MY_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_SPAWN;
             }

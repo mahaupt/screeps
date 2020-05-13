@@ -118,23 +118,17 @@ var roleHarvester = {
 	
 	pickOwnContainer: function(creep) {
 		//search containers
-		var structures = creep.room.find(FIND_MY_STRUCTURES, {
-		    filter: { structureType: STRUCTURE_CONTAINER }
-		});
-			
-		var container_id;
-		for (var s of structures)
-		{
-			if (creep.memory.source == s.memory.source)
-			{
-				container_id = s.id;
-				break;
-			}
-		}
+		if (!creep.memory.source) return false;
+		var s = Game.getObjectById(creep.memory.source);
+		var containers = s.pos.findInRange(FIND_MY_STRUCTURES, 1, {
+	        filter: (structure) => {
+	            return structure.structureType == STRUCTURE_CONTAINER;
+	        }});
+	    console.log(containers.length);
 		
-		if (container_id)
+		if (containers.length > 0)
 		{
-			creep.memory.container = container_id;
+			creep.memory.container = containers[0].id;
 			return true;
 		}
 		
