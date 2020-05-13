@@ -40,6 +40,7 @@ var roleRenewSelf = {
 			        {
 				        creep.moveTo(spawns[0]);
 			        }
+			        return;
 		        } else {
 			        if (spawns[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
@@ -50,14 +51,11 @@ var roleRenewSelf = {
         }
         
         
-        if (creep)
+        //renew successful or energy empty
+        if (creep.ticksToLive >= 1100 || (creep.store[RESOURCE_ENERGY] == 0 && targets[0].store[RESOURCE_ENERGY] == 0))
         {
-	        //renew successful or energy empty
-	        if (creep.ticksToLive >= 1100 || (creep.store[RESOURCE_ENERGY] == 0 && targets[0].store[RESOURCE_ENERGY] == 0))
-	        {
-		        creep.memory.renewSelf = false;
-	        }
-	    }
+	        creep.memory.renewSelf = false;
+        }
 	}
 }
 
