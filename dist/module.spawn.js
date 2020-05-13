@@ -8,13 +8,10 @@ var moduleSpawn = {
         var builderCount = counts['builder'] || 0;
         
         var spawnBody = [WORK, CARRY, MOVE];
-        if (spawn.room.energyAvailable >= 400)
+        var bodyIterations = Math.floor(spawn.room.energyAvailable/200.0)-1;
+        for (var i=0; i < bodyIterations; i++)
         {
-	        spawnBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-        }
-        if (spawn.room.energyAvailable >= 600)
-        {
-	        spawnBody = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+	        spawnBody.push(WORK, CARRY, MOVE);
         }
         
         if (harvesterCount < 3)
