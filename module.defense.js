@@ -6,7 +6,7 @@ var moduleDefense = {
 			filter: { structureType: STRUCTURE_TOWER }
 		});
 		
-		for(var tower in towers)
+		for(var tower of towers)
 		{
 			var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
 	            filter: (structure) => structure.hits < structure.hitsMax
