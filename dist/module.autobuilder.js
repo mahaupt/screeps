@@ -95,7 +95,7 @@ var moduleAutobuilder = {
 					var path = s.pos.findPathTo(spawn[0], {ignoreCreeps:true});	
 					if (path.length > 1)
 					{
-						var buildPos = new RoomPosition(path[1].x, path[1].y, room.name);
+						var buildPos = new RoomPosition(path[0].x, path[0].y, room.name);
 						room.createConstructionSite(buildPos, STRUCTURE_CONTAINER);
 						//console.log("Container x" + buildPos.x + " y" + buildPos.y);
 						return;
