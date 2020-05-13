@@ -7,29 +7,55 @@ var moduleAutobuilder = {
 	    
 	    var extensions_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_EXTENSION);
 	    var extensions_max = 0;
-	    if (room.controller.level >= 2) {
+	    if (room.controller.level == 2) {
 		    extensions_max = 5;
-	    }
-	    if (room.controller.level >= 3) {
+	    } else if (room.controller.level == 3) {
 		    extensions_max = 10;
+	    } else if (room.controller.level >= 4) {
+		    extensions_max = (room.controller.level-2)*10;
 	    }
 	    
-	    //build missing strutures
+	    var towers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_TOWER);
+	    var towers_max = 0;
+	    if (room.controller.level >= 3) {
+		    towers_max = 1;
+		}
+		if (room.controller.level >= 5) {
+		    towers_max = 2;
+		}
+		if (room.controller.level >= 7) {
+		    towers_max = 3;
+		}
+		if (room.controller.level == 8) {
+		    towers_max = 6;
+		}
+	    
+	    
+	    //build spawns - build own
+	    
+	    //build towers
+	    
+	    //build extensions
 	    if (extensions_num < extensions_max)
 	    {
-		    var spawns = room.find(FIND_STRUCTURES, {
-	            filter: (structure) => {
-	                return structure.structureType == STRUCTURE_SPAWN;
-	            }
-	        });
-	        
-	        //build around spawn 0
-	        if (spawns.length > 0)
-	        {
-		        var buildPos = moduleAutobuilder.getFreePosNextTo(room, spawns[0].pos);
-		        room.createConstructionSite(buildPos, STRUCTURE_EXTENSION);
-	        }
+		    moduleAutobuilder.buildExtensions();
 	    }
+    },
+    
+    
+    buildExtensions: function(room) {
+	    var spawns = room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return structure.structureType == STRUCTURE_SPAWN;
+            }
+        });
+        
+        //build around spawn 0
+        if (spawns.length > 0)
+        {
+	        var buildPos = moduleAutobuilder.getFreePosNextTo(room, spawns[0].pos);
+	        room.createConstructionSite(buildPos, STRUCTURE_EXTENSION);
+        }
     }, 
     
     
