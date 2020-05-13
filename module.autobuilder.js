@@ -10,6 +10,9 @@ var moduleAutobuilder = {
 	    if (room.controller.level >= 2) {
 		    extensions_max = 5;
 	    }
+	    if (room.controller.level >= 3) {
+		    extensions_max = 10;
+	    }
 	    
 	    //build missing strutures
 	    if (extensions_num < extensions_max)

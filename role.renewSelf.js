@@ -49,11 +49,15 @@ var roleRenewSelf = {
 		    }
         }
         
-        //renew successful or energy empty
-        if (creep.ticksToLive >= 1100 || (creep.store[RESOURCE_ENERGY] == 0 && targets[0].store[RESOURCE_ENERGY] == 0))
+        
+        if (creep)
         {
-	        creep.memory.renewSelf = false;
-        }
+	        //renew successful or energy empty
+	        if (creep.ticksToLive >= 1100 || (creep.store[RESOURCE_ENERGY] == 0 && targets[0].store[RESOURCE_ENERGY] == 0))
+	        {
+		        creep.memory.renewSelf = false;
+	        }
+	    }
 	}
 }
 
