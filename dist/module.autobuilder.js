@@ -1,6 +1,7 @@
 var moduleAutobuilder = {
     run: function(room) {
 	    if (Game.time % 51 != 0) return;
+	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
 	    //SPAWN - no autobuild
 	    //var spawn_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_SPAWN);
@@ -36,10 +37,7 @@ var moduleAutobuilder = {
 		//CONTAINERS
 		var containers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_CONTAINER);
 		var source_num = room.find(FIND_SOURCES).length;
-	    var containers_max = 0;
-	    if (extensions_num >= 5) {
-		    containers_max = 5;
-	    }
+	    var containers_max = 5;
 	    
 	    
 	    //build spawns - build own
@@ -64,6 +62,35 @@ var moduleAutobuilder = {
 	    if (extensions_num < extensions_max)
 	    {
 		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION);
+	    }
+	    
+	    //build roads - nothing other to build
+	    if (extensions_num > 1 && constr_sites_num == 0)
+	    {
+		    var spawn = room.find(FIND_STRUCTURES, {
+			    filter: { structureType: STRUCTURE_SPAWN }
+			});
+			var container = room.find(FIND_STRUCTURES, {
+			    filter: { structureType: STRUCTURE_CONTAINER }
+			});
+			if (spawn.length > 0 && container.length > 0)
+			{
+				var builtRoads = 0;
+				
+				for (var c of container)
+				{
+					var path = spawn[0].pos.findPathTo(c.pos, {ignoreCreeps: true});
+					for (var i=0; i < path.length; i++)
+					{
+						if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
+						{
+							builtRoads++;
+						}
+					}
+					//console.log(builtRoads);
+					if (builtRoads > 0) break;	
+				}
+			}
 	    }
     },
     

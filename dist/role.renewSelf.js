@@ -21,30 +21,29 @@ var roleRenewSelf = {
         if (spawns.length > 0)
         {
 	        //recycle self to build better creep
-	        var recycleSelf = false;
-	        if (creep.room.energyCapacityAvailable > 75*(creep.body.length+3))
+	        if (!creep.memory.killSelf)
 	        {
-		        recycleSelf=true;
+		        roleRenewSelf.killSelfDecision(creep);
 	        }
-	        
 	        
 	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(targets[0]);
+	                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#0000ff'}});
 	            }
 	        } else {
 		        //renew self vs recycle self
-		        if (recycleSelf)
+		        if (creep.memory.killSelf)
 		        {
 			        if (spawns[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
-				        creep.moveTo(spawns[0]);
+				        creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
 			        }
+			        creep.say("RIP");
 			        return;
 		        } else {
 			        if (spawns[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
-				        creep.moveTo(spawns[0]);
+				        creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
 			        }
 		        }
 		    }
@@ -58,10 +57,26 @@ var roleRenewSelf = {
         }
         if (targets.length > 0)
         {
-	        if (creep.store[RESOURCE_ENERGY] == 0 && targets[0].store[RESOURCE_ENERGY] == 0)
+	        if (creep.store[RESOURCE_ENERGY] == 0 && creep.room.energyAvailable < 10)
 	        {
 		        creep.memory.renewSelf = false;
 	        }
+        }
+	}, 
+	
+	
+	killSelfDecision: function(creep) 
+	{
+		var bodyIterations = Math.floor(creep.room.energyAvailable/400)-1;
+        bodyIterations = Math.min(bodyIterations, 1);
+        var possibleBodyParts = 3 + 3*bodyIterations;
+		var freeEnergyCapacity = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
+		var recycleEnergy = creep.body.length*75 + creep.store[RESOURCE_ENERGY];
+		
+		//could produce better creep and has enough energy capacity to handle recycling
+		if (freeEnergyCapacity >= recycleEnergy && possibleBodyParts > creep.body.length)
+        {
+	        creep.memory.killSelf = true;
         }
 	}
 }

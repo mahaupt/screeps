@@ -17,7 +17,8 @@ var moduleSpawn = {
         
         
         var spawnBody = [WORK, CARRY, MOVE];
-        var bodyIterations = Math.floor(spawn.room.energyAvailable/200.0)-1;
+        var bodyIterations = Math.floor(spawn.room.energyAvailable/400)-1;
+        bodyIterations = Math.min(bodyIterations, 1);
         
         
         if (harvesterCount < sourceCount)

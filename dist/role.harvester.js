@@ -33,7 +33,7 @@ var roleHarvester = {
 	    {
             var s = Game.getObjectById(creep.memory.source);
             if(creep.harvest(s) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(s);
+                creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
             }
         }
         else 
@@ -50,15 +50,15 @@ var roleHarvester = {
 	            
 		            //repair vs drop
 		            if (c.hits < c.hitsMax) {
+			            creep.say("repairing");
 			            if (creep.repair(c) == ERR_NOT_IN_RANGE) {
-				            creep.moveTo(c);
+				            creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
 			            }
 			        } else {
-			            if (c.pos.isEqualTo(creep.pos)) {
-					        creep.drop(RESOURCE_ENERGY);
-							creep.say("dropping");
-			            } else {
-				            creep.moveTo(c);
+				        creep.say("dropping");
+				        if (creep.transfer(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+				        {
+					        creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
 				        }
 				    }
 				    
@@ -86,19 +86,19 @@ var roleHarvester = {
         });
         if(targets.length > 0) {
             if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0]);
+                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
             }
         } else {
             //maybe build construction sites
             var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
     		if(targets.length > 0) {
     			if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-    				creep.moveTo(targets[0]);
+    				creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
     			}
     		} else {
     		    //upgrade if no construction site
     		    if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller);
+                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
                 }
     		}
         }

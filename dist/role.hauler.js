@@ -19,23 +19,63 @@ var roleHauler = {
 	        if (!c) { delete creep.memory.container; return; }
 	        
 	        if (creep.withdraw(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-		    	creep.moveTo(c);
+		    	creep.moveTo(c, {visualizePathStyle: {stroke: '#ff0000'}});
 	        }
-        } else {
-	        var targets = creep.room.find(FIND_STRUCTURES, {
+	        
+	        //no more energy - stop and carry to base
+	        if (c.store[RESOURCE_ENERGY] == 0)
+	        {
+		        creep.memory.harvesting = false;
+	        }
+        } 
+        else 
+        {
+	        
+	        // Prio 1: SPAWNS, Extensions
+	        var prio1 = creep.room.find(FIND_STRUCTURES, {
 	            filter: (structure) => {
 	                return (structure.structureType == STRUCTURE_EXTENSION ||
 	                    structure.structureType == STRUCTURE_SPAWN ||
-	                    structure.structureType == STRUCTURE_TOWER ||
-	                    structure.structureType == STRUCTURE_STORAGE || 
+	                    structure.structureType == STRUCTURE_TOWER) &&
+	                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+	            }
+	        });
+	        
+	        // Prio 2: Containers, Storage
+	        var prio2 = creep.room.find(FIND_STRUCTURES, {
+	            filter: (structure) => {
+	                return (structure.structureType == STRUCTURE_STORAGE || 
 	                    (structure.structureType == STRUCTURE_CONTAINER && structure.pos.findInRange(FIND_SOURCES, 2).length == 0)) &&
 	                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
 	            }
 	        });
-	        if(targets.length > 0) {
-	            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(targets[0]);
+	        
+	        
+	        //drop stuff
+	        if(prio1.length > 0) {
+	            if(creep.transfer(prio1[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+	                creep.moveTo(prio1[0], {visualizePathStyle: {stroke: '#00ff00'}});
 	            }
+	        } 
+	        else if (prio2.length > 0)
+	        {
+		        if(creep.transfer(prio2[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+	                creep.moveTo(prio2[0], {visualizePathStyle: {stroke: '#00ff00'}});
+	            }
+	        } 
+	        else 
+	        {
+		    	//no free capacity - just walk to spawn and wait
+		    	var spawn = creep.room.find(FIND_STRUCTURES, {
+	            	filter: (structure) => {
+		                return (structure.structureType == STRUCTURE_SPAWN);
+		            }
+		        });
+		        if (spawn.length > 0)
+		        {
+			        creep.moveTo(spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
+		        }
+		        
 	        }
 	    }
 	}, 
@@ -72,6 +112,9 @@ var roleHauler = {
 	    
 	    return false;
 	}
+	
+	
+	
 }
 
 
