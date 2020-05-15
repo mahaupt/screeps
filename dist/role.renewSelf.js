@@ -78,6 +78,17 @@ var roleRenewSelf = {
         {
 	        creep.memory.killSelf = true;
         }
+		
+		//special kill decision: harvester
+		//upgrade to at least 2 works when having a container
+		if (creep.memory.role == 'harvester' && creep.memory.container)
+		{
+			if (_.sum(creep.body, (c) => c.type == WORK) == 1)
+			{
+				console.log(creep.name + " kills himself due special rule");
+				creep.memory.killSelf = true;
+			}
+		}
 	}
 }
 
