@@ -11,7 +11,7 @@ var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) 
-    {
+    {    
 	    //first - pick own source
 	    if (!creep.memory.source) {
 		    creep.say("picking own source");
@@ -29,11 +29,24 @@ var roleHarvester = {
             creep.memory.harvesting = false;
         }
         
+        
 	    if(creep.memory.harvesting) 
 	    {
             var s = Game.getObjectById(creep.memory.source);
             if(creep.harvest(s) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
+            }
+            
+            //container in available
+            if (creep.memory.container)
+            {
+	            //carry to container immediately
+	            var c = Game.getObjectById(creep.memory.container);
+	            if (!c) { delete creep.memory.container; return; }
+                if (c.hits == c.hitsMax) 
+                { // if damaged keep energy and repair later
+                    creep.transfer(c, RESOURCE_ENERGY);
+                }
             }
         }
         else 

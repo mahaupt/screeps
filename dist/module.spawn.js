@@ -23,6 +23,10 @@ var moduleSpawn = {
         
         if (harvesterCount < sourceCount)
         {
+            if (containerCount > 0)
+            {
+                var spawnBody = [WORK, WORK, CARRY, MOVE];
+            }
 	        for (var i=0; i < bodyIterations; i++)
 	        {
 		        if (i%2==0) {
