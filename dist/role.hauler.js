@@ -49,18 +49,14 @@ var roleHauler = {
 	                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
 	            }
 	        });
+			
+			var targets = prio1.concat(prio2);
 	        
 	        
 	        //drop stuff
-	        if(prio1.length > 0) {
-	            if(creep.transfer(prio1[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(prio1[0], {visualizePathStyle: {stroke: '#00ff00'}});
-	            }
-	        } 
-	        else if (prio2.length > 0)
-	        {
-		        if(creep.transfer(prio2[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(prio2[0], {visualizePathStyle: {stroke: '#00ff00'}});
+	        if(targets.length > 0) {
+	            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+	                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
 	            }
 	        } 
 	        else 
