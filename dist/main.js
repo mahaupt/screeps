@@ -1,6 +1,6 @@
 global.commonFunctions = require('common.functions');
 
-var roleHarvester = require('role.harvester');
+var roleMiner = require('role.miner');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleRenewSelf = require('role.renewSelf');
@@ -21,14 +21,16 @@ module.exports.loop = function () {
         
         if (creep.memory.renewSelf) {
 	        roleRenewSelf.run(creep);
-        } else if(creep.memory.role == 'harvester') {
-            roleHarvester.run(creep);
+        } else if(creep.memory.role == 'miner') {
+            roleMiner.run(creep);
         } else if(creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);
         } else if(creep.memory.role == 'builder') {
             roleBuilder.run(creep);
         } else if(creep.memory.role == 'hauler') {
 	        roleHauler.run(creep);
+        } else if (creep.memory.role == 'harvester') {
+            creep.memory.role = 'miner';
         }
         
         if (creep.ticksToLive <= 100)

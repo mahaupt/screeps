@@ -1,6 +1,6 @@
 /*
 Memory Layout
-.role = "harvester"
+.role = "miner"
 .harvesting = true/false
 .renewSelf = true/false
 .source = source.id

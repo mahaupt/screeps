@@ -3,7 +3,7 @@ var moduleSpawn = {
         if (Game.time % 10 != 0) return;
         
         var counts = _.countBy(Game.creeps, 'memory.role');
-        var harvesterCount = counts['harvester'] || 0;
+        var minerCount = counts['miner'] || 0;
         var upgraderCount = counts['upgrader'] || 0;
         var builderCount = counts['builder'] || 0;
         var haulerCount = counts['hauler'] || 0;
@@ -21,7 +21,7 @@ var moduleSpawn = {
         bodyIterations = Math.min(bodyIterations, 1);
         
         
-        if (harvesterCount < sourceCount)
+        if (minerCount < sourceCount)
         {
             if (containerCount > 0)
             {
@@ -36,7 +36,7 @@ var moduleSpawn = {
 		        }
 	        }
 	        spawnBody.sort();
-            spawn.spawnCreep(spawnBody, 'Harvester'+Game.time, { memory: {role: 'harvester', renewSelf: false}});
+            spawn.spawnCreep(spawnBody, 'Miner'+Game.time, { memory: {role: 'miner', renewSelf: false}});
         } else
         if (haulerCount < containerCount && haulerCount < sourceCount) 
         {
