@@ -73,13 +73,15 @@ var moduleAutobuilder = {
 			var container = room.find(FIND_STRUCTURES, {
 			    filter: { structureType: STRUCTURE_CONTAINER }
 			});
-			if (spawn.length > 0 && container.length > 0)
+            var targets = container.concat([room.controller]);
+			if (spawn.length > 0 && targets.length > 0)
 			{
 				var builtRoads = 0;
 				
-				for (var c of container)
+                //roads from spawn to Structures
+				for (var t of targets)
 				{
-					var path = spawn[0].pos.findPathTo(c.pos, {ignoreCreeps: true});
+					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true, ignoreRoads: true});
 					for (var i=0; i < path.length; i++)
 					{
 						if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
@@ -90,6 +92,19 @@ var moduleAutobuilder = {
 					//console.log(builtRoads);
 					if (builtRoads > 0) break;	
 				}
+                
+                //roads around spawn
+                if (builtRoads == 0) {
+                    var sPos = spawn[0].pos;
+                    room.createConstructionSite(sPos.x+1, sPos.y+1, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x+1, sPos.y, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x+1, sPos.y-1, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x, sPos.y+1, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x, sPos.y-1, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x-1, sPos.y+1, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x-1, sPos.y, STRUCTURE_ROAD);
+                    room.createConstructionSite(sPos.x-1, sPos.y-1, STRUCTURE_ROAD);
+                }
 			}
 	    }
     },
