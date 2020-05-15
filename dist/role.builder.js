@@ -30,7 +30,7 @@ var roleBuilder = {
             }
             
             
-            var target = Game.getElementById(creep.memory.building);
+            var target = Game.getObjectById(creep.memory.building);
             if (!target) { delete creep.memory.building; return; }
             
             if (target instanceof ConstructionSite)
