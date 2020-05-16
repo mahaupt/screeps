@@ -205,6 +205,14 @@ var moduleAutobuilder = {
 			});
 			
 		return structures.length + constr.length;
+    }, 
+    
+    //todo: add predefined layout
+    getPositionDeltas: function(type)
+    {
+        var positions = [
+            {x: -1,y: -2}
+        ];
     }
 }
 

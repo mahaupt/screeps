@@ -74,7 +74,8 @@ var roleRenewSelf = {
 		var recycleEnergy = creep.body.length*75 + creep.store[RESOURCE_ENERGY];
 		
 		//could produce better creep and has enough energy capacity to handle recycling
-		if (freeEnergyCapacity >= recycleEnergy && possibleBodyParts > creep.body.length)
+		//freeEnergyCapacity >= recycleEnergy && 
+		if (possibleBodyParts > creep.body.length)
         {
 	        creep.memory.killSelf = true;
         }

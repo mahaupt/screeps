@@ -44,6 +44,12 @@ var common = {
 	            delete creep.memory.source;
             }
         }
+	},
+	
+	
+	pickupDroppedEnergy: function(creep, range)
+	{
+		
 	}
 }
 
