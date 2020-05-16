@@ -84,6 +84,7 @@ var moduleAutobuilder = {
 					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true, ignoreRoads: true});
                     
                     //bugfix, dont build road on controller
+                    //it strangely needs 25k to complete
                     if (t instanceof StructureController) {
                         path.pop();
                     }
