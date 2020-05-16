@@ -1,13 +1,16 @@
 {
   "name": "cbacon93/screeps",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "cbacon93s Screeps AI",
-  "main": "Gruntfile.js",
+  "main": "src/main.js",
   "dependencies": {
     "grunt": "~0.4.5",
     "grunt-screeps": "^1.4.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,5 +23,5 @@
   "bugs": {
     "url": "https://github.com/cbacon93/screeps/issues"
   },
-  "homepage": "https://github.com/cbacon93/screeps#readme"
+  "homepage": "https://github.com/cbacon93/screeps"
 }

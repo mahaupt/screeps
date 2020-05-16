@@ -1,10 +1,10 @@
 global.commonFunctions = require('common.functions');
 
-var roleMiner = require('role.miner');
-var roleUpgrader = require('role.upgrader');
-var roleBuilder = require('role.builder');
-var roleRenewSelf = require('role.renewSelf');
-var roleHauler = require('role.hauler');
+var roleMiner = require('creeps_role.miner');
+var roleUpgrader = require('creeps_role.upgrader');
+var roleBuilder = require('creeps_role.builder');
+var roleRenewSelf = require('creeps_role.renewSelf');
+var roleHauler = require('creeps_role.hauler');
 
 var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
