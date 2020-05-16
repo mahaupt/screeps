@@ -82,6 +82,12 @@ var moduleAutobuilder = {
 				for (var t of targets)
 				{
 					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true, ignoreRoads: true});
+                    
+                    //bugfix, dont build road on controller
+                    if (t instanceof StructureController) {
+                        path.pop();
+                    }
+                    
 					for (var i=0; i < path.length; i++)
 					{
 						if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
