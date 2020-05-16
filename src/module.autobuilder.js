@@ -1,11 +1,26 @@
 var moduleAutobuilder = {
     run: function(room) {
+        //Base building calculation
+        if (Memory.pickingBaseLocation) {
+            moduleAutobuilder.pickFirstBasePos(room);
+            return;
+        }
+        
+        //slow down for cpu savings
 	    if (Game.time % 51 != 0) return;
+        
+        
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
 	    //SPAWN - no autobuild
-	    //var spawn_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_SPAWN);
-	    //var spawn_max = 1;
+	    var spawn_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_SPAWN);
+	    var spawn_max = 1;
+        if (spawn_num == 0) {
+            //moduleAutobuilder.pickFirstBasePos(room);
+            return;
+        } else if (spawn_num < spawn_max) {
+            //todo: additional spawns
+        }
 	    
 	    //EXTENSIONS
 	    var extensions_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_EXTENSION);
@@ -84,6 +99,7 @@ var moduleAutobuilder = {
 					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true, ignoreRoads: true});
                     
                     //bugfix, dont build road on controller
+                    //it strangely needs 25k to complete
                     if (t instanceof StructureController) {
                         path.pop();
                     }
@@ -166,7 +182,7 @@ var moduleAutobuilder = {
         //build around spawn 0
         if (spawns.length > 0)
         {
-	        var buildPos = moduleAutobuilder.getFreePosNextTo(room, spawns[0].pos);
+	        var buildPos = moduleAutobuilder.getNextFreeBasePos(room, type, spawns[0].pos);
 	        room.createConstructionSite(buildPos, type);
         }
     }, 
@@ -188,14 +204,11 @@ var moduleAutobuilder = {
 			    if (i==7) { dx = -1*r; dy =  0; }
 			    if (i==8) { dx = -1*r; dy = -1*r; }
 			    
-			    var target = room.lookAt(pos.x+dx, pos.y+dy);
-			    if (target[0]['type'] == 'terrain')
-			    {
-				    if (target[0]['terrain'] == 'plain')
-					{
-				    	return new RoomPosition(pos.x+dx, pos.y+dy, room.name);
-				    }
-			    }
+                var tpos = new RoomPosition(pos.x+dx, pos.y+dy, room.name);
+                
+			    if (moduleAutobuilder.checkPositionFree(room, tpos)) {
+                    return tpos;
+                }
 		    }
 		}
 	    
@@ -213,12 +226,205 @@ var moduleAutobuilder = {
 		return structures.length + constr.length;
     }, 
     
+    
+    checkPositionFree: function(room, pos)
+    {
+        var target = room.lookAt(pos);
+        if (target[0]['type'] == 'terrain')
+        {
+            if (target[0]['terrain'] == 'plain')
+            {
+                return true;
+            }
+        }
+        return false;
+    }, 
+    
+    
+    getNextFreeBasePos: function(room, type, centerPos)
+    {
+        var deltas = moduleAutobuilder.getPositionDeltas(type);
+        for (var i=0; i < deltas.length; i++)
+        {
+            var p1 = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y-deltas[i].y, room.name);
+            var p2 = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y+deltas[i].y, room.name);
+            var p3 = new RoomPosition(centerPos.x-deltas[i].x, centerPos.y+deltas[i].y, room.name);
+            var p4 = new RoomPosition(centerPos.x-deltas[i].x, centerPos.y-deltas[i].y, room.name);
+            
+            if (moduleAutobuilder.checkPositionFree(room, p1)) {
+                return p1;
+            }
+            if (moduleAutobuilder.checkPositionFree(room, p2)) {
+                return p2;
+            }
+            if (moduleAutobuilder.checkPositionFree(room, p3)) {
+                return p3;
+            }
+            if (moduleAutobuilder.checkPositionFree(room, p4)) {
+                return p4;
+            }
+        }
+    }, 
+    
     //todo: add predefined layout
     getPositionDeltas: function(type)
     {
-        var positions = [
-            {x: -1,y: -2}
+        var positions = {};
+        
+        //extensions
+        positions[STRUCTURE_EXTENSION] = [
+            {x: 1,y: 2}, {x: 1,y: 3},
+            {x: 2,y: 2}, {x: 2,y: 3},
+            
+            {x: 1,y: 5}, {x: 1,y: 6},
+            {x: 2,y: 5}, {x: 2,y: 6},
+            
+            {x: 4,y: 2}, {x: 4,y: 3},
+            {x: 5,y: 2}, {x: 5,y: 3},
+            
+            {x: 4,y: 5}, {x: 4,y: 6},
+            {x: 5,y: 5}, {x: 5,y: 6},
         ];
+        
+        positions[STRUCTURE_CONTAINER] = [
+            {x:2, y:0}, {x:3, y:0}
+        ];
+        
+        positions[STRUCTURE_STORAGE] = [
+            {x:1, y:0}
+        ];
+        
+        positions[STRUCTURE_TOWER] = [
+            {x:3, y:4}
+        ]
+        
+        positions[STRUCTURE_LINK] = [
+            
+        ]
+        
+        
+        
+        return positions[type];
+    },
+    
+    
+    pickFirstBasePos: function(room)
+    {
+        if (Memory.pickingBaseLocation) {
+            //calculation already running in different room
+            if (room.name != Memory.pickingBaseRoom) return;
+        } else {
+            Memory.pickingBaseLocation = true;
+            Memory.pickingBaseRoom = room.name;
+            Memory.pickingBasePoints = -99999;
+            Memory.pickingBasePosX = 0;
+            Memory.pickingBasePosY = 0;
+            Memory.pickingBaseCalcs = 0;
+        }
+        
+        for (var i=0; i < 10; i++)
+        {
+            var x = Math.floor(Math.random()*48)+1;
+            var y = Math.floor(Math.random()*48)+1;
+            var pos = new RoomPosition(x, y, room.name);
+            var points = moduleAutobuilder.valueBasePos(room, pos);
+            Memory.pickingBaseCalcs++;
+            
+            if (Memory.pickingBasePoints < points)
+            {
+                Memory.pickingBasePoints = points;
+                Memory.pickingBasePosX = x;
+                Memory.pickingBasePosY = y;
+            }
+        }
+        
+        //calculated enough
+        if (Memory.pickingBaseCalcs >= 1000 || Memory.pickingBasePoints >= -120)
+        {
+            var x = Memory.pickingBasePosX;
+            var y = Memory.pickingBasePosY;
+            var pts = Memory.pickingBasePoints;
+            var calcs = Memory.pickingBaseCalcs;
+            console.log("Picked Spawn Location for Room " + room.name);
+            console.log("Building Spawn at " + x + " / " + y);
+            console.log("Needed " + calcs + " calcs and got " + pts + " points");
+            
+            room.createConstructionSite(x, y, STRUCTURE_SPAWN, "cbacon");
+            
+            //cleanup
+            delete Memory.pickingBaseLocation;
+            delete Memory.pickingBaseRoom;
+            delete Memory.pickingBasePoints;
+            delete Memory.pickingBasePosX;
+            delete Memory.pickingBasePosY;
+            delete Memory.pickingBaseCalcs;
+        }
+    }, 
+    
+    
+    valueBasePos: function(room, pos)
+    {
+        var points = 0;
+        var baseSize = 7;
+        
+        //distance to sources
+        var sources = room.find(FIND_SOURCES);
+        for (var i=0; i < sources.length; i++) {
+            var path = pos.findPathTo(sources[i]);
+            
+            if (!path.length)
+            {
+                points -= 9999;
+            } else {
+                points -= Math.pow(path.length, 2)*0.5;
+            }
+        }
+        
+        //free positions to build
+        var places = room.lookAtArea(
+            pos.y-baseSize, 
+            pos.x-baseSize, 
+            pos.y+baseSize, 
+            pos.x+baseSize, 
+            true);
+        for(var i=0; i < places.length; i++)
+        {
+            if (places[i].terrain == 'plain')
+            {
+                points += 1;
+            }
+            if (places[i].terrain == 'swamp')
+            {
+                points -= 1;
+            }
+            if (places[i].terrain == 'wall')
+            {
+                points -= 15;
+            }
+        }
+        
+        //distance to exit
+        var exits = [];
+        exits.push(pos.findClosestByPath(FIND_EXIT_TOP));
+        exits.push(pos.findClosestByPath(FIND_EXIT_RIGHT));
+        exits.push(pos.findClosestByPath(FIND_EXIT_BOTTOM));
+        exits.push(pos.findClosestByPath(FIND_EXIT_LEFT));
+        
+        for (var i=0; i < exits.length; i++)
+        {
+            if (!exits[i]) continue;
+            var path = pos.findPathTo(exits[i]);
+            
+            if (!path.length)
+            {
+                points += 50*5;
+            } else {
+                //the longer the better
+                points += path.length*5;
+            }
+        }
+        
+        return points;
     }
 }
 

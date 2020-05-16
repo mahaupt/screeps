@@ -1,4 +1,4 @@
-global.commonFunctions = require('common.functions');
+global.baseCreep = require('creeps_baseCreep');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');

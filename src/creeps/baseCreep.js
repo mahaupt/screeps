@@ -1,4 +1,6 @@
-var common = {
+var baseCreep = {
+	
+	
 	pickEnergySource: function(creep) 
     {
 	    //try to find half full containers
@@ -19,7 +21,7 @@ var common = {
 		    	creep.memory.source = s.id;
 		    }
 	    }
-    }, 
+    },
     
     
 	goGetEnergyFromSource: function(creep)
@@ -54,4 +56,4 @@ var common = {
 }
 
 
-module.exports = common;
+module.exports = baseCreep;

@@ -15,10 +15,10 @@ var roleUpgrader = {
         {
             if (!creep.memory.source)
 	        {
-		        commonFunctions.pickEnergySource(creep);
+		        baseCreep.pickEnergySource(creep);
 	        }
 	        
-	        commonFunctions.goGetEnergyFromSource(creep);
+	        baseCreep.goGetEnergyFromSource(creep);
 	        
         } else {
             if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {

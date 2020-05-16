@@ -17,10 +17,10 @@ var roleBuilder = {
         {
 	        if (!creep.memory.source)
 	        {
-		        commonFunctions.pickEnergySource(creep);
+		        baseCreep.pickEnergySource(creep);
 	        }
 	        
-	        commonFunctions.goGetEnergyFromSource(creep);
+	        baseCreep.goGetEnergyFromSource(creep);
 	        
         } else {
             

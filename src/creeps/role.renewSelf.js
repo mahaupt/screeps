@@ -86,7 +86,6 @@ var roleRenewSelf = {
 		{
 			if (_.sum(creep.body, (c) => c.type == WORK) == 1)
 			{
-				console.log(creep.name + " kills himself due special rule");
 				creep.memory.killSelf = true;
 			}
 		}
