@@ -3,7 +3,7 @@ Memory Layout
 .role = "hauler"
 .harvesting = true/false
 .renewSelf = true/false
-.container = container.id	
+.container = container.id // link.id
 .target = target.id
 */
 
@@ -17,6 +17,11 @@ var roleHauler = {
 		if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.harvesting = true;
 			delete creep.memory.target;
+			
+			//check container - if its linked go in to link mode
+			if (roleHauler.checkContainerIsLinked(creep)) {
+				roleHauler.pickSpawnLink(creep);
+			}
         }
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
@@ -91,7 +96,13 @@ var roleHauler = {
 	    {
 		    //check mining container
 		    var sources = c.pos.findInRange(FIND_SOURCES, 2);
+			var links = c.pos.findInRange(FIND_STRUCTURES, 2, {
+		        filter: (structure) => {
+		            return structure.structureType == STRUCTURE_LINK;
+		        }});
+				
 		    if (sources.length == 0) continue;
+			if (links.length != 0) continue;
 		    
 		    
 		    var contPicked = false;
@@ -112,7 +123,33 @@ var roleHauler = {
 			}
 	    }
 	    
+		//no container found - pick spawn link if possible
+		roleHauler.pickSpawnLink(creep);
+		
 	    return false;
+	}, 
+	
+	pickSpawnLink: function(creep) {
+		var spawnlink = baseCreep.getSpawnLink(creep.room);
+		if (spawnlink)
+		{
+			creep.memory.container = spawnlink.id;
+		}
+	}, 
+	
+	checkContainerIsLinked: function(creep) {
+		var c = Game.getObjectById(creep.memory.container);
+		if (!c) { delete creep.memory.container; return false; }
+		
+		var links = c.pos.findInRange(FIND_STRUCTURES, 2, {
+			filter: (structure) => {
+				return structure.structureType == STRUCTURE_LINK;
+			}});
+		if (links.length > 0)
+		{
+			return true;
+		}
+		return false;
 	}, 
 	
 	pickEnergyReceiver: function(creep) {

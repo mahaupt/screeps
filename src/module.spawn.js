@@ -14,6 +14,10 @@ var moduleSpawn = {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_CONTAINER;
 	        }}).length;
+        var linkCount = spawn.room.find(FIND_STRUCTURES, {
+	        filter: (structure) => {
+	            return structure.structureType == STRUCTURE_LINK;
+	        }}).length;
         
         
         if (minerCount < sourceCount)
@@ -22,12 +26,20 @@ var moduleSpawn = {
             let body = baseCreep.buildBody(spawn.room, 'miner', bodySize);
             spawn.spawnCreep(body, 'Miner'+Game.time, { memory: {role: 'miner', renewSelf: false}});
         } else
-        if (haulerCount < containerCount && haulerCount < sourceCount) 
+        if (haulerCount < containerCount && 
+            haulerCount < sourceCount &&
+            haulerCount < sourceCount - linkCount+2) 
         {
             let bodySize = baseCreep.getSuitableBodySize('hauler', spawn.room.energyAvailable);
             let body = baseCreep.buildBody(spawn.room, 'hauler', bodySize);
 	        spawn.spawnCreep(body, 'Hauler'+Game.time, { memory: {role: 'hauler', renewSelf: false}});
         } else 
+        /*if (false) 
+        {
+            let bodySize = baseCreep.getSuitableBodySize('queen', spawn.room.energyAvailable);
+            let body = baseCreep.buildBody(spawn.room, 'queen', bodySize);
+            spawn.spawnCreep(body, 'Queen'+Game.time, { memory: {role: 'queen', renewSelf: false}});
+        } else */
         if (upgraderCount < 1)
         {
             let bodySize = baseCreep.getSuitableBodySize('upgrader', spawn.room.energyAvailable);

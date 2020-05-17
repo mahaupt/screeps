@@ -6,7 +6,9 @@ var baseCreep = {
             filter: (structure) => {
                 return ((structure.structureType == STRUCTURE_CONTAINER) &&
                     structure.store.getUsedCapacity(RESOURCE_ENERGY)/structure.store.getCapacity(RESOURCE_ENERGY) > 0.3) || 
-                    ((structure.structureType == STRUCTURE_CONTAINER) && structure.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
+					
+                    ((structure.structureType == STRUCTURE_CONTAINER || 
+					structure.structureType == STRUCTURE_STORAGE) && structure.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
                     structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0);
             }
         });
@@ -168,7 +170,43 @@ var baseCreep = {
 		}
 		
 		return size;
-	}
+	}, 
+	
+	getSpawnLink: function(room) {
+        var spawn = room.find(FIND_STRUCTURES, {
+	        filter: (structure) => {
+	            return (structure.structureType == STRUCTURE_SPAWN);
+	        }});
+        if (spawn.length > 0) {
+            var spawnlink = spawn[0].pos.findInRange(FIND_STRUCTURES, 2, {
+    	        filter: (structure) => {
+    	            return (structure.structureType == STRUCTURE_LINK);
+    	        }});
+            if (spawnlink.length > 0) {
+                return spawnlink[0];
+            }
+        }
+        
+        return false;
+    },
+	
+	sendLinkToSpawn: function(link) 
+    {
+		if (link.cooldown > 0) return false;
+        var spawnlink = baseCreep.getSpawnLink(link.room);
+        if (spawnlink) 
+        {
+            //spawnlink has full capacity
+            if (spawnlink.store.getFreeCapacity(RESOURCE_ENERGY) == LINK_CAPACITY)
+            {
+                link.transferEnergy(spawnlink);
+                return true;
+            } else {
+                //console.log("Spawnlink full");
+            }
+        }
+        return false;
+    }
 };
 
 

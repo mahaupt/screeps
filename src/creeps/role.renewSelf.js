@@ -26,11 +26,14 @@ var roleRenewSelf = {
 		        roleRenewSelf.killSelfDecision(creep);
 	        }
 	        
+			//carry energy to base
 	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 	                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#0000ff'}});
 	            }
-	        } else {
+	        } 
+			else 
+			{
 		        //renew self vs recycle self
 		        if (creep.memory.killSelf)
 		        {
@@ -68,26 +71,12 @@ var roleRenewSelf = {
 	killSelfDecision: function(creep) 
 	{
 		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
-        var possibleBodyParts = 3*bodySize;
-		//var freeEnergyCapacity = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
-		//var recycleEnergy = creep.body.length*75 + creep.store[RESOURCE_ENERGY];
-		
-		//could produce better creep and has enough energy capacity to handle recycling
-		//freeEnergyCapacity >= recycleEnergy && 
+        var possibleBodyParts = baseCreep.buildBody(creep.room, creep.memory.role, bodySize).length;
+
 		if (possibleBodyParts > creep.body.length)
         {
 	        creep.memory.killSelf = true;
         }
-		
-		//special kill decision: miner
-		//upgrade to at least 2 works when having a container
-		if (creep.memory.role == 'miner' && creep.memory.container)
-		{
-			if (_.sum(creep.body, (c) => c.type == WORK) == 1)
-			{
-				creep.memory.killSelf = true;
-			}
-		}
 	}
 }
 
