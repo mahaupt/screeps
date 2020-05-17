@@ -20,7 +20,7 @@ module.exports.loop = function () {
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         
-        try {
+        //try {
             if (creep.memory.renewSelf) {
     	        roleRenewSelf.run(creep);
             } else if(creep.memory.role == 'miner') {
@@ -34,11 +34,11 @@ module.exports.loop = function () {
             } else if (creep.memory.role == 'explorer') {
                 roleExplorer.run(creep);
             }
-        }
+        /*}
         catch(err)
         {
             console.log(err.message);
-        }
+        }*/
         
         if (creep.ticksToLive <= 100)
         {

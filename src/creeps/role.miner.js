@@ -8,7 +8,7 @@ Memory Layout
 .link = link.id	
 */
 
-var roleHarvester = {
+var roleMiner = {
 
     /** @param {Creep} creep **/
     run: function(creep) 
@@ -16,7 +16,7 @@ var roleHarvester = {
 	    //first - pick own source
 	    if (!creep.memory.source) {
 		    creep.say("picking own source");
-		    if (!roleHarvester.pickOwnSource(creep))
+		    if (!roleMiner.pickOwnSource(creep))
 		    {
 			    console.log("Creep " + creep.name + " didn't find any source");
 				Game.notify("Creep " + creep.name + " didn't find any source");
@@ -29,10 +29,16 @@ var roleHarvester = {
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
             
+            //link harvesting
+            if (!creep.memory.link)
+            {
+                roleMiner.pickOwnLink(creep);
+            }
+            
             //try to pick own container for container harvesting
             if (!creep.memory.container) {
-                roleHarvester.pickOwnContainer(creep);
-            } else if (!roleHarvester.containerHasHauler(creep.memory.container)) 
+                roleMiner.pickOwnContainer(creep);
+            } else if (!roleMiner.containerHasHauler(creep, creep.memory.container)) 
             {
                 //hauler died - go back to normal harvesting
                 delete creep.memory.container;
@@ -47,10 +53,27 @@ var roleHarvester = {
                 creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
             }
             
-            //container in available
+            //link in range - carry to link immediately
+            if (creep.memory.link)
+            {
+                //maybe withdraw from container?
+                var l = Game.getObjectById(creep.memory.link);
+                if (!l) { delete creep.memory.link; return; }
+                var xx = creep.transfer(l, RESOURCE_ENERGY);
+                
+                if (l.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                    roleMiner.sendLinkToSpawn(l);
+                }
+                
+                if (xx == OK) {
+                    return;
+                }
+                //if full, or failed, try with container
+            }
+            
+            //container in range - carry to container immediately
             if (creep.memory.container)
             {
-	            //carry to container immediately
 	            var c = Game.getObjectById(creep.memory.container);
 	            if (!c) { delete creep.memory.container; return; }
                 if (c.hits == c.hitsMax) 
@@ -60,8 +83,29 @@ var roleHarvester = {
             }
         }
         else 
-        {   
-            //carry energy to Containers
+        {
+            if (creep.memory.link)
+            {
+                //maybe withdraw from container?
+                var l = Game.getObjectById(creep.memory.link);
+                if (!l) { delete creep.memory.link; return; }
+                var xx = creep.transfer(l, RESOURCE_ENERGY);
+                if (xx == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
+                }
+                
+                if (l.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                    roleMiner.sendLinkToSpawn(l);
+                }
+                
+                if (xx == OK) {
+                    return;
+                }
+                //if full, or failed, try with container
+                
+            }   
+            
+            //CONTAINER MINING
             if (creep.memory.container)
             {
 	            //carry to container
@@ -89,11 +133,11 @@ var roleHarvester = {
                     //stop container mining temp. and assist transport chain
                     delete creep.memory.container;
 					creep.say("MC full!");
-					roleHarvester.carryEnergyBackToBase(creep);
+					roleMiner.carryEnergyBackToBase(creep);
 				}
 	            
             } else {
-	        	roleHarvester.carryEnergyBackToBase(creep);
+	        	roleMiner.carryEnergyBackToBase(creep);
             }
         }
 	},
@@ -169,26 +213,72 @@ var roleHarvester = {
 		//search containers
 		if (!creep.memory.source) return false;
 		var s = Game.getObjectById(creep.memory.source);
-		var containers = s.pos.findInRange(FIND_STRUCTURES, 2, {
-	        filter: (structure) => {
-	            return structure.structureType == STRUCTURE_CONTAINER;
-	        }});
-		
-		if (containers.length > 0)
-		{
-            if (roleHarvester.containerHasHauler(containers[0].id))
+		var container = roleMiner.getMiningStructure(s, STRUCTURE_CONTAINER);
+        if (container) {
+            if (roleMiner.containerHasHauler(creep, container.id))
             {
-                creep.memory.container = containers[0].id;
+                creep.memory.container = container.id;
                 return true;
             }
 		}
 		
 		return false;
-	}, 
+	},
+    
+    pickOwnLink: function(creep) {
+        if (!creep.memory.source) return false;
+		var s = Game.getObjectById(creep.memory.source);
+        
+        //check if there is a link around spawn
+        var spawnlink = roleMiner.getSpawnLink(creep.room);
+        if (!spawnlink) return false;
+        
+        var link = roleMiner.getMiningStructure(s, STRUCTURE_LINK);
+        if (link) {
+            creep.memory.link = link.id;
+            return true;
+        }
+        return false;
+    }, 
+    
+    getMiningStructure: function(source, type)
+    {
+        var structures = source.pos.findInRange(FIND_STRUCTURES, 2, {
+	        filter: (structure) => {
+	            return structure.structureType == type;
+	        }});
+        
+        if (structures.length > 0)
+		{
+            return structures[0];
+		}
+        return false;
+    },
+    
+    getSpawnLink: function(room) {
+        var spawn = room.find(FIND_STRUCTURES, {
+	        filter: (structure) => {
+	            return (structure.structureType == STRUCTURE_SPAWN);
+	        }});
+        if (spawn.length > 0) {
+            var spawnlink = spawn[0].pos.findInRange(FIND_STRUCTURES, 2, {
+    	        filter: (structure) => {
+    	            return (structure.structureType == STRUCTURE_LINK);
+    	        }});
+            if (spawnlink.length > 0) {
+                return spawnlink[0];
+            }
+        }
+        
+        return false;
+    },
 	
 	
-	containerHasHauler: function(containerid)
+	containerHasHauler: function(creep, containerid)
 	{
+        //link acts as hauler
+        if (creep.memory.link) return true;
+        
 		for (var i in Memory.creeps)
 		{
 			if (Memory.creeps[i].container == containerid && 
@@ -198,7 +288,24 @@ var roleHarvester = {
 			}
 		}
 		return false;
-	}
+	},
+    
+    sendLinkToSpawn: function(link) 
+    {
+        var spawnlink = roleMiner.getSpawnLink(link.room);
+        if (spawnlink) 
+        {
+            //spawnlink has full capacity
+            if (spawnlink.store.getFreeCapacity(RESOURCE_ENERGY) == LINK_CAPACITY)
+            {
+                link.transferEnergy(spawnLink);
+                return true;
+            } else {
+                console.log("Spawnlink full");
+            }
+        }
+        return false;
+    }
 };
 
-module.exports = roleHarvester;
+module.exports = roleMiner;
