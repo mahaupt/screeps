@@ -74,6 +74,16 @@ var moduleAutobuilder = {
 		    }
             constr_sites_num++;
 	    }
+        
+        //Storage
+        var storage_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_STORAGE);
+        var storage_max = 0
+        if (room.controller.level >= 4) storage_max = 1;
+        if (storage_num < storage_max)
+        {
+            moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE);
+            constr_sites_num++;
+        }
 	    
 	    
 	    //build roads - nothing other to build
@@ -177,33 +187,6 @@ var moduleAutobuilder = {
     }, 
     
     
-    getFreePosNextTo: function(room, pos)
-    {
-	    for (var r=2; r<10; r++) {
-		    for (var i=1; i <= 8; i++)
-		    {
-			    var dx = 0;
-			    var dy = 0;
-			    if (i==1) { dx =  1*r; dy =  1*r; }
-			    if (i==2) { dx =  1*r; dy =  0; }
-			    if (i==3) { dx =  1*r; dy = -1*r; }
-			    if (i==4) { dx =  0  ; dy =  1*r; }
-			    if (i==5) { dx =  0  ; dy = -1*r; }
-			    if (i==6) { dx = -1*r; dy =  1*r; }
-			    if (i==7) { dx = -1*r; dy =  0; }
-			    if (i==8) { dx = -1*r; dy = -1*r; }
-			    
-                var tpos = new RoomPosition(pos.x+dx, pos.y+dy, room.name);
-                
-			    if (moduleAutobuilder.checkPositionFree(room, tpos)) {
-                    return tpos;
-                }
-		    }
-		}
-	    
-    }, 
-    
-    
     getTotalStructures: function(room, type) {
 	    var structures = room.find(FIND_STRUCTURES, {
 			    filter: { structureType: type }
@@ -219,14 +202,32 @@ var moduleAutobuilder = {
     checkPositionFree: function(room, pos)
     {
         var target = room.lookAt(pos);
-        if (target[0]['type'] == 'terrain')
+        var buildable = true;
+        
+        for (var i = 0; i < target.length; i++)
         {
-            if (target[0]['terrain'] == 'plain')
+            //terrain not plain
+            if (target[i].type == 'terrain')
             {
-                return true;
+                if (target[i].terrain != 'plain')
+                {
+                    buildable = false;
+                    break;
+                }
+            }
+            
+            //structure not road
+            if (target[i].type == 'structure')
+            {
+                if (!(target[i].structure instanceof StructureRoad))
+                {
+                    buildable = false;
+                    break;
+                }
             }
         }
-        return false;
+
+        return buildable;
     }, 
     
     
@@ -279,9 +280,7 @@ var moduleAutobuilder = {
             {x:2, y:0}, {x:3, y:0}
         ];
         
-        positions[STRUCTURE_STORAGE] = [
-            {x:1, y:0}
-        ];
+        positions[STRUCTURE_STORAGE] = positions[STRUCTURE_CONTAINER];
         
         positions[STRUCTURE_TOWER] = [
             {x:3, y:4}
