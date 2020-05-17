@@ -287,7 +287,7 @@ var moduleAutobuilder = {
         ];
         
         positions[STRUCTURE_LINK] = [
-            
+            {x:0, y:1}
         ];
         
         positions[STRUCTURE_ROAD] = [
