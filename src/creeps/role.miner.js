@@ -27,6 +27,15 @@ var roleHarvester = {
         }
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
+            
+            //try to pick own container for container harvesting
+            if (!creep.memory.container) {
+                roleHarvester.pickOwnContainer(creep);
+            } else if (!roleHarvester.containerHasHauler(creep.memory.container)) 
+            {
+                //hauler died - go back to normal harvesting
+                delete creep.memory.container;
+            }
         }
         
         
@@ -76,12 +85,13 @@ var roleHarvester = {
 				    }
 				    
 				} else {
+                    //stop container mining temp. and assist transport chain
+                    delete creep.memory.container;
 					creep.say("MC full!");
 					roleHarvester.carryEnergyBackToBase(creep);
 				}
 	            
             } else {
-	            roleHarvester.pickOwnContainer(creep);
 	        	roleHarvester.carryEnergyBackToBase(creep);
             }
         }
@@ -165,10 +175,27 @@ var roleHarvester = {
 		
 		if (containers.length > 0)
 		{
-			creep.memory.container = containers[0].id;
-			return true;
+            if (roleHarvester.containerHasHauler(containers[0].id))
+            {
+                creep.memory.container = containers[0].id;
+                return true;
+            }
 		}
 		
+		return false;
+	}, 
+	
+	
+	containerHasHauler: function(containerid)
+	{
+		for (var i in Memory.creeps)
+		{
+			if (Memory.creeps[i].container == containerid && 
+				Memory.creeps[i].role == "hauler")
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 };
