@@ -1,6 +1,4 @@
 var baseCreep = {
-	
-	
 	pickEnergySource: function(creep) 
     {
 	    //try to find half full containers
@@ -26,6 +24,9 @@ var baseCreep = {
     
 	goGetEnergyFromSource: function(creep)
 	{
+		//dropped energy
+		if (baseCreep.pickupDroppedEnergy(creep, 4)) return;
+		
 		var source = Game.getObjectById(creep.memory.source);
         if (!source) { delete creep.memory.source; return; }
         
@@ -50,11 +51,41 @@ var baseCreep = {
 	
 	
 	pickupDroppedEnergy: function(creep, range)
-	{
-		var targets = creep.pos.findInRange(FIND_DROPPED_RESOURCES, range);
-		if (targets.length > 0) {
-			//todo do something
+	{	
+		if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+			
+			var res = creep.pos.findInRange(FIND_DROPPED_RESOURCES, range);
+			var ts = creep.pos.findInRange(FIND_TOMBSTONES, range);
+			var targets = res.concat(ts);
+			
+			if (targets.length > 0) {
+				var dist = creep.pos.getRangeTo(targets[0]);
+				
+				var amount = targets[0].amount || targets[0].store[RESOURCE_ENERGY];
+				//console.log("amount: " + amount);
+				
+				//worth it?
+				if (amount > 0 && amount > dist*2) 
+				{
+					//console.log("dropped res found - pickup");
+					
+					if (targets[0] instanceof Resource) {
+						if (creep.pickup(targets[0]) == ERR_NOT_IN_RANGE) {
+							creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ff0000'}});
+						}
+					} else {
+						if (creep.withdraw(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+							creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ff0000'}});
+						}
+					}
+					
+					return true;
+					
+				}
+			}
 		}
+		
+		return false;
 	},
 	
 	
@@ -74,9 +105,9 @@ var baseCreep = {
 		
 		if (role=='miner')
 		{
-			nwork = 1.5*bodySize;
-			ncarry = Math.max(0.5*bodySize, 1);
-			nmove = Math.max(0.5*bodySize, 1);
+			nwork = Math.floor(1.5*bodySize);
+			ncarry = Math.max(Math.floor(0.5*bodySize), 1);
+			nmove = Math.max(Math.floor(0.5*bodySize), 1);
 			
 			//container miner
 			if (ncontainer > 0 && bodySize == 1) {
@@ -90,6 +121,11 @@ var baseCreep = {
 			nwork=0;
 			ncarry = 2*bodySize;
 			nmove = 2*bodySize-1;
+		}
+		if (role=='explorer')
+		{
+			nwork=1;
+			nmove = Math.floor(2.5*bodySize);
 		}
 		
 		//WORK

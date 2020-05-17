@@ -35,6 +35,7 @@ var moduleAutobuilder = {
         if (extensions_num < extensions_max && constr_sites_num < 2)
 	    {
 		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION);
+            constr_sites_num++;
 	    }
 	    
 	    //TOWERS
@@ -56,6 +57,7 @@ var moduleAutobuilder = {
         if (towers_num < towers_max && constr_sites_num < 2)
 	    {
 		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER);
+            constr_sites_num++;
 	    }
 		
 		//CONTAINERS
@@ -70,11 +72,12 @@ var moduleAutobuilder = {
 		    } else {
 			    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER);
 		    }
+            constr_sites_num++;
 	    }
 	    
 	    
 	    //build roads - nothing other to build
-	    if (extensions_num > 1 && constr_sites_num == 0)
+	    if (containers_num > 1 && constr_sites_num == 0)
 	    {
 		    var spawn = room.find(FIND_STRUCTURES, {
 			    filter: { structureType: STRUCTURE_SPAWN }

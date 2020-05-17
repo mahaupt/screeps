@@ -23,12 +23,14 @@ var roleHauler = {
 			delete creep.memory.target;
         }
         
+		//dropped energy
+		if (baseCreep.pickupDroppedEnergy(creep, 4)) return;
         
         if (creep.memory.harvesting)
         {
 	        var c = Game.getObjectById(creep.memory.container);
 	        if (!c) { delete creep.memory.container; return; }
-	        
+			
 	        if (creep.withdraw(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 		    	creep.moveTo(c, {visualizePathStyle: {stroke: '#ff0000'}});
 	        }
