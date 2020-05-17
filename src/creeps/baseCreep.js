@@ -27,7 +27,7 @@ var baseCreep = {
 	goGetEnergyFromSource: function(creep)
 	{
 		//dropped energy
-		if (baseCreep.pickupDroppedEnergy(creep, 4)) return;
+		if (baseCreep.pickupDroppedEnergy(creep, 4)) { return; }
 		
 		var source = Game.getObjectById(creep.memory.source);
         if (!source) { delete creep.memory.source; return; }

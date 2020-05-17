@@ -7,7 +7,7 @@ var moduleAutobuilder = {
         }
         
         //slow down for cpu savings
-	    if (Game.time % 51 != 0) return;
+	    if (Game.time % 20 != 1) return;
         
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
@@ -23,40 +23,21 @@ var moduleAutobuilder = {
 	    
 	    //EXTENSIONS
 	    var extensions_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_EXTENSION);
-	    var extensions_max = 0;
-	    if (room.controller.level == 2) {
-		    extensions_max = 5;
-	    } else if (room.controller.level == 3) {
-		    extensions_max = 10;
-	    } else if (room.controller.level >= 4) {
-		    extensions_max = (room.controller.level-2)*10;
-	    }
-        
+	    var extensions_max = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][room.controller.level];
+	    
         if (extensions_num < extensions_max && constr_sites_num < 2)
 	    {
-		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION);
+		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION, true);
             constr_sites_num++;
 	    }
 	    
 	    //TOWERS
 	    var towers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_TOWER);
-	    var towers_max = 0;
+	    var towers_max = CONTROLLER_STRUCTURES[STRUCTURE_TOWER][room.controller.level];
         
-	    if (room.controller.level >= 3) {
-		    towers_max = 1;
-		}
-		if (room.controller.level >= 5) {
-		    towers_max = 2;
-		}
-		if (room.controller.level >= 7) {
-		    towers_max = 3;
-		}
-		if (room.controller.level == 8) {
-		    towers_max = 6;
-		}
         if (towers_num < towers_max && constr_sites_num < 2)
 	    {
-		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER);
+		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER, true);
             constr_sites_num++;
 	    }
 		
@@ -70,33 +51,30 @@ var moduleAutobuilder = {
 		    if (containers_num < source_num) {
 		    	moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0);
 		    } else {
-			    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER);
+			    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER, false);
 		    }
             constr_sites_num++;
 	    }
         
         //Storage
         var storage_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_STORAGE);
-        var storage_max = 0
-        if (room.controller.level >= 4) storage_max = 1;
+        var storage_max = CONTROLLER_STRUCTURES[STRUCTURE_STORAGE][room.controller.level];
+        
         if (storage_num < storage_max && constr_sites_num < 2)
         {
-            moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE);
+            moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE, true);
             constr_sites_num++;
         }
         
         //Links
         var links_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_LINK);
-        var links_max = 0;
-        if (room.controller.level >= 5) links_max = 2;
-        if (room.controller.level >= 6) links_max = 3;
-        if (room.controller.level >= 7) links_max = 4;
-        if (room.controller.level >= 8) links_max = 6;
+        var links_max = CONTROLLER_STRUCTURES[STRUCTURE_LINK][room.controller.level];
+        
         if (links_num < links_max && constr_sites_num < 2)
         {
             //build base link
             if (links_num == 0) {
-                moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_LINK);
+                moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_LINK, true);
                 constr_sites_num++;
             } else {
                 //build mining links
@@ -148,7 +126,7 @@ var moduleAutobuilder = {
                 
                 //roads around spawn
                 if (builtRoads == 0) {
-                    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_ROAD);
+                        moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_ROAD, false);
                 }
 			}
 	    }
@@ -198,7 +176,7 @@ var moduleAutobuilder = {
     }, 
     
     
-    buildAroundSpawn: function(room, type) {
+    buildAroundSpawn: function(room, type, removeRoads=false) {
 	    var spawns = room.find(FIND_MY_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_SPAWN;
@@ -209,7 +187,11 @@ var moduleAutobuilder = {
         if (spawns.length > 0)
         {
 	        var buildPos = moduleAutobuilder.getNextFreeBasePos(room, type, spawns[0].pos);
-	        room.createConstructionSite(buildPos, type);
+	        if (room.createConstructionSite(buildPos, type) == OK) {
+                if (removeRoads) {
+                    moduleAutobuilder.removeRoads(room, buildPos);
+                }
+            }
         }
     }, 
     
@@ -226,7 +208,7 @@ var moduleAutobuilder = {
     }, 
     
     
-    checkPositionFree: function(room, pos)
+    checkPositionFree: function(room, pos, ignoreRoads=true)
     {
         var target = room.lookAt(pos);
         var buildable = true;
@@ -238,7 +220,7 @@ var moduleAutobuilder = {
             {
                 if (target[i].terrain != 'plain')
                 {
-                    buildable = false;
+                    return false;
                     break;
                 }
             }
@@ -246,13 +228,17 @@ var moduleAutobuilder = {
             //structure not road
             if (target[i].type == 'structure')
             {
-                if (!(target[i].structure instanceof StructureRoad))
+                if (!(target[i].structure instanceof StructureRoad) || !ignoreRoads)
                 {
-                    buildable = false;
+                    return false;
                     break;
                 }
             }
         }
+        
+        //check for construction sites
+        var csites = pos.findInRange(FIND_CONSTRUCTION_SITES, 0);
+        if (csites.length > 0) return false;
 
         return buildable;
     }, 
@@ -268,16 +254,18 @@ var moduleAutobuilder = {
             var p3 = new RoomPosition(centerPos.x-deltas[i].x, centerPos.y+deltas[i].y, room.name);
             var p4 = new RoomPosition(centerPos.x-deltas[i].x, centerPos.y-deltas[i].y, room.name);
             
-            if (moduleAutobuilder.checkPositionFree(room, p1)) {
+            var ignoreRoads = type != STRUCTURE_ROAD;
+            
+            if (moduleAutobuilder.checkPositionFree(room, p1, ignoreRoads)) {
                 return p1;
             }
-            if (moduleAutobuilder.checkPositionFree(room, p2)) {
+            if (moduleAutobuilder.checkPositionFree(room, p2, ignoreRoads)) {
                 return p2;
             }
-            if (moduleAutobuilder.checkPositionFree(room, p3)) {
+            if (moduleAutobuilder.checkPositionFree(room, p3, ignoreRoads)) {
                 return p3;
             }
-            if (moduleAutobuilder.checkPositionFree(room, p4)) {
+            if (moduleAutobuilder.checkPositionFree(room, p4, ignoreRoads)) {
                 return p4;
             }
         }
@@ -444,6 +432,18 @@ var moduleAutobuilder = {
         }
         
         return points;
+    },
+    
+    removeRoads: function(room, pos)
+    {
+        var roads = pos.findInRange(FIND_STRUCTURES, 0, {filter: (s) => {
+            return s.structureType == STRUCTURE_ROAD;
+        }});
+        
+        if (roads.length > 0)
+        {
+            roads[0].destroy();
+        }
     }
 };
 

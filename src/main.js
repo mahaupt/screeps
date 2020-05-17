@@ -7,15 +7,21 @@ var roleRenewSelf = require('creeps_role.renewSelf');
 var roleHauler = require('creeps_role.hauler');
 var roleExplorer = require('creeps_role.explorer');
 
+var moduleStats = require('module.stats');
 var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 
 
 module.exports.loop = function () {
-    moduleSpawn.run(Game.spawns.Spawn1);
-    moduleAutobuilder.run(Game.spawns.Spawn1.room);
-    moduleDefense.run(Game.spawns.Spawn1.room);
+    for (var sname in Game.spawns)
+    {
+        var spawn = Game.spawns[sname];
+        moduleStats.run(spawn.room);
+        moduleSpawn.run(spawn);
+        moduleAutobuilder.run(spawn.room);
+        moduleDefense.run(spawn.room);
+    }
 
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];

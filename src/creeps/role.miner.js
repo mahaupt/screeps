@@ -134,9 +134,9 @@ var roleMiner = {
 					roleMiner.carryEnergyBackToBase(creep);
 				} else {
                     //not in range mostl likely
-                    if (creep.transfer(c, RESOURCES_ENERGY)== ERR_NOT_IN_RANGE)
+                    if (creep.transfer(c, RESOURCE_ENERGY)== ERR_NOT_IN_RANGE)
                     {
-                        cree.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
+                        creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
                     }
                 }
 	            
