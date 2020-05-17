@@ -29,18 +29,32 @@ var moduleDefense = {
 		var hostiles = room.find(FIND_HOSTILE_CREEPS);
 		if (hostiles.length > 0)
 		{
-			if (!room.controller.safeMode) {
-				if (room.controller.activateSafeMode() == OK)
+			//check if hostiles are near creeps or structures
+			for (var i=0; i < hostiles.length; i++)
+			{
+				var ncreeps = hostiles[i].pos.findInRange(FIND_MY_CREEPS, 4).length;
+				var nconstr = hostiles[i].pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 4).length;
+				var nstruct = hostiles[i].pos.findInRange(FIND_STRUCTURES, 4).length;
+				
+				console.log("Danger-level: " + (ncreeps+nconstr+nstruct));
+				if (ncreeps+nconstr+nstruct > 0)
 				{
-					Game.notify("Hostiles detected! Safe mode activated!");
-					console.log("Hostiles detected! Safe mode activated!");
-				} else {
-					Game.notify("Hostiles detected! Safe mode failed!");
-					console.log("Hostiles detected! Safe mode failed!");
+					//try activate safe mode
+					console.log("danger!");
+					if (!room.controller.safeMode) {
+						if (room.controller.activateSafeMode() == OK)
+						{
+							Game.notify("Hostiles detected! Safe mode activated!");
+							console.log("Hostiles detected! Safe mode activated!");
+						} else {
+							Game.notify("Hostiles detected! Safe mode failed!");
+							console.log("Hostiles detected! Safe mode failed!");
+						}
+					}
+					
+					break;
 				}
 			}
-			
-			
 		}
 	}
 }
