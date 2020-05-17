@@ -27,6 +27,13 @@ var roleMiner = {
 		    }
 	    }
         
+        //periodically check link avbl
+        if (!creep.memory.link && creep.room.controller.level >= 5){
+            if (Game.time % 20 == 1) {
+                roleMiner.pickOwnLink(creep);
+            }
+        }
+        
         //Special mode
         if (creep.memory.containerLinkPurge) {
             roleMiner.containerLinkPurge(creep);
@@ -40,8 +47,8 @@ var roleMiner = {
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
             
-            //link harvesting
-            if (!creep.memory.link)
+            //check link avbl
+            if (!creep.memory.link && creep.room.controller.level >= 5)
             {
                 roleMiner.pickOwnLink(creep);
             }
@@ -59,15 +66,16 @@ var roleMiner = {
         
 	    if(creep.memory.harvesting) 
 	    {
+            //go to source and harvest
             var s = Game.getObjectById(creep.memory.source);
             if(creep.harvest(s) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
             }
             
-            //link in range - carry to link immediately
+            //link abvl - carry to link immediately
             if (creep.memory.link)
             {
-                //maybe withdraw from container?
+                //put stuff into link
                 var l = Game.getObjectById(creep.memory.link);
                 if (!l) { delete creep.memory.link; return; }
                 var xx = creep.transfer(l, RESOURCE_ENERGY);
@@ -94,6 +102,7 @@ var roleMiner = {
             //container in range - carry to container immediately
             if (creep.memory.container)
             {
+                //put stuff into container
 	            var c = Game.getObjectById(creep.memory.container);
 	            if (!c) { delete creep.memory.container; return; }
                 if (c.hits == c.hitsMax) 
@@ -105,34 +114,31 @@ var roleMiner = {
         else 
         { //not harvesting  
             
-            //Drop into Mining Container
+            //MC damaged or full
             if (creep.memory.container)
             {
-	            //carry to container
 	            var c = Game.getObjectById(creep.memory.container);
 	            if (!c) { delete creep.memory.container; return; }
 	            
-	            
-	            if (c.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-	            
-		            //repair vs transfer
-		            if (c.hits < c.hitsMax) {
-			            if (creep.repair(c) == ERR_NOT_IN_RANGE) {
-				            creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
-			            }
-			        } else {
-				        if (creep.transfer(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-				        {
-					        creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
-				        }
-				    }
-				    
-				} else {
+                //repair
+                if (c.hits < c.hitsMax) {
+                    if (creep.repair(c) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
+                    }
+                } 
+                else if (c.store.getFreeCapacity(RESOURCE_ENERGY) == 0) 
+                {   //full
                     //stop container mining temp. and assist transport chain
                     delete creep.memory.container;
 					creep.say("MC full!");
 					roleMiner.carryEnergyBackToBase(creep);
-				}
+				} else {
+                    //not in range mostl likely
+                    if (creep.transfer(c, RESOURCES_ENERGY)== ERR_NOT_IN_RANGE)
+                    {
+                        cree.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
+                    }
+                }
 	            
             } else {
                 //no mining container
@@ -158,8 +164,6 @@ var roleMiner = {
             delete creep.memory.containerLinkPurge;
             return;
         }
-        
-        creep.say("CL-TX");
         
         if (creep.store[RESOURCE_ENERGY] == 0) {
             //pickup
