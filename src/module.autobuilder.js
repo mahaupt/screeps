@@ -68,7 +68,7 @@ var moduleAutobuilder = {
 	    if (containers_num < containers_max && extensions_num >= 4 && constr_sites_num < 2)
 	    {
 		    if (containers_num < source_num) {
-		    	moduleAutobuilder.buildMiningContainer(room);
+		    	moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0);
 		    } else {
 			    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER);
 		    }
@@ -79,10 +79,34 @@ var moduleAutobuilder = {
         var storage_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_STORAGE);
         var storage_max = 0
         if (room.controller.level >= 4) storage_max = 1;
-        if (storage_num < storage_max)
+        if (storage_num < storage_max && constr_sites_num < 2)
         {
             moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE);
             constr_sites_num++;
+        }
+        
+        //Links
+        var links_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_LINK);
+        var links_max = 0;
+        if (room.controller.level >= 5) links_max = 2;
+        if (room.controller.level >= 6) links_max = 3;
+        if (room.controller.level >= 7) links_max = 4;
+        if (room.controller.level >= 8) links_max = 6;
+        if (links_num < links_max && constr_sites_num < 2)
+        {
+            //build base link
+            if (links_num == 0) {
+                moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_LINK);
+                constr_sites_num++;
+            } else {
+                //build mining links
+                if (links_num-1 < source_num)
+                {
+                    //todo - look 
+                    moduleAutobuilder.buildMiningStructure(room, STRUCTURE_LINK, 1);
+                    constr_sites_num++;
+                }
+            }
         }
 	    
 	    
@@ -103,7 +127,7 @@ var moduleAutobuilder = {
                 //roads from spawn to Structures
 				for (var t of targets)
 				{
-					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true, ignoreRoads: true});
+					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true});
                     
                     //bugfix, dont build road on controller
                     //it strangely needs 25k to complete
@@ -131,18 +155,18 @@ var moduleAutobuilder = {
     },
     
     
-    buildMiningContainer: function(room) {
+    buildMiningStructure: function(room, type, steps_from_source=0) {
 	    var sources = room.find(FIND_SOURCES);
 	    for (var s of sources)
 	    {
 		    
 		    var cont = s.pos.findInRange(FIND_STRUCTURES, 2, {
 		        filter: (structure) => {
-		            return structure.structureType == STRUCTURE_CONTAINER;
+		            return structure.structureType == type;
 		        }});
 		    var cont_c = s.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 2, {
 		        filter: (structure) => {
-		            return structure.structureType == STRUCTURE_CONTAINER;
+		            return structure.structureType == type;
 		        }});
 		    
 		    //console.log("S x" + s.pos.x + " y" + s.pos.y + " - " + (cont.length+cont_c.length));
@@ -158,12 +182,15 @@ var moduleAutobuilder = {
 					var path = s.pos.findPathTo(spawn[0], {ignoreCreeps:true});	
 					if (path.length > 1)
 					{
-						var buildPos = new RoomPosition(path[0].x, path[0].y, room.name);
-						room.createConstructionSite(buildPos, STRUCTURE_CONTAINER);
+						var buildPos = new RoomPosition(
+                            path[steps_from_source].x, 
+                            path[steps_from_source].y, 
+                            room.name);
+						room.createConstructionSite(buildPos, type);
 						//console.log("Container x" + buildPos.x + " y" + buildPos.y);
 						return;
 					} else {
-						console.log("Container Spawn: No place found");
+						console.log("Mining Structure Spawn: No place found");
 					}
 				}
 		    }

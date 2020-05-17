@@ -4,7 +4,8 @@ Memory Layout
 .harvesting = true/false
 .renewSelf = true/false
 .source = source.id
-.container = container.id	
+.container = container.id
+.link = link.id	
 */
 
 var roleHarvester = {

@@ -56,9 +56,7 @@ var baseCreep = {
 			
 			var res = creep.pos.findInRange(FIND_DROPPED_RESOURCES, range);
 			var ts = creep.pos.findInRange(FIND_TOMBSTONES, range);
-			var ru = creep.pos.findInRange(FIND_STRUCTURES, range, {
-				    filter: { structureType: RUIN }
-				});
+			var ru = creep.pos.findInRange(FIND_RUINS, range);
 				
 			var targets = res.concat(ts).concat(ru);
 			
