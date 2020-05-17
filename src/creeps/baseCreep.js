@@ -51,9 +51,87 @@ var baseCreep = {
 	
 	pickupDroppedEnergy: function(creep, range)
 	{
+		var targets = creep.pos.findInRange(FIND_DROPPED_RESOURCES, range);
+		if (targets.length > 0) {
+			//todo do something
+		}
+	},
+	
+	
+	buildBody: function(room, role, bodySize) {
+		var body = [];
 		
+		var nwork = bodySize;
+		var ncarry = bodySize;
+		var nmove = bodySize;
+		
+		//statistics
+		var ncontainer = room.find(FIND_STRUCTURES, {
+	        filter: (structure) => {
+	            return structure.structureType == STRUCTURE_CONTAINER;
+	        }}).length;
+			
+		
+		if (role=='miner')
+		{
+			nwork = 1.5*bodySize;
+			ncarry = Math.max(0.5*bodySize, 1);
+			nmove = Math.max(0.5*bodySize, 1);
+			
+			//container miner
+			if (ncontainer > 0 && bodySize == 1) {
+				nwork = 2;
+				ncarry = 1;
+				nmove = 1;
+			}
+		}
+		if (role=='hauler')
+		{
+			nwork=0;
+			ncarry = 2*bodySize;
+			nmove = 2*bodySize-1;
+		}
+		
+		//WORK
+		for (var i=0; i<nwork; i++)
+		{
+			body.push(WORK);
+		}
+		
+		//CARRY
+		for (var j=0; j<ncarry; j++)
+		{
+			body.push(CARRY);
+		}
+		
+		//MOVE
+		for (var k=0; k<nmove; k++)
+		{
+			body.push(MOVE);
+		}
+		
+		
+		return body;
+	}, 
+	
+	getSuitableBodySize: function(role, availableEnergy) {
+		var size = Math.floor(availableEnergy/400);
+		size = Math.max(size, 1);
+		
+		if (availableEnergy >= 500 && availableEnergy <= 800)
+		{
+			size = 2;
+		}
+		
+		//role specific modifier
+		if (role == 'miner') {
+			//max body size
+			size = Math.min(size, 5);
+		}
+		
+		return size;
 	}
-}
+};
 
 
 module.exports = baseCreep;

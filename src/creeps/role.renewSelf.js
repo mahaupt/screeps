@@ -67,11 +67,10 @@ var roleRenewSelf = {
 	
 	killSelfDecision: function(creep) 
 	{
-		var bodyIterations = Math.floor(creep.room.energyAvailable/400)-1;
-        bodyIterations = Math.max(bodyIterations, 0);
-        var possibleBodyParts = 3 + 3*bodyIterations;
-		var freeEnergyCapacity = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
-		var recycleEnergy = creep.body.length*75 + creep.store[RESOURCE_ENERGY];
+		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
+        var possibleBodyParts = 3*bodySize;
+		//var freeEnergyCapacity = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
+		//var recycleEnergy = creep.body.length*75 + creep.store[RESOURCE_ENERGY];
 		
 		//could produce better creep and has enough energy capacity to handle recycling
 		//freeEnergyCapacity >= recycleEnergy && 

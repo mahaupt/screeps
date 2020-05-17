@@ -128,7 +128,8 @@ var roleHarvester = {
 			
 			for (var i in Memory.creeps)
 			{
-				if (Memory.creeps[i].source == source.id)
+				if (Memory.creeps[i].source == source.id &&
+                     Memory.creeps[i].role == "miner")
 				{
 					sourcePicked[source.id]++;
 				}

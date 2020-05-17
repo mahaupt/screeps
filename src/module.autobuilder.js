@@ -1,7 +1,7 @@
 var moduleAutobuilder = {
     run: function(room) {
         //Base building calculation
-        if (Memory.pickingBaseLocation) {
+        if (Memory.pBLocation) {
             moduleAutobuilder.pickFirstBasePos(room);
             return;
         }
@@ -9,10 +9,9 @@ var moduleAutobuilder = {
         //slow down for cpu savings
 	    if (Game.time % 51 != 0) return;
         
-        
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
-	    //SPAWN - no autobuild
+	    //SPAWN
 	    var spawn_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_SPAWN);
 	    var spawn_max = 1;
         if (spawn_num == 0) {
@@ -32,10 +31,16 @@ var moduleAutobuilder = {
 	    } else if (room.controller.level >= 4) {
 		    extensions_max = (room.controller.level-2)*10;
 	    }
+        
+        if (extensions_num < extensions_max && constr_sites_num < 2)
+	    {
+		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION);
+	    }
 	    
 	    //TOWERS
 	    var towers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_TOWER);
 	    var towers_max = 0;
+        
 	    if (room.controller.level >= 3) {
 		    towers_max = 1;
 		}
@@ -48,23 +53,17 @@ var moduleAutobuilder = {
 		if (room.controller.level == 8) {
 		    towers_max = 6;
 		}
+        if (towers_num < towers_max && constr_sites_num < 2)
+	    {
+		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER);
+	    }
 		
 		//CONTAINERS
 		var containers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_CONTAINER);
 		var source_num = room.find(FIND_SOURCES).length;
 	    var containers_max = 5;
-	    
-	    
-	    //build spawns - build own
-	    
-	    //build towers
-	    if (towers_num < towers_max)
-	    {
-		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER);
-	    }
-	    
-	    //build containers
-	    if (containers_num < containers_max)
+        
+	    if (containers_num < containers_max && extensions_num >= 4 && constr_sites_num < 2)
 	    {
 		    if (containers_num < source_num) {
 		    	moduleAutobuilder.buildMiningContainer(room);
@@ -73,11 +72,6 @@ var moduleAutobuilder = {
 		    }
 	    }
 	    
-	    //build extensions
-	    if (extensions_num < extensions_max)
-	    {
-		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION);
-	    }
 	    
 	    //build roads - nothing other to build
 	    if (extensions_num > 1 && constr_sites_num == 0)
@@ -104,7 +98,7 @@ var moduleAutobuilder = {
                         path.pop();
                     }
                     
-					for (var i=0; i < path.length; i++)
+					for (var i=0; i < path.length && builtRoads < 5; i++)
 					{
 						if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
 						{
@@ -117,15 +111,7 @@ var moduleAutobuilder = {
                 
                 //roads around spawn
                 if (builtRoads == 0) {
-                    var sPos = spawn[0].pos;
-                    room.createConstructionSite(sPos.x+1, sPos.y+1, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x+1, sPos.y, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x+1, sPos.y-1, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x, sPos.y+1, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x, sPos.y-1, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x-1, sPos.y+1, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x-1, sPos.y, STRUCTURE_ROAD);
-                    room.createConstructionSite(sPos.x-1, sPos.y-1, STRUCTURE_ROAD);
+                    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_ROAD);
                 }
 			}
 	    }
@@ -296,12 +282,16 @@ var moduleAutobuilder = {
         
         positions[STRUCTURE_TOWER] = [
             {x:3, y:4}
-        ]
+        ];
         
         positions[STRUCTURE_LINK] = [
             
-        ]
+        ];
         
+        positions[STRUCTURE_ROAD] = [
+            {x:-1, y:0}, {x:-1, y:-1}, 
+            {x:0, y:-1}
+        ];
         
         
         return positions[type];
@@ -310,16 +300,16 @@ var moduleAutobuilder = {
     
     pickFirstBasePos: function(room)
     {
-        if (Memory.pickingBaseLocation) {
+        if (Memory.pBLocation) {
             //calculation already running in different room
-            if (room.name != Memory.pickingBaseRoom) return;
+            if (room.name != Memory.pBRoom) return;
         } else {
-            Memory.pickingBaseLocation = true;
-            Memory.pickingBaseRoom = room.name;
-            Memory.pickingBasePoints = -99999;
-            Memory.pickingBasePosX = 0;
-            Memory.pickingBasePosY = 0;
-            Memory.pickingBaseCalcs = 0;
+            Memory.pBLocation = true;
+            Memory.pBRoom = room.name;
+            Memory.pBPoints = -99999;
+            Memory.pBPosX = 0;
+            Memory.pBPosY = 0;
+            Memory.pBCalcs = 0;
         }
         
         for (var i=0; i < 10; i++)
@@ -328,23 +318,23 @@ var moduleAutobuilder = {
             var y = Math.floor(Math.random()*48)+1;
             var pos = new RoomPosition(x, y, room.name);
             var points = moduleAutobuilder.valueBasePos(room, pos);
-            Memory.pickingBaseCalcs++;
+            Memory.pBCalcs++;
             
-            if (Memory.pickingBasePoints < points)
+            if (Memory.pBPoints < points)
             {
-                Memory.pickingBasePoints = points;
-                Memory.pickingBasePosX = x;
-                Memory.pickingBasePosY = y;
+                Memory.pBPoints = points;
+                Memory.pBPosX = x;
+                Memory.pBPosY = y;
             }
         }
         
         //calculated enough
-        if (Memory.pickingBaseCalcs >= 1000 || Memory.pickingBasePoints >= -120)
+        if (Memory.pBCalcs >= 1000 || Memory.pBPoints >= -120)
         {
-            var x = Memory.pickingBasePosX;
-            var y = Memory.pickingBasePosY;
-            var pts = Memory.pickingBasePoints;
-            var calcs = Memory.pickingBaseCalcs;
+            var x = Memory.pBPosX;
+            var y = Memory.pBPosY;
+            var pts = Memory.pBPoints;
+            var calcs = Memory.pBCalcs;
             console.log("Picked Spawn Location for Room " + room.name);
             console.log("Building Spawn at " + x + " / " + y);
             console.log("Needed " + calcs + " calcs and got " + pts + " points");
@@ -352,12 +342,12 @@ var moduleAutobuilder = {
             room.createConstructionSite(x, y, STRUCTURE_SPAWN, "cbacon");
             
             //cleanup
-            delete Memory.pickingBaseLocation;
-            delete Memory.pickingBaseRoom;
-            delete Memory.pickingBasePoints;
-            delete Memory.pickingBasePosX;
-            delete Memory.pickingBasePosY;
-            delete Memory.pickingBaseCalcs;
+            delete Memory.pBLocation;
+            delete Memory.pBRoom;
+            delete Memory.pBPoints;
+            delete Memory.pBPosX;
+            delete Memory.pBPosY;
+            delete Memory.pBCalcs;
         }
     }, 
     
@@ -426,6 +416,6 @@ var moduleAutobuilder = {
         
         return points;
     }
-}
+};
 
 module.exports = moduleAutobuilder;

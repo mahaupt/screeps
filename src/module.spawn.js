@@ -1,74 +1,49 @@
 var moduleSpawn = {
     run: function(spawn) {
         if (Game.time % 10 != 0) return;
+        moduleSpawn.memCleanup();
         
         var counts = _.countBy(Game.creeps, 'memory.role');
-        var minerCount = counts['miner'] || 0;
-        var upgraderCount = counts['upgrader'] || 0;
-        var builderCount = counts['builder'] || 0;
-        var haulerCount = counts['hauler'] || 0;
+        var minerCount = counts.miner || 0;
+        var upgraderCount = counts.upgrader || 0;
+        var builderCount = counts.builder || 0;
+        var haulerCount = counts.hauler || 0;
         
         var sourceCount = spawn.room.find(FIND_SOURCES).length;
         var containerCount = spawn.room.find(FIND_STRUCTURES, {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_CONTAINER;
 	        }}).length;
-	        
-        
-        
-        var spawnBody = [WORK, CARRY, MOVE];
-        var bodyIterations = Math.floor(spawn.room.energyAvailable/400)-1;
-        bodyIterations = Math.max(bodyIterations, 0);
         
         
         if (minerCount < sourceCount)
         {
-            if (containerCount > 0)
-            {
-                var spawnBody = [WORK, WORK, CARRY, MOVE];
-            }
-	        for (var i=0; i < bodyIterations; i++)
-	        {
-		        if (i%2==0) {
-		        	spawnBody.push(WORK, WORK);
-		        } else {
-			        spawnBody.push(WORK, CARRY, MOVE);
-		        }
-	        }
-	        spawnBody.sort();
-            spawn.spawnCreep(spawnBody, 'Miner'+Game.time, { memory: {role: 'miner', renewSelf: false}});
+            let bodySize = baseCreep.getSuitableBodySize('miner', spawn.room.energyAvailable);
+            let body = baseCreep.buildBody(spawn.room, 'miner', bodySize);
+            spawn.spawnCreep(body, 'Miner'+Game.time, { memory: {role: 'miner', renewSelf: false}});
         } else
         if (haulerCount < containerCount && haulerCount < sourceCount) 
         {
-	        spawnBody = [CARRY, CARRY, MOVE];
-	        for (var i=0; i < bodyIterations; i++)
-	        {
-			    spawnBody.push(CARRY, CARRY, MOVE, MOVE);
-	        }
-	        spawnBody.sort();
-	        spawn.spawnCreep(spawnBody, 'Hauler'+Game.time, { memory: {role: 'hauler', renewSelf: false}});
+            let bodySize = baseCreep.getSuitableBodySize('hauler', spawn.room.energyAvailable);
+            let body = baseCreep.buildBody(spawn.room, 'hauler', bodySize);
+	        spawn.spawnCreep(body, 'Hauler'+Game.time, { memory: {role: 'hauler', renewSelf: false}});
         } else 
         if (upgraderCount < 1)
         {
-	        for (var i=0; i < bodyIterations; i++)
-	        {
-			    spawnBody.push(WORK, CARRY, MOVE);
-	        }
-	        spawnBody.sort();
-            spawn.spawnCreep(spawnBody, 'Upgrader'+Game.time, { memory: {role: 'upgrader', renewSelf: false}});
+            let bodySize = baseCreep.getSuitableBodySize('upgrader', spawn.room.energyAvailable);
+            let body = baseCreep.buildBody(spawn.room, 'upgrader', bodySize);
+            spawn.spawnCreep(body, 'Upgrader'+Game.time, { memory: {role: 'upgrader', renewSelf: false}});
         } else 
         if (builderCount < 4)
         {
-	        for (var i=0; i < bodyIterations; i++)
-	        {
-			    spawnBody.push(WORK, CARRY, MOVE);
-	        }
-	        spawnBody.sort();
-            spawn.spawnCreep(spawnBody, 'Builder'+Game.time, { memory: {role: 'builder', renewSelf: false}});
+            let bodySize = baseCreep.getSuitableBodySize('builder', spawn.room.energyAvailable);
+            let body = baseCreep.buildBody(spawn.room, 'builder', bodySize);
+            spawn.spawnCreep(body, 'Builder'+Game.time, { memory: {role: 'builder', renewSelf: false}});
         } 
         
-        
-        
+    },
+    
+    memCleanup: function() {
         //cleanup
         for (var i in Memory.creeps)
         {
@@ -77,7 +52,7 @@ var moduleSpawn = {
                 delete Memory.creeps[i];
             }
         }
-    }
-}
+    } 
+};
 
 module.exports = moduleSpawn;

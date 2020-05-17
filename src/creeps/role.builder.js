@@ -67,21 +67,21 @@ var roleBuilder = {
     pickBuildTarget: function(creep) {
         
         //repairs needed - except mining containers
-        var repairs = creep.room.find(FIND_STRUCTURES, {
+        var repairs = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax && structure.pos.findInRange(FIND_SOURCES, 2).length == 0);
             }
         });
-        if (repairs.length > 0)
+        if (repairs)
         {
-            creep.memory.building = repairs[0].id;
+            creep.memory.building = repairs.id;
         } else {
         
         
             //construction sites
-            var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-            if(targets.length > 0) {
-                creep.memory.building = targets[0].id;
+            var targets = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+            if(targets) {
+                creep.memory.building = targets.id;
             } else {
                 //upgrade if no construction site
                 creep.memory.building = creep.room.controller.id;
