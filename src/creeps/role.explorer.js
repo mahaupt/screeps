@@ -13,7 +13,10 @@ var roleExplorer =  {
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
         }
-    }
+    }, 
+    
+    
+    
 };
 
 

@@ -134,6 +134,9 @@ var moduleAutobuilder = {
     
     
     buildMiningStructure: function(room, type, steps_from_source=0) {
+        var validPositions = [];
+        
+        //first - pick valid build positions
 	    var sources = room.find(FIND_SOURCES);
 	    for (var s of sources)
 	    {
@@ -164,15 +167,22 @@ var moduleAutobuilder = {
                             path[steps_from_source].x, 
                             path[steps_from_source].y, 
                             room.name);
-						room.createConstructionSite(buildPos, type);
-						//console.log("Container x" + buildPos.x + " y" + buildPos.y);
-						return;
+                        validPositions.push({pos: buildPos, dist: path.length});
 					} else {
 						console.log("Mining Structure Spawn: No place found");
 					}
 				}
 		    }
 	    }
+        
+        //build at position most far away first
+        validPositions = _.sortBy(validPositions, s => -s.dist);
+        if (validPositions.length > 0) {
+            room.createConstructionSite(validPositions[0].pos, type);
+            return true;
+        }
+        
+        return false;
     }, 
     
     
