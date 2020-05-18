@@ -5,12 +5,14 @@ var roleUpgrader = require('creeps_role.upgrader');
 var roleBuilder = require('creeps_role.builder');
 var roleRenewSelf = require('creeps_role.renewSelf');
 var roleHauler = require('creeps_role.hauler');
-var roleExplorer = require('creeps_role.explorer');
+var roleScout = require('creeps_role.scout');
 
 var moduleStats = require('module.stats');
 var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
+var moduleLogistics = require('module.logistics');
+var moduleStrategy = require('module.strategy');
 
 
 module.exports.loop = function () {
@@ -21,6 +23,8 @@ module.exports.loop = function () {
         moduleSpawn.run(spawn);
         moduleAutobuilder.run(spawn.room);
         moduleDefense.run(spawn.room);
+        moduleStrategy.run(spawn.room);
+        moduleLogistics.run(spawn.room);
     }
 
     for(var name in Game.creeps) {
@@ -37,8 +41,8 @@ module.exports.loop = function () {
                 roleBuilder.run(creep);
             } else if(creep.memory.role == 'hauler') {
     	        roleHauler.run(creep);
-            } else if (creep.memory.role == 'explorer') {
-                roleExplorer.run(creep);
+            } else if (creep.memory.role == 'scout') {
+                roleScout.run(creep);
             }
         /*}
         catch(err)

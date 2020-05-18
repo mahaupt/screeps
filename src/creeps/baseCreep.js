@@ -126,11 +126,13 @@ var baseCreep = {
 			ncarry = 2*bodySize;
 			nmove = 2*bodySize-1;
 		}
-		if (role=='explorer')
+		if (role=='scout')
 		{
 			nwork=1;
+			ncarry = bodySize;
 			nmove = Math.floor(2.5*bodySize);
 		}
+		//upgrader && builder == standard
 		
 		//WORK
 		for (var i=0; i<nwork; i++)

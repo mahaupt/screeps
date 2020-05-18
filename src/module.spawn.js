@@ -22,38 +22,53 @@ var moduleSpawn = {
         
         if (minerCount < sourceCount)
         {
-            let bodySize = baseCreep.getSuitableBodySize('miner', spawn.room.energyAvailable);
-            let body = baseCreep.buildBody(spawn.room, 'miner', bodySize);
-            spawn.spawnCreep(body, 'Miner'+Game.time, { memory: {role: 'miner', renewSelf: false}});
+            moduleSpawn.spawn("Miner", "miner", spawn);
         } else
         if (haulerCount < containerCount && 
             haulerCount < sourceCount &&
             haulerCount < sourceCount - linkCount+2) 
         {
-            let bodySize = baseCreep.getSuitableBodySize('hauler', spawn.room.energyAvailable);
-            let body = baseCreep.buildBody(spawn.room, 'hauler', bodySize);
-	        spawn.spawnCreep(body, 'Hauler'+Game.time, { memory: {role: 'hauler', renewSelf: false}});
+            moduleSpawn.spawn("Hauler", "hauler", spawn);
         } else 
-        /*if (false) 
-        {
-            let bodySize = baseCreep.getSuitableBodySize('queen', spawn.room.energyAvailable);
-            let body = baseCreep.buildBody(spawn.room, 'queen', bodySize);
-            spawn.spawnCreep(body, 'Queen'+Game.time, { memory: {role: 'queen', renewSelf: false}});
-        } else */
         if (upgraderCount < 1)
         {
-            let bodySize = baseCreep.getSuitableBodySize('upgrader', spawn.room.energyAvailable);
-            let body = baseCreep.buildBody(spawn.room, 'upgrader', bodySize);
-            spawn.spawnCreep(body, 'Upgrader'+Game.time, { memory: {role: 'upgrader', renewSelf: false}});
+            moduleSpawn.spawn("Upgrader", "upgrader", spawn);
         } else 
         if (builderCount < 4)
         {
-            let bodySize = baseCreep.getSuitableBodySize('builder', spawn.room.energyAvailable);
-            let body = baseCreep.buildBody(spawn.room, 'builder', bodySize);
-            spawn.spawnCreep(body, 'Builder'+Game.time, { memory: {role: 'builder', renewSelf: false}});
-        } 
+            moduleSpawn.spawn("Builder", "builder", spawn);
+        } else  
         
+        if (spawn.memory.spawnList)
+        {
+            if (spawn.memory.spawnList.length > 0)
+            {
+                var ret = moduleSpawn.spawn(spawn.memory.spawnList[0].name, spawn.memory.spawnList[0].role, spawn);
+                if (ret == OK) {
+                    spawn.memory.spawnList.shift();
+                }
+            }
+        }
     },
+    
+    spawn: function(name, role, spawn)
+    {
+        let bodySize = baseCreep.getSuitableBodySize(role, spawn.room.energyAvailable);
+        let body = baseCreep.buildBody(spawn.room, role, bodySize);
+        var ret = spawn.spawnCreep(body, name+Game.time, { 
+            memory: {
+                role: role, 
+                renewSelf: false
+            }
+        });
+        
+        if (ret == OK)
+        {
+            return true;
+        } else {
+            return false;
+        }
+    }, 
     
     memCleanup: function() {
         //cleanup
