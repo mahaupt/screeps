@@ -15,6 +15,9 @@ var roleBuilder = {
         
         if (creep.memory.harvesting)
         {
+            //check energy levels sufficient for building
+            if (baseCreep.skipDueEnergyLevels(creep)) return;
+            
 	        if (!creep.memory.source)
 	        {
 		        baseCreep.pickEnergySource(creep);
@@ -88,7 +91,21 @@ var roleBuilder = {
             }
             
         }
+    },
+    
+    skipDueEnergyLevels: function(creep) {
+        var energy = creep.room.energyAvailable;
+        var cap = creep.room.energyCapacityAvailable;
+        var ratio = energy / cap;
+        
+        if (cap > 800 && ratio <= 0.3)
+        {
+            console.log("Builder idling due energy levels");
+            return true;
+        }
+        return false;
     }
-}
+    
+};
 
 module.exports = roleBuilder;

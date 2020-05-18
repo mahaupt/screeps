@@ -69,7 +69,7 @@ var baseCreep = {
 				//console.log("amount: " + amount);
 				
 				//worth it?
-				if (amount > 0 && amount > dist*2) 
+				if (amount > 0 && amount > dist*10) 
 				{
 					//console.log("dropped res found - pickup");
 					
