@@ -15,6 +15,13 @@ var moduleDefense = {
 				continue;
 	        }
 			
+			//heal creeps
+			var injured = tower.pos.findClosestByRange(FIND_MY_CREEPS, {filter: (s) => (s.hits < s.hitsMax) });
+			if (injured) {
+				tower.heal(injured);
+				continue;
+			}
+			
 			//repair stuff if no hostiles
 			var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
 	            filter: (structure) => structure.hits < structure.hitsMax

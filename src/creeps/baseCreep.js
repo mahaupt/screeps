@@ -206,6 +206,19 @@ var baseCreep = {
             }
         }
         return false;
+    }, 
+	
+	skipDueEnergyLevels: function(creep) {
+        var energy = creep.room.energyAvailable;
+        var cap = creep.room.energyCapacityAvailable;
+        var ratio = energy / cap;
+        
+        if (cap > 800 && ratio <= 0.3)
+        {
+            console.log("Builder idling due energy levels");
+            return true;
+        }
+        return false;
     }
 };
 
