@@ -17,7 +17,7 @@ var roleScout =  {
         if (!creep.memory.target) 
         {
             if (creep.room.name != creep.memory.home) {
-                roleScout.moveToRoom(creep.room.home);
+                roleScout.moveToRoom(creep, creep.room.home);
             }
             else 
             {
@@ -31,18 +31,20 @@ var roleScout =  {
         //has target - go scout
         if (creep.room.name != creep.memory.target) {
             //move to room
-            roleScout.moveToRoom(creep.memory.target);
+            roleScout.moveToRoom(creep, creep.memory.target);
         } else {
             //scout
             roleScout.collectIntel(creep, creep.room);
             
             delete creep.memory.target;
+            //creep.memory.renewSelf = true;
+            //creep.memory.killSelf = true;
         }
     }, 
     
     
-    moveToRoom: function(name) {
-        var pos = new RoomPosition(25, 25, creep.memory.target);
+    moveToRoom: function(creep, name) {
+        var pos = new RoomPosition(25, 25, name);
         creep.moveTo(pos);
     }, 
     
@@ -62,7 +64,9 @@ var roleScout =  {
         for (let i=0; i < creeps.length; i++)
         {
             //skip own creeps
-            if (creeps[i].owner.username == creep.owner.username) continue;
+            if (creeps[i].owner) {
+                if (creeps[i].owner.username == creep.owner.username) continue;
+            }
             var cintel = {};
             cintel.body = creeps[i].body;
             cintel.hits = creeps[i].hits;
@@ -78,7 +82,9 @@ var roleScout =  {
         for (let i=0; i < struct.length; i++)
         {
             //skip own structs
-            if (struct[i].owner.username == creep.owner.username) continue;
+            if (struct[i].owner) {
+                if (struct[i].owner.username == creep.owner.username) continue;
+            }
             var sintel = {};
             sintel.structureType = struct[i].structureType;
             sintel.hits = struct[i].hits;
