@@ -1,5 +1,3 @@
-// todo: remove old tasks
-
 var moduleLogistics = {
     run: function(room) {
         if (!room.memory.ltasks) {
