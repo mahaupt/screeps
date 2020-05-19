@@ -25,8 +25,7 @@ This is a temporary role which is automatically assigned to a creep when it is a
 
 
 ## Roadmap
-#### Improve spawning of better creeps
-#### Improve efficient building layout
-#### Autoplacement of spawns
-#### Improve offensive and devensive strategies
-#### Implement taking over other rooms
+#### Implement offensive and devensive strategies
+#### Improvement of logistic operations and looting
+#### Implement Scouting and Exploring
+#### Implement capturing over other rooms
