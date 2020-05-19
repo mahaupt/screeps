@@ -123,8 +123,8 @@ var baseCreep = {
 		if (role=='hauler')
 		{
 			nwork=0;
-			ncarry = 2*bodySize;
-			nmove = 2*bodySize-1;
+			ncarry = Math.min(2*bodySize, 25);
+			nmove = Math.min(2*bodySize-1, 25);
 		}
 		if (role=='scout')
 		{
@@ -133,6 +133,17 @@ var baseCreep = {
 			nmove = Math.floor(2.5*bodySize);
 		}
 		//upgrader && builder == standard
+		
+		
+		//max 50 body parts - reducing
+		if (nwork + ncarry + nmove > 50)
+		{
+			var above = nwork + ncarry + nmove - 50;
+			nwork -= Math.ceil(nwork/50*above);
+			ncarry -= Math.ceil(ncarry/50*above);
+			nmove -= Math.ceil(nmove/50*above);
+		}
+		
 		
 		//WORK
 		for (var i=0; i<nwork; i++)

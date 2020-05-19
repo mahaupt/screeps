@@ -16,6 +16,7 @@ var moduleLogistics = {
         moduleLogistics.genLootTasks(room);
         moduleLogistics.genContainerTasks(room);
         moduleLogistics.genLinkTask(room);
+        moduleLogistics.genSpawnDistributionTask(room);
         moduleLogistics.sortTaskList(room);
     }, 
     
@@ -92,10 +93,55 @@ var moduleLogistics = {
         }
     }, 
     
-    
-    insertOrUpdate: function(room, task)
+    //carries energy from Containers and Storages to Spawn
+    genSpawnDistributionTask: function(room)
     {
-        var index = _.findIndex(room.memory.ltasks, (s) => { return s.s == task.s && s.t == task.t; });
+        var energyNeeded = room.energyCapacityAvailable;
+        var source = false;
+        
+        //get base containers containing energy
+        var containers = room.find(FIND_STRUCTURES, {filter: (s) => {
+            return s.structureType == STRUCTURE_CONTAINER && 
+            s.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
+            s.store[RESOURCE_ENERGY] > 0;
+        }});
+        containers = _.sortBy(containers, (s)=>-s.store[RESOURCE_ENERGY]);
+        
+        //get energy of fullest container
+        var contStorage = 0;
+        if (containers.length > 0)
+        {
+            contStorage = containers[0].store[RESOURCE_ENERGY];
+        }
+        
+        if (room.storage && 
+            room.storage.store[RESOURCE_ENERGY] > contStorage)
+        {
+            source = room.storage;
+        } else if (containers.length > 0) {
+            source = containers[0];
+        }
+        
+        if (source) {
+             
+            var task = {};
+            task.p = 4;
+            task.t = "s";
+            task.s = source.id;
+            task.v = energyNeeded;
+            task.a = 0;
+            
+            moduleLogistics.insertOrUpdate(task);
+        } else {
+            moduleLogistics.removeTaskGroup(room, "s");
+        }
+    },
+    
+    //insert or update task
+    //if ignoreSource=true, only compares task type
+    insertOrUpdate: function(room, task, ignoreSource=false)
+    {
+        var index = _.findIndex(room.memory.ltasks, (s) => { return (s.s == task.s || ignoreSource) && s.t == task.t; });
         
         if (index >= 0)
         {
@@ -108,6 +154,11 @@ var moduleLogistics = {
             room.memory.ltasks.push(task);
         }
     }, 
+    
+    removeTaskGroup: function(room, taskgroup)
+    {
+        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { return s.t != taskgroup; });
+    },
     
     
     sortTaskList: function(room)
