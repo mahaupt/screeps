@@ -5,6 +5,7 @@ var moduleLogistics = {
         if (!room.memory.ltasks) {
             room.memory.ltasks = [];
         }
+        room.memory.ltasks_upd = true;
         
         //ltasks = {p, t:, s:, v:, a: }
         //prio, type, source, volume, accepted volume
@@ -17,7 +18,6 @@ var moduleLogistics = {
         moduleLogistics.genContainerTasks(room);
         moduleLogistics.genLinkTask(room);
         moduleLogistics.genSpawnDistributionTask(room);
-        moduleLogistics.sortTaskList(room);
     }, 
     
     genLootTasks: function(room)
@@ -164,6 +164,25 @@ var moduleLogistics = {
     sortTaskList: function(room)
     {
         room.memory.ltasks = _.sortBy(room.memory.ltasks, (s) => -(s.p*1000000+s.v-s.a));
+    },
+    
+    
+    getTask: function(room, capacity)
+    {
+        if (room.memory.ltasks_upd) {
+            moduleLogistics.updateTaskList(room);
+            room.memory.ltasks_upd = false;
+        }
+        moduleLogistics.sortTaskList(room);
+        
+        var index = _.findIndex(room.memory.ltasks, (s) => { return s.v > s.a;});
+        
+        if (index >= 0) {
+            room.memory.ltasks[index].a += capacity;
+            return room.memory.ltasks[index];
+        }
+        
+        return null;
     }
     
     

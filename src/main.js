@@ -1,4 +1,5 @@
 global.baseCreep = require('creeps_baseCreep');
+global.moduleLogistics = require('module.logistics');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
@@ -11,7 +12,6 @@ var moduleStats = require('module.stats');
 var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
-var moduleLogistics = require('module.logistics');
 var moduleStrategy = require('module.strategy');
 
 
