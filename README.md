@@ -5,10 +5,9 @@ your units' AI. You control your colony by writing JavaScript.
 
 ## Strategy
 #### 1. Spawn creeps to be self sufficient
-#### 2. Build mining containers and upgrade miners
-#### 3. Build extensions to upgrade all creeps
-#### 4. Build roads to speed up movement
-#### 5. Upgrade controller and build towers for defense
+#### 2. Automatically build extensions and base structures
+#### 3. Establish container/link mining automatically
+#### 4. Upgrade controller and build towers for defense
 
 
 ## Roles
@@ -20,6 +19,14 @@ They spawn when mining containers are present. They carry ressources from mining
 They repair and construct stuff. If there is nothing left to repair or construct, they become temporary upgraders
 ### Upgrader
 Their only job is to upgrade the controller
+### Scout
+The scout gets intel from other rooms
+### Explorer (Planned)
+The explorers job is to mine distant resources from other rooms in potentially hostile environments
+### Soldier (Planned)
+The soldier has offensive and defensive task.
+### Pioneer (Planned)
+The Pioneer builds structures in hostile environments, and captures rooms.
 ### RenewSelf
 This is a temporary role which is automatically assigned to a creep when it is about to die. It either renews the creep at the spawn or commits suicide to allow a bigger creep to spawn 
 
