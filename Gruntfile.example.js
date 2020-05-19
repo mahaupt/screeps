@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
     
-    var branch = grunt.option('branch') || 'experimental';
+    var branch = grunt.option('branch') || 'dev';
 
     grunt.loadNpmTasks('grunt-screeps');
     grunt.loadNpmTasks('grunt-contrib-clean');
