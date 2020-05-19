@@ -58,12 +58,19 @@ var roleHauler = {
 	        if (target) 
 			{
 				//target valid - go to target and transfer
-				if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+				var ret = creep.transfer(target, RESOURCE_ENERGY);
+				if(ret == ERR_NOT_IN_RANGE) {
 					creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
 				}
 				//target full - search new target
 				if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
 					delete creep.memory.target;
+				}
+				//target will be full i next tick
+				if (ret == OK) {
+					if (target.store.getFreeCapacity(RESOURCE_ENERGY) <= creep.store[RESOURCE_ENERGY]) {
+						delete creep.memory.target;
+					}
 				}
 			}
 	        else 
@@ -157,14 +164,21 @@ var roleHauler = {
 		var prio1 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 			filter: (structure) => {
 				return (structure.structureType == STRUCTURE_EXTENSION ||
-					structure.structureType == STRUCTURE_SPAWN ||
-					structure.structureType == STRUCTURE_TOWER) &&
+					structure.structureType == STRUCTURE_SPAWN) &&
 					structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
 			}
 		});
 		
-		// Prio 2: Containers, Storage
+		//prio 2: towers
 		var prio2 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+			filter: (structure) => {
+				return (structure.structureType == STRUCTURE_TOWER && 
+					structure.store.getFreeCapacity(RESOURCE_ENERGY) > 10);
+			}
+		});
+		
+		// Prio 3: Containers, Storage
+		var prio3 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 			filter: (structure) => {
 				return (structure.structureType == STRUCTURE_STORAGE || 
 					(structure.structureType == STRUCTURE_CONTAINER && structure.pos.findInRange(FIND_SOURCES, 2).length == 0)) &&
@@ -177,6 +191,8 @@ var roleHauler = {
 			targets.push(prio1);
 		if (prio2)
 			targets.push(prio2);
+		if (prio3)
+			targets.push(prio3);
 		
 		if(targets.length > 0) {
 			creep.memory.target = targets[0].id
