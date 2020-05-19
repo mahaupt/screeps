@@ -10,14 +10,24 @@ var moduleLogistics = {
         //ltasks = {p, t:, s:, v:, a: }
         //prio, type, source, volume, accepted volume
         //moduleLogistics.updateTaskList(room);
+        //moduleLogistics.sortTaskList(room);
     }, 
     
     updateTaskList: function(room)
     {
+        moduleLogistics.removeInvalidTasks(room);
         moduleLogistics.genLootTasks(room);
-        moduleLogistics.genContainerTasks(room);
         moduleLogistics.genLinkTask(room);
+        moduleLogistics.genContainerTasks(room);
         moduleLogistics.genSpawnDistributionTask(room);
+    }, 
+    
+    removeInvalidTasks: function(room)
+    {
+        //also remove inactive MC and Links
+        _.remove(room.memory.ltasks, (s) => { 
+            return ((s.t == 'mc' || s.t == 'l') && s.a == 0) || 
+                Game.getObjectById(s.s) == null; });
     }, 
     
     genLootTasks: function(room)
@@ -47,6 +57,28 @@ var moduleLogistics = {
         }
     }, 
     
+    genLinkTask: function(room)
+    {
+        //find base links
+        var links = room.find(FIND_STRUCTURES, {filter: (s) => {
+            return s.structureType == STRUCTURE_LINK &&
+            s.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
+            s.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+        }});
+        
+        for (var i=0; i<links.length; i++)
+        {
+            var task = {};
+            task.p = 7;
+            task.t = "l";
+            task.s = links[i].id;
+            task.v = links[i].store.getUsedCapacity(RESOURCE_ENERGY);
+            task.a = 0;
+            
+            moduleLogistics.insertOrUpdate(room, task);
+        }
+    }, 
+    
     genContainerTasks: function(room)
     {
         //find mining containers without links
@@ -71,32 +103,10 @@ var moduleLogistics = {
         
     },
     
-    genLinkTask: function(room)
-    {
-        //find base links
-        var links = room.find(FIND_STRUCTURES, {filter: (s) => {
-            return s.structureType == STRUCTURE_LINK &&
-            s.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
-            s.store.getUsedCapacity() > 0;
-        }});
-        
-        for (var i=0; i<links.length; i++)
-        {
-            var task = {};
-            task.p = 7;
-            task.t = "l";
-            task.s = links[i].id;
-            task.v = links[i].store.getUsedCapacity();
-            task.a = 0;
-            
-            moduleLogistics.insertOrUpdate(room, task);
-        }
-    }, 
-    
     //carries energy from Containers and Storages to Spawn
     genSpawnDistributionTask: function(room)
     {
-        var energyNeeded = room.energyCapacityAvailable;
+        var energyNeeded = room.energyCapacityAvailable - room.energyAvailable;
         var source = false;
         
         //get base containers containing energy
@@ -131,7 +141,7 @@ var moduleLogistics = {
             task.v = energyNeeded;
             task.a = 0;
             
-            moduleLogistics.insertOrUpdate(task);
+            moduleLogistics.insertOrUpdate(room, task, true);
         } else {
             moduleLogistics.removeTaskGroup(room, "s");
         }
@@ -183,6 +193,26 @@ var moduleLogistics = {
         }
         
         return null;
+    }, 
+    
+    dropTask: function(room, task, capacity)
+    {
+        var index = _.findIndex(room.memory.ltasks, (s) => { return s.s == task.s && s.t == task.t; });
+        
+        if (index >= 0)
+        {
+            room.memory.ltasks[index].a -= capacity;
+            if (room.memory.ltasks[index].a < 0) {
+                room.memory.ltasks[index].a = 0;
+            }
+        }
+    }, 
+    
+    deleteTask: function(room, task)
+    {
+        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { 
+            return !(s.s == task.s && s.t == task.t); 
+        });
     }
     
     
