@@ -64,6 +64,9 @@ var moduleSpawn = {
         let body = baseCreep.buildBody(spawn.room, role, bodySize);
         var ret = spawn.spawnCreep(body, name+Game.time, data);
         
+        //console.log(body);
+        //console.log(ret);
+        
         if (ret == OK)
         {
             return true;

@@ -1,9 +1,6 @@
 /*
 Soldier
-target = room name
-targetx = room x
-targety = room y
-targett = attack / defend / guard
+target = room name to start attack
 
 */
 
@@ -15,7 +12,7 @@ var roleSoldier = {
         if (!creep.memory.target) 
         {
             if (creep.room.name != creep.memory.home) {
-                baseCreep.moveToRoom(creep, creep.room.home);
+                baseCreep.moveToRoom(creep, creep.memory.home);
             }
             else 
             {
@@ -26,7 +23,22 @@ var roleSoldier = {
         }
         
         
-        //go destroy target
+        if (creep.room.name == creep.memory.target) {
+            //go destroy target
+            var target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+            if (target)
+            {
+                if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
+                }
+            } else {
+                //no targets - move home
+                delete creep.memory.target;
+            }
+        } else {
+            baseCreep.moveToRoom(creep, creep.memory.target);
+        }
+        
     }
 };
 

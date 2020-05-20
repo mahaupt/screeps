@@ -21,12 +21,12 @@ They repair and construct stuff. If there is nothing left to repair or construct
 Their only job is to upgrade the controller
 ### Scout
 The scout gets intel from other rooms
-### Explorer (Planned)
-The explorers job is to mine distant resources from other rooms in potentially hostile environments
-### Soldier (Planned)
+### Soldier
 The soldier has offensive and defensive task.
-### Pioneer (Planned)
-The Pioneer builds structures in hostile environments, and captures rooms.
+### Pioneer
+The Pioneer builds structures and mines resources in hostile environments
+### Claimer
+The Claimer is responsible for claiming stuff. He is fast and fragile.
 ### RenewSelf
 This is a temporary role which is automatically assigned to a creep when it is about to die. It either renews the creep at the spawn or commits suicide to allow a bigger creep to spawn 
 

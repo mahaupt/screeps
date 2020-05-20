@@ -103,73 +103,8 @@ var roleHauler = {
 	        }
 	    }
 	}, 
-	
-	pickOwnContainer: function(creep) {
-		var containers = creep.room.find(FIND_STRUCTURES, {
-	        filter: (structure) => {
-	            return structure.structureType == STRUCTURE_CONTAINER;
-	        }});
-	        
-	    for (var c of containers)
-	    {
-		    //check mining container
-		    var sources = c.pos.findInRange(FIND_SOURCES, 2);
-			var links = c.pos.findInRange(FIND_STRUCTURES, 2, {
-		        filter: (structure) => {
-		            return structure.structureType == STRUCTURE_LINK;
-		        }});
-				
-		    if (sources.length == 0) continue;
-			if (links.length != 0) continue;
-		    
-		    
-		    var contPicked = false;
-			
-			for (var i in Memory.creeps)
-			{
-				if (Memory.creeps[i].container == c.id && 
-					Memory.creeps[i].role == "hauler")
-				{
-					contPicked = true;
-				}
-			}
-			
-			if (!contPicked)
-			{
-				creep.memory.container = c.id;
-				return true;
-			}
-	    }
-	    
-		//no container found - pick spawn link if possible
-		roleHauler.pickSpawnLink(creep);
-		
-	    return false;
-	}, 
-	
-	pickSpawnLink: function(creep) {
-		var spawnlink = baseCreep.getSpawnLink(creep.room);
-		if (spawnlink)
-		{
-			creep.memory.container = spawnlink.id;
-		}
-	}, 
-	
-	checkContainerIsLinked: function(creep) {
-		var c = Game.getObjectById(creep.memory.container);
-		if (!c) { delete creep.memory.container; return false; }
-		
-		var links = c.pos.findInRange(FIND_STRUCTURES, 2, {
-			filter: (structure) => {
-				return structure.structureType == STRUCTURE_LINK;
-			}});
-		if (links.length > 0)
-		{
-			return true;
-		}
-		return false;
-	}, 
-	
+
+
 	pickEnergyReceiver: function(creep) {
 		// Prio 1: SPAWNS, Extensions
 		var prio1 = creep.pos.findClosestByPath(FIND_STRUCTURES, {

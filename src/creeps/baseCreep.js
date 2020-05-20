@@ -101,6 +101,7 @@ var baseCreep = {
 		var ncarry = bodySize;
 		var nclaim = 0;
 		var nmove = bodySize;
+		var nattack = 0;
 		
 		//statistics
 		var ncontainer = room.find(FIND_STRUCTURES, {
@@ -149,9 +150,11 @@ var baseCreep = {
 		}
 		if (role == 'soldier')
 		{
-			ntough=17;
-			nmove=13;
-			//attack
+			nwork=0;
+			ncarry=0;
+			ntough=30;
+			nmove=10;
+			nattack=10;
 		}
 		//upgrader && builder == standard
 		
@@ -164,6 +167,7 @@ var baseCreep = {
 			ncarry -= Math.ceil(ncarry/50*above);
 			nmove -= Math.ceil(nmove/50*above);
 		}
+		
 		
 		//Tough
 		for (var h=0; h < ntough; h++)
@@ -192,6 +196,12 @@ var baseCreep = {
 		for (var l=0; l<nmove; l++)
 		{
 			body.push(MOVE);
+		}
+		
+		//attack
+		for (var m=0; m<nattack; m++)
+		{
+			body.push(ATTACK);
 		}
 		
 		

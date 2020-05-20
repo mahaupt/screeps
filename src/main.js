@@ -62,7 +62,7 @@ module.exports.loop = function () {
             console.log(err.message);
         }*/
         
-        if (creep.ticksToLive <= 100)
+        if (creep.ticksToLive <= 100 && !creep.memory.noRenew)
         {
 	        creep.memory.renewSelf = true;
         }

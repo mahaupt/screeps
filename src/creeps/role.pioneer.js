@@ -17,6 +17,7 @@ var rolePioneer = {
         if (!creep.memory.embark)
         {
             rolePioneer.prepareCreep(creep);
+            creep.memory.noRenew = true;
             return;
         }
         
@@ -94,6 +95,8 @@ var rolePioneer = {
                             if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                                 creep.moveTo(spawn);
                             }
+                            //switch renew back on
+                            if (creep.memory.noRenew) delete creep.memory.noRenew;
                         } else {
                             //upgrade controller
                             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
