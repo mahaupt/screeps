@@ -1,4 +1,6 @@
 var moduleStrategy = {
+    pioneerCount: 5,
+    
     run: function(room)
     {
         
@@ -6,15 +8,75 @@ var moduleStrategy = {
         
         
         
-        
+        //capturing
+        if (room.memory.strat_capture) {
+            moduleStrategy.captureRoom(room);
+        }
     },
     
-    sendScout: function(room)
+    sendScout: function(room, target)
     {
-        var roomname = "W1S1";
+        var spawn = room.find(FIND_STRUCTURES, {filter: (s) => 
+            s.structureType == STRUCTURE_SPAWN});
+        if (spawn.length <= 0) return;
         
-        
+        moduleSpawn.addSpawnList(spawn, "Scout", "scout", {target: target});
     },
+    
+    startCapturingRoom: function(room, target)
+    {
+        room.memory.strat_capture = true;
+        room.memory.strat_capture_tgt = target;
+        
+        //create pioneer group
+        var spawn = room.find(FIND_STRUCTURES, {filter: (s) => 
+            s.structureType == STRUCTURE_SPAWN});
+        if (spawn.length > 0)
+        {
+            moduleStrategy.createPioneerGroup(spawn[0]);
+        }
+    },
+    
+    captureRoom: function(room)
+    {
+        var pioneers = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == 'pioneer'});
+        
+        if (pioneers.length >= moduleStrategy.pioneerCount) 
+        {
+            //pioneers have spawned - spawn claimer and go
+            var spawn = room.find(FIND_STRUCTURES, {filter: (s) => 
+                s.structureType == STRUCTURE_SPAWN});
+            if (spawn.length <= 0) return;
+            
+            var ret = moduleSpawn.spawn(
+                "Claimer", 
+                "claimer", 
+                spawn[0], 
+                {target: room.memory.strat_capture_tgt}
+            );
+            
+            if (ret) 
+            {
+                console.log("Claimer created... sending pioneers");
+                //claimer spawn successful, set targets
+                for (var index in pioneers) {
+                    pioneers[index].memory.target = room.memory.strat_capture_tgt;
+                }
+                
+                //cleanup
+                delete room.memory.strat_capture;
+                delete room.memory.strat_capture_tgt;
+            }
+        } 
+    }, 
+    
+    createPioneerGroup: function(spawn)
+    {
+        console.log("creating pioneer spawn...");
+        for (var i=0; i < moduleStrategy.pioneerCount; i++) {
+            moduleSpawn.addSpawnList(spawn, "Pioneer", "pioneer");
+        }
+    }, 
     
     
     roomNameToCoords: function(name)

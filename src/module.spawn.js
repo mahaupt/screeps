@@ -44,23 +44,25 @@ var moduleSpawn = {
         {
             if (spawn.memory.spawnList.length > 0)
             {
-                var ret = moduleSpawn.spawn(spawn.memory.spawnList[0].name, spawn.memory.spawnList[0].role, spawn);
-                if (ret == OK) {
+                var ret = moduleSpawn.spawn(
+                    spawn.memory.spawnList[0].name, 
+                    spawn.memory.spawnList[0].role, 
+                    spawn, 
+                    spawn.memory.spawnList[0].mem || {});
+                if (ret) {
                     spawn.memory.spawnList.shift();
                 }
             }
         }
     },
     
-    spawn: function(name, role, spawn)
+    spawn: function(name, role, spawn, memory={})
     {
+        let data = { memory: {...{role: role}, ...memory}};
+        
         let bodySize = baseCreep.getSuitableBodySize(role, spawn.room.energyAvailable);
         let body = baseCreep.buildBody(spawn.room, role, bodySize);
-        var ret = spawn.spawnCreep(body, name+Game.time, { 
-            memory: {
-                role: role
-            }
-        });
+        var ret = spawn.spawnCreep(body, name+Game.time, data);
         
         if (ret == OK)
         {
@@ -72,7 +74,12 @@ var moduleSpawn = {
     
     addSpawnList: function(spawn, name, role)
     {
+        if (!spawn.memory.spawnList) {
+            spawn.memory.spawnList = [];
+        }
         
+        var s = {name: name, role: role};
+        spawn.memory.spawnList.push(s);
     }, 
     
     memCleanup: function() {

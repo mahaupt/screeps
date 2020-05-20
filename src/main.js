@@ -1,6 +1,7 @@
 global.baseCreep = require('creeps_baseCreep');
 global.moduleLogistics = require('module.logistics');
 global.moduleSpawn = require('module.spawn');
+global.moduleStrategy = require('module.strategy');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
@@ -14,7 +15,7 @@ var roleClaimer = require('creeps_role.claimer');
 var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
-var moduleStrategy = require('module.strategy');
+
 
 
 console.log("reset detected");

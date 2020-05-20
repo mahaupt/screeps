@@ -43,11 +43,11 @@ var moduleDefense = {
 				var nconstr = hostiles[i].pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 4).length;
 				var nstruct = hostiles[i].pos.findInRange(FIND_STRUCTURES, 4).length;
 				
-				console.log("Danger-level: " + (ncreeps+nconstr+nstruct));
+				//console.log("Danger-level: " + (ncreeps+nconstr+nstruct));
 				if (ncreeps+nconstr+nstruct > 0)
 				{
 					//try activate safe mode
-					console.log("danger!");
+					//console.log("danger!");
 					if (!room.controller.safeMode) {
 						if (room.controller.activateSafeMode() == OK)
 						{

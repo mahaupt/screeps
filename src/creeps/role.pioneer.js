@@ -47,6 +47,9 @@ var rolePioneer = {
             
             if (creep.memory.harvest)
             {
+                //dropped energy
+        		if (baseCreep.pickupDroppedEnergy(creep, 4)) { return; }
+                
                 var source = creep.pos.findClosestByPath(FIND_SOURCES);
                 if (source)
                 {
@@ -74,6 +77,11 @@ var rolePioneer = {
                 } 
                 else 
                 {
+                    //kill switch
+                    if (creep.room.controller.level >= 3) {
+                        creep.memory.killSelf = true;
+                    }
+                    
                     //build spawn
                     var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
                     if (consite) {
