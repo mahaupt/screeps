@@ -5,7 +5,7 @@ var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
 var roleBuilder = require('creeps_role.builder');
 var roleRenewSelf = require('creeps_role.renewSelf');
-var roleHauler = require('creeps_role.hauler');
+var roleHauler = require('creeps_role.newhauler');
 var roleScout = require('creeps_role.scout');
 
 var moduleStats = require('module.stats');
@@ -14,6 +14,8 @@ var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 var moduleStrategy = require('module.strategy');
 
+
+console.log("reset detected");
 
 module.exports.loop = function () {
     for (var sname in Game.spawns)

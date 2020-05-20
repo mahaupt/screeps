@@ -168,12 +168,12 @@ var roleMiner = {
         if (creep.store[RESOURCE_ENERGY] == 0) {
             //pickup
             if (creep.withdraw(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ff0000'}});
+                creep.moveTo(c, {visualizePathStyle: {stroke: '#ff0000'}});
             }
         } else {
             //dropoff
             if (creep.transfer(l, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
+                creep.moveTo(l, {visualizePathStyle: {stroke: '#00ff00'}});
             }
         }
         
@@ -306,7 +306,7 @@ var roleMiner = {
         
 		for (var i in Memory.creeps)
 		{
-			if (Memory.creeps[i].container == containerid && 
+			if (//Memory.creeps[i].container == containerid && 
 				Memory.creeps[i].role == "hauler")
 			{
 				return true;

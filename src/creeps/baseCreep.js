@@ -228,7 +228,7 @@ var baseCreep = {
         
         if (cap > 800 && ratio <= 0.1)
         {
-            console.log("Builder idling due energy levels");
+            //console.log("Builder idling due energy levels");
             return true;
         }
         return false;
