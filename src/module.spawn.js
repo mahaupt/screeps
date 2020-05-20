@@ -72,13 +72,13 @@ var moduleSpawn = {
         }
     },
     
-    addSpawnList: function(spawn, name, role)
+    addSpawnList: function(spawn, name, role, memory={})
     {
         if (!spawn.memory.spawnList) {
             spawn.memory.spawnList = [];
         }
         
-        var s = {name: name, role: role};
+        var s = {name: name, role: role, mem: memory};
         spawn.memory.spawnList.push(s);
     }, 
     

@@ -4,11 +4,7 @@
 var rolePioneer = {
     run: function(creep)
     {
-        //set home
-        if (!creep.memory.home)
-        {
-            creep.memory.home = creep.room.name;
-        }
+        baseCreep.init(creep);
         
         //wait for target
         if (!creep.memory.target)

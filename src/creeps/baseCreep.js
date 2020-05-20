@@ -130,9 +130,9 @@ var baseCreep = {
 		}
 		if (role=='scout')
 		{
-			nwork=1;
-			ncarry = bodySize;
-			nmove = Math.floor(2.5*bodySize);
+			nwork=0;
+			ncarry = 0;
+			nmove = 2;
 		}
 		if (role == 'pioneer')
 		{
@@ -146,6 +146,12 @@ var baseCreep = {
 			ncarry=0;
 			nclaim=1;
 			nmove=1;
+		}
+		if (role == 'soldier')
+		{
+			ntough=17;
+			nmove=13;
+			//attack
 		}
 		//upgrader && builder == standard
 		
@@ -264,6 +270,13 @@ var baseCreep = {
         var pos = new RoomPosition(25, 25, name);
         creep.moveTo(pos);
     }, 
+	
+	init: function(creep) {
+		//set home
+        if (!creep.memory.home) {
+            creep.memory.home = creep.room.name;
+        }
+	}
 };
 
 

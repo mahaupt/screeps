@@ -20,7 +20,7 @@ var moduleStrategy = {
             s.structureType == STRUCTURE_SPAWN});
         if (spawn.length <= 0) return;
         
-        moduleSpawn.addSpawnList(spawn, "Scout", "scout", {target: target});
+        moduleSpawn.addSpawnList(spawn[0], "Scout", "scout", {target: target});
     },
     
     startCapturingRoom: function(room, target)

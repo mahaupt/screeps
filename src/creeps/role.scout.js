@@ -8,10 +8,7 @@ Memory Layout
 
 var roleScout =  {
     run: function(creep) {
-        //set home
-        if (!creep.memory.home) {
-            creep.memory.home = creep.room.name;
-        }
+        baseCreep.init(creep);
         
         //no target - go home
         if (!creep.memory.target) 
