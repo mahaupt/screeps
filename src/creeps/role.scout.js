@@ -17,7 +17,7 @@ var roleScout =  {
         if (!creep.memory.target) 
         {
             if (creep.room.name != creep.memory.home) {
-                roleScout.moveToRoom(creep, creep.room.home);
+                baseCreep.moveToRoom(creep, creep.room.home);
             }
             else 
             {
@@ -31,7 +31,7 @@ var roleScout =  {
         //has target - go scout
         if (creep.room.name != creep.memory.target) {
             //move to room
-            roleScout.moveToRoom(creep, creep.memory.target);
+            baseCreep.moveToRoom(creep, creep.memory.target);
         } else {
             //scout
             roleScout.collectIntel(creep, creep.room);
@@ -40,12 +40,6 @@ var roleScout =  {
             //creep.memory.renewSelf = true;
             //creep.memory.killSelf = true;
         }
-    }, 
-    
-    
-    moveToRoom: function(creep, name) {
-        var pos = new RoomPosition(25, 25, name);
-        creep.moveTo(pos);
     }, 
     
     

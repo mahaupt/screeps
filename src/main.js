@@ -1,5 +1,6 @@
 global.baseCreep = require('creeps_baseCreep');
 global.moduleLogistics = require('module.logistics');
+global.moduleSpawn = require('module.spawn');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
@@ -7,9 +8,10 @@ var roleBuilder = require('creeps_role.builder');
 var roleRenewSelf = require('creeps_role.renewSelf');
 var roleHauler = require('creeps_role.newhauler');
 var roleScout = require('creeps_role.scout');
+var rolePioneer = require('creeps_role.pioneer');
+var roleClaimer = require('creeps_role.claimer');
 
 var moduleStats = require('module.stats');
-var moduleSpawn = require('module.spawn');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 var moduleStrategy = require('module.strategy');
@@ -45,6 +47,10 @@ module.exports.loop = function () {
     	        roleHauler.run(creep);
             } else if (creep.memory.role == 'scout') {
                 roleScout.run(creep);
+            } else if (creep.memory.role == 'pioneer') {
+                rolePioneer.run(creep);
+            } else if (creep.memory.role == 'claimer') {
+               roleClaimer.run(creep);
             }
         /*}
         catch(err)

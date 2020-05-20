@@ -96,8 +96,10 @@ var baseCreep = {
 	buildBody: function(room, role, bodySize) {
 		var body = [];
 		
+		var ntough = 0;
 		var nwork = bodySize;
 		var ncarry = bodySize;
+		var nclaim = 0;
 		var nmove = bodySize;
 		
 		//statistics
@@ -132,6 +134,19 @@ var baseCreep = {
 			ncarry = bodySize;
 			nmove = Math.floor(2.5*bodySize);
 		}
+		if (role == 'pioneer')
+		{
+			nwork=3;
+			ncarry=4;
+			nmove=7;
+		}
+		if (role == 'claimer')
+		{
+			nwork=0;
+			ncarry=0;
+			nclaim=1;
+			nmove=1;
+		}
 		//upgrader && builder == standard
 		
 		
@@ -144,6 +159,11 @@ var baseCreep = {
 			nmove -= Math.ceil(nmove/50*above);
 		}
 		
+		//Tough
+		for (var h=0; h < ntough; h++)
+		{
+			body.push(TOUGH);
+		}
 		
 		//WORK
 		for (var i=0; i<nwork; i++)
@@ -157,8 +177,13 @@ var baseCreep = {
 			body.push(CARRY);
 		}
 		
+		//CLAIM
+		for (var k=0; k < nclaim; k++) {
+			body.push(CLAIM);
+		}
+		
 		//MOVE
-		for (var k=0; k<nmove; k++)
+		for (var l=0; l<nmove; l++)
 		{
 			body.push(MOVE);
 		}
@@ -222,17 +247,23 @@ var baseCreep = {
     }, 
 	
 	skipDueEnergyLevels: function(creep) {
-        var energy = creep.room.memory.totel_energy;
+        var energy = creep.room.memory.total_energy;
         var cap = creep.room.memory.total_capacity;
         var ratio = energy / cap;
         
         if (cap > 800 && ratio <= 0.1)
         {
             //console.log("Builder idling due energy levels");
+			creep.moveTo(creep.room.controller);
             return true;
         }
         return false;
-    }
+    }, 
+	
+	moveToRoom: function(creep, name) {
+        var pos = new RoomPosition(25, 25, name);
+        creep.moveTo(pos);
+    }, 
 };
 
 

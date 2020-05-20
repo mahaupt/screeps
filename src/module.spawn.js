@@ -3,7 +3,8 @@ var moduleSpawn = {
         if (Game.time % 10 != 0) return;
         moduleSpawn.memCleanup();
         
-        var counts = _.countBy(Game.creeps, 'memory.role');
+        var roomCreeps = spawn.room.find(FIND_MY_CREEPS);
+        var counts = _.countBy(roomCreeps, 'memory.role');
         var minerCount = counts.miner || 0;
         var upgraderCount = counts.upgrader || 0;
         var builderCount = counts.builder || 0;
@@ -34,7 +35,7 @@ var moduleSpawn = {
         {
             moduleSpawn.spawn("Upgrader", "upgrader", spawn);
         } else 
-        if (builderCount < 4)
+        if (builderCount < sourceCount)
         {
             moduleSpawn.spawn("Builder", "builder", spawn);
         } else  
@@ -57,8 +58,7 @@ var moduleSpawn = {
         let body = baseCreep.buildBody(spawn.room, role, bodySize);
         var ret = spawn.spawnCreep(body, name+Game.time, { 
             memory: {
-                role: role, 
-                renewSelf: false
+                role: role
             }
         });
         
@@ -68,6 +68,11 @@ var moduleSpawn = {
         } else {
             return false;
         }
+    },
+    
+    addSpawnList: function(spawn, name, role)
+    {
+        
     }, 
     
     memCleanup: function() {
