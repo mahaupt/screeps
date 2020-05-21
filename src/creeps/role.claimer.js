@@ -12,6 +12,7 @@ var rolePioneer = {
             if (creep.room.name != creep.memory.home) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
+                creep.say("😴");
                 creep.moveTo(creep.room.controller);
             }
             return;
@@ -27,7 +28,7 @@ var rolePioneer = {
         //capture controller
         if (!creep.room.controller.my) {
             if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller);
+                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
             }
         } else {
             //go back and kill self

@@ -269,7 +269,7 @@ var baseCreep = {
         
         if (cap > 800 && ratio <= 0.1)
         {
-            //console.log("Builder idling due energy levels");
+            creep.say("😴");
 			creep.moveTo(creep.room.controller);
             return true;
         }
@@ -278,7 +278,7 @@ var baseCreep = {
 	
 	moveToRoom: function(creep, name) {
         var pos = new RoomPosition(25, 25, name);
-        creep.moveTo(pos);
+        creep.moveTo(pos, {visualizePathStyle: {stroke: '#ffff00'}});
     }, 
 	
 	init: function(creep) {

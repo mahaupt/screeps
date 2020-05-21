@@ -9,6 +9,8 @@ var rolePioneer = {
         //wait for target
         if (!creep.memory.target)
         {
+            //idle around controller
+            creep.say("😴");
             creep.moveTo(creep.room.controller);
             return;
         }
@@ -51,7 +53,7 @@ var rolePioneer = {
                 if (source)
                 {
                     if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(source);
+                        creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
                     }
                 }
             } else {
@@ -69,7 +71,7 @@ var rolePioneer = {
                 {
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
                     {
-                        creep.moveTo(creep.room.controller);
+                        creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
                     }
                 } 
                 else 
@@ -83,7 +85,7 @@ var rolePioneer = {
                     var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
                     if (consite) {
                         if (creep.build(consite) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(consite);
+                            creep.moveTo(consite, {visualizePathStyle: {stroke: '#00ff00'}});
                         }
                     } else {
                         //transfer energy to spawn
@@ -93,7 +95,7 @@ var rolePioneer = {
                                     s.store.getFreeCapacity(RESOURCE_ENERGY) > 0});
                         if (spawn) {
                             if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(spawn);
+                                creep.moveTo(spawn, {visualizePathStyle: {stroke: '#00ff00'}});
                             }
                             //switch renew back on
                             if (creep.memory.noRenew) delete creep.memory.noRenew;
@@ -101,7 +103,8 @@ var rolePioneer = {
                             //upgrade controller
                             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
                             {
-                                creep.moveTo(creep.room.controller);
+                                creep.moveTo(creep.room.controller, 
+                                    {visualizePathStyle: {stroke: '#00ff00'}});
                             }
                         }
                         
@@ -125,7 +128,7 @@ var rolePioneer = {
         {
             var xx = spawns[0].renewCreep(creep);
             if (xx == ERR_NOT_IN_RANGE) {
-                creep.moveTo(spawns[0]);
+                creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
             }
         }
         

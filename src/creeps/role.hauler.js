@@ -40,7 +40,7 @@ var roleHauler = {
 			
 			var ret = null;
 			if (s instanceof Resource){
-				ret = creep.pickup(s, RESOURCE_ENERGY);
+				ret = creep.pickup(s);
 			} else {
 				ret = creep.withdraw(s, RESOURCE_ENERGY);
 			}

@@ -17,6 +17,7 @@ var roleSoldier = {
             else 
             {
                 //idle around controller
+                creep.say("😴");
                 creep.moveTo(creep.room.controller);
             }
             return;
@@ -28,8 +29,9 @@ var roleSoldier = {
             var target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
             if (target)
             {
+                creep.say("⚔️");
                 if (creep.attack(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
+                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
                 }
             } else {
                 //no targets - move home

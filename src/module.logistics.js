@@ -104,7 +104,7 @@ var moduleLogistics = {
     //carries energy from Containers and Storages to Spawn
     genSpawnDistributionTask: function(room)
     {
-        var energyNeeded = room.energyCapacityAvailable - room.energyAvailable;
+        var energyNeeded = room.energyCapacityAvailable - room.energyAvailable + 100;
         var source = false;
         
         //get base containers containing energy
