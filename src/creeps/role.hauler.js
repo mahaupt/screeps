@@ -68,18 +68,27 @@ var roleHauler = {
 	        var target = Game.getObjectById(creep.memory.target);
 	        if (target) 
 			{
-				//target valid - go to target and transfer
-				var ret = creep.transfer(target, RESOURCE_ENERGY);
+				//select resource for transfer if target is storage
+				var resource = RESOURCE_ENERGY;
+				var stored_resources = baseCreep.getStoredResourceTypes(creep.store);
+				var multi_dropoff = false;
+				if (target instanceof StructureStorage) {
+					multi_dropoff = stored_resources.length > 1;
+					resource = stored_resources[0];
+				}
+				
+				//go to target and transfer
+				var ret = creep.transfer(target, resource);
 				if(ret == ERR_NOT_IN_RANGE) {
 					creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
 				}
 				//target full - search new target
-				if (target.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+				if (target.store.getFreeCapacity(resource) == 0) {
 					delete creep.memory.target;
 				}
 				//target will be full i next tick
-				if (ret == OK) {
-					if (target.store.getFreeCapacity(RESOURCE_ENERGY) <= creep.store[RESOURCE_ENERGY]) {
+				if (ret == OK && !multi_dropoff) {
+					if (target.store.getFreeCapacity(resource) <= creep.store[resource]) {
 						delete creep.memory.target;
 					}
 				}

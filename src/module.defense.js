@@ -22,13 +22,23 @@ var moduleDefense = {
 				continue;
 			}
 			
-			//repair stuff if no hostiles
-			var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-	            filter: (structure) => structure.hits < structure.hitsMax
-	        });
-	        if(closestDamagedStructure) {
-	            tower.repair(closestDamagedStructure);
-	        }
+			//repair stuff if no hostiles and enough energy
+			if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
+				
+				//repair structures except walls
+				var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+		            filter: (structure) => structure.hits < structure.hitsMax && 
+					structure.structureType != STRUCTURE_WALL && 
+					structure.structureType != STRUCTURE_RAMPART
+		        });
+		        if(closestDamagedStructure) {
+		            tower.repair(closestDamagedStructure);
+					continue;
+		        }
+				
+				//maybe repair walls
+				
+			}
 		}
 		
 		

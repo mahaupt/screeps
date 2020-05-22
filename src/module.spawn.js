@@ -23,21 +23,21 @@ var moduleSpawn = {
         
         if (minerCount < sourceCount)
         {
-            moduleSpawn.spawn("Miner", "miner", spawn);
+            moduleSpawn.spawn(spawn, "miner");
         } else
         if (haulerCount < containerCount && 
             haulerCount < sourceCount &&
             haulerCount < sourceCount - linkCount+2) 
         {
-            moduleSpawn.spawn("Hauler", "hauler", spawn);
+            moduleSpawn.spawn(spawn, "hauler");
         } else 
         if (upgraderCount < 1)
         {
-            moduleSpawn.spawn("Upgrader", "upgrader", spawn);
+            moduleSpawn.spawn(spawn, "upgrader");
         } else 
         if (builderCount < sourceCount)
         {
-            moduleSpawn.spawn("Builder", "builder", spawn);
+            moduleSpawn.spawn(spawn, "builder");
         } else  
         
         if (spawn.memory.spawnList)
@@ -45,9 +45,8 @@ var moduleSpawn = {
             if (spawn.memory.spawnList.length > 0)
             {
                 var ret = moduleSpawn.spawn(
-                    spawn.memory.spawnList[0].name, 
-                    spawn.memory.spawnList[0].role, 
                     spawn, 
+                    spawn.memory.spawnList[0].role, 
                     spawn.memory.spawnList[0].mem || {});
                 if (ret) {
                     spawn.memory.spawnList.shift();
@@ -56,13 +55,14 @@ var moduleSpawn = {
         }
     },
     
-    spawn: function(name, role, spawn, memory={})
+    spawn: function(spawn, role, memory={})
     {
         let data = { memory: {...{role: role}, ...memory}};
         
         let bodySize = baseCreep.getSuitableBodySize(role, spawn.room.energyAvailable);
         let body = baseCreep.buildBody(spawn.room, role, bodySize);
-        var ret = spawn.spawnCreep(body, name+Game.time, data);
+        let name = baseCreep.getName(spawn.room, role);
+        var ret = spawn.spawnCreep(body, name, data);
         
         //console.log(body);
         //console.log(ret);
@@ -75,13 +75,13 @@ var moduleSpawn = {
         }
     },
     
-    addSpawnList: function(spawn, name, role, memory={})
+    addSpawnList: function(spawn, role, memory={})
     {
         if (!spawn.memory.spawnList) {
             spawn.memory.spawnList = [];
         }
         
-        var s = {name: name, role: role, mem: memory};
+        var s = {role: role, mem: memory};
         spawn.memory.spawnList.push(s);
     }, 
     

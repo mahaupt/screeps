@@ -20,7 +20,7 @@ var moduleStrategy = {
             s.structureType == STRUCTURE_SPAWN});
         if (spawn.length <= 0) return;
         
-        moduleSpawn.addSpawnList(spawn[0], "Scout", "scout", {target: target});
+        moduleSpawn.addSpawnList(spawn[0], "scout", {target: target});
     },
     
     startCapturingRoom: function(room, target)
@@ -49,9 +49,8 @@ var moduleStrategy = {
             if (spawn.length <= 0) return;
             
             var ret = moduleSpawn.spawn(
-                "Claimer", 
+                spawn[0],  
                 "claimer", 
-                spawn[0], 
                 {target: room.memory.strat_capture_tgt}
             );
             
@@ -74,7 +73,7 @@ var moduleStrategy = {
     {
         console.log("creating pioneer spawn...");
         for (var i=0; i < moduleStrategy.pioneerCount; i++) {
-            moduleSpawn.addSpawnList(spawn, "Pioneer", "pioneer");
+            moduleSpawn.addSpawnList(spawn, "pioneer");
         }
     }, 
     

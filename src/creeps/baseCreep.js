@@ -1,4 +1,26 @@
 var baseCreep = {
+	getName: function(room, role)
+	{
+		var baseName = role + "-#";
+		var name = "";
+		
+		do {
+			name = baseName + baseCreep.getRandomString(3);
+		} while (Game.creeps[name]);
+		
+		return name;
+	},
+	
+	getRandomString: function(length) {
+	    var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	    var result = '';
+	    for ( var i = 0; i < length; i++ ) {
+	        result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+	    }
+	    return result;
+	},
+	
+	
 	pickEnergySource: function(creep) 
     {
 	    //try to find half full containers
@@ -25,10 +47,7 @@ var baseCreep = {
     
     
 	goGetEnergyFromSource: function(creep)
-	{
-		//dropped energy
-		if (baseCreep.pickupDroppedEnergy(creep, 4)) { return; }
-		
+	{	
 		var source = Game.getObjectById(creep.memory.source);
         if (!source) { delete creep.memory.source; return; }
         
@@ -322,6 +341,10 @@ var baseCreep = {
         if (!creep.memory.home) {
             creep.memory.home = creep.room.name;
         }
+	}, 
+	
+	getStoredResourceTypes: function(store) {
+		 return _.filter(Object.keys(store), resource => store[resource] > 0);
 	}
 };
 
