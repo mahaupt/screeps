@@ -14,11 +14,12 @@ var roleScout =  {
         if (!creep.memory.target) 
         {
             if (creep.room.name != creep.memory.home) {
-                baseCreep.moveToRoom(creep, creep.room.home);
+                baseCreep.moveToRoom(creep, creep.memory.home);
             }
             else 
             {
                 //idle around controller
+                creep.say("😴");
                 creep.moveTo(creep.room.controller);
             }
             return;

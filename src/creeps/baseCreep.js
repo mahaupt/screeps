@@ -276,9 +276,45 @@ var baseCreep = {
         return false;
     }, 
 	
-	moveToRoom: function(creep, name) {
+	//source callback avoiding source keepers
+	avoidSourceCostCallback: function(rname, costs)
+	{
+		var room = Game.rooms[rname];
+		
+		if (!room) return;
+		
+		var sources = room.find(FIND_SOURCES);
+		var minerals = room.find(FIND_MINERALS);
+		var avoids = [].concat(sources, minerals);
+		
+		_.forEach(avoids, function(avoid){
+			var xStart = avoid.pos.x - 5;
+			var xEnd = avoid.pos.x + 5;
+			var yStart = avoid.pos.y - 5;
+			var yEnd = avoid.pos.y + 5;
+
+			for(var x = xStart; x <= xEnd; x++) {
+				for(var y = yStart; y <= yEnd; y++) {
+					costs.set(x, y, 20);
+				}
+			}
+		});
+
+	}, 
+	
+	//moves creep to room name, avoids source keeper
+	moveToRoom: function(creep, name, travelSafe=true) {
         var pos = new RoomPosition(25, 25, name);
-        creep.moveTo(pos, {visualizePathStyle: {stroke: '#ffff00'}});
+		
+		if (travelSafe) {
+	        creep.moveTo(pos, {
+				reusePath: 10, 
+				costCallback: baseCreep.avoidSourceCostCallback, 
+				visualizePathStyle: {stroke: '#ffff00'}
+			});
+		} else {
+			creep.moveTo(pos, {visualizePathStyle: {stroke: '#ffff00'}});
+		}
     }, 
 	
 	init: function(creep) {

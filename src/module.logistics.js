@@ -28,6 +28,7 @@ var moduleLogistics = {
                 Game.getObjectById(s.s) == null; });
     }, 
     
+    //generates hauling tasks for transporting loot
     genLootTasks: function(room)
     {
         //get loot sources
@@ -35,7 +36,7 @@ var moduleLogistics = {
         var ts = room.find(FIND_TOMBSTONES);
         var ru = room.find(FIND_RUINS);
         
-        var targets = res.concat(ts).concat(ru);
+        var targets = [].concat(res, ts, ru);
         
         for (var i=0; i < targets.length; i++)
         {
@@ -55,6 +56,7 @@ var moduleLogistics = {
         }
     }, 
     
+    //generates hauling tasks for emtying base links
     genLinkTask: function(room)
     {
         //find base links
@@ -77,6 +79,7 @@ var moduleLogistics = {
         }
     }, 
     
+    //
     genContainerTasks: function(room)
     {
         //find mining containers without links
@@ -104,7 +107,24 @@ var moduleLogistics = {
     //carries energy from Containers and Storages to Spawn
     genSpawnDistributionTask: function(room)
     {
-        var energyNeeded = room.energyCapacityAvailable - room.energyAvailable + 100;
+        //calc energy need of towers (and labs?)
+        var energyNeed = room.find(FIND_MY_STRUCTURES, 
+            {
+                filter: (s) => 
+                { 
+                    return s.structureType == STRUCTURE_TOWER && 
+                        s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                }
+            }
+        );
+        var structEnergyNeed = 0;
+        for (let i=0; i < energyNeed.length; i++)
+        {
+            structEnergyNeed += energyNeed[i].store.getFreeCapacity(RESOURCE_ENERGY);
+        }
+        
+        //calc total energy needed
+        var energyNeeded = room.energyCapacityAvailable - room.energyAvailable + structEnergyNeed;
         var source = false;
         
         //get base containers containing energy

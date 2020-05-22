@@ -11,15 +11,23 @@ var roleRenewSelf = {
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
-        var spawns = creep.room.find(FIND_STRUCTURES, {
+        var spawns = creep.room.find(FIND_MY_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_SPAWN;
             }
         });
         
         
-        if (spawns.length > 0)
+        if (spawns.length == 0)
+		{
+			//no spawn in room - try to go home
+			if (creep.memory.home) {
+				baseCreep.moveToRoom(creep, creep.memory.home);
+			}
+		} 
+		else
         {
+			//spawn in room
 	        //recycle self to build better creep
 	        if (!creep.memory.killSelf)
 	        {
