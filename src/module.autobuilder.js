@@ -86,49 +86,27 @@ var moduleAutobuilder = {
                 }
             }
         }
+        
+        
+        //Extractor
+        var extractor_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_EXTRACTOR);
+        var extractor_max = CONTROLLER_STRUCTURES[STRUCTURE_EXTRACTOR][room.controller.level];
+        if (extractor_num < extractor_max && constr_sites_num < 2) 
+        {
+            var minerals = room.find(FIND_MINERALS);
+            if (minerals.length > 0) {
+                if (room.createConstructionSite(minerals[0].pos, STRUCTURE_EXTRACTOR) == OK)
+                {
+                    constr_sites_num++;
+                }
+            }
+        }
 	    
 	    
 	    //build roads - nothing other to build
 	    if (containers_num > 1 && constr_sites_num == 0)
 	    {
-		    var spawn = room.find(FIND_STRUCTURES, {
-			    filter: { structureType: STRUCTURE_SPAWN }
-			});
-			var container = room.find(FIND_STRUCTURES, {
-			    filter: { structureType: STRUCTURE_CONTAINER }
-			});
-            var targets = container.concat([room.controller]);
-			if (spawn.length > 0 && targets.length > 0)
-			{
-				var builtRoads = 0;
-				
-                //roads from spawn to Structures
-				for (var t of targets)
-				{
-					var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true});
-                    
-                    //bugfix, dont build road on controller
-                    //it strangely needs 25k to complete
-                    if (t instanceof StructureController) {
-                        path.pop();
-                    }
-                    
-					for (var i=0; i < path.length && builtRoads < 5; i++)
-					{
-						if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
-						{
-							builtRoads++;
-						}
-					}
-					//console.log(builtRoads);
-					if (builtRoads > 0) break;	
-				}
-                
-                //roads around spawn
-                if (builtRoads == 0) {
-                        moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_ROAD, false);
-                }
-			}
+		    moduleAutobuilder.buildRoads(room);
 	    }
         
         //todo: building walls
@@ -465,6 +443,52 @@ var moduleAutobuilder = {
         if (roads.length > 0)
         {
             roads[0].destroy();
+        }
+    }, 
+    
+    
+    buildRoads: function(room)
+    {
+        var spawn = room.find(FIND_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN }
+        });
+        var container = room.find(FIND_STRUCTURES, {
+            filter: (s) => { 
+                return s.structureType == STRUCTURE_CONTAINER || 
+                    s.structureType == STRUCTURE_EXTRACTOR; 
+            }
+        });
+        var targets = container.concat([room.controller]);
+        if (spawn.length > 0 && targets.length > 0)
+        {
+            var builtRoads = 0;
+            
+            //roads from spawn to Structures
+            for (var t of targets)
+            {
+                var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true});
+                
+                //bugfix, dont build road on controller
+                //it strangely needs 25k to complete
+                if (t instanceof StructureController) {
+                    path.pop();
+                }
+                
+                for (var i=0; i < path.length && builtRoads < 5; i++)
+                {
+                    if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
+                    {
+                        builtRoads++;
+                    }
+                }
+                //console.log(builtRoads);
+                if (builtRoads > 0) break;	
+            }
+            
+            //roads around spawn
+            if (builtRoads == 0) {
+                    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_ROAD, false);
+            }
         }
     }
 };

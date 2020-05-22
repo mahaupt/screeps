@@ -121,6 +121,8 @@ var baseCreep = {
 		var nclaim = 0;
 		var nmove = bodySize;
 		var nattack = 0;
+		var nrattack = 0;
+		var nheal = 0;
 		
 		//statistics
 		var ncontainer = room.find(FIND_STRUCTURES, {
@@ -141,39 +143,58 @@ var baseCreep = {
 				ncarry = 1;
 				nmove = 1;
 			}
-		}
+		} else 
 		if (role=='hauler')
 		{
 			nwork=0;
 			ncarry = Math.min(2*bodySize, 25);
 			nmove = Math.min(2*bodySize-1, 25);
-		}
+		} else 
 		if (role=='scout')
 		{
 			nwork=0;
 			ncarry = 0;
 			nmove = 2;
-		}
+		} else 
 		if (role == 'pioneer')
 		{
 			nwork=3;
 			ncarry=4;
 			nmove=7;
-		}
+		} else 
 		if (role == 'claimer')
 		{
 			nwork=0;
 			ncarry=0;
 			nclaim=1;
 			nmove=1;
-		}
+		} else 
 		if (role == 'soldier')
 		{
+			bodySize = Math.min(bodySize, 10);
 			nwork=0;
 			ncarry=0;
-			ntough=30;
-			nmove=10;
-			nattack=10;
+			ntough=2*bodySize; //10
+			nmove=2*bodySize; //50
+			nattack=bodySize; //80
+		} else 
+		if (role == 'ranger')
+		{
+			bodySize = Math.min(bodySize, 10);
+			nwork=0;
+			ncarry=0;
+			ntough=2*bodySize; //10
+			nmove=2*bodySize; //50
+			nrattack=bodySize; //150
+		} else 
+		if (role == 'healer')
+		{
+			bodySize = Math.min(bodySize, 10);
+			nwork=0;
+			ncarry=0;
+			ntough=2*bodySize; //10
+			nmove=2*bodySize; //50
+			nheal=bodySize; //150
 		}
 		//upgrader && builder == standard
 		
@@ -221,6 +242,18 @@ var baseCreep = {
 		for (var m=0; m<nattack; m++)
 		{
 			body.push(ATTACK);
+		}
+		
+		//ranged attack
+		for (var n=0; n<nrattack; n++)
+		{
+			body.push(RANGED_ATTACK);
+		}
+		
+		//heal
+		for (var o=0; o<nheal; o++)
+		{
+			body.push(HEAL);
 		}
 		
 		

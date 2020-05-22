@@ -52,8 +52,13 @@ var rolePioneer = {
                 var source = creep.pos.findClosestByPath(FIND_SOURCES);
                 if (source)
                 {
-                    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    if (creep.harvest(source) != OK) {
                         creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+                    }
+                
+                    //source empty
+                    if (source.energy == 0) {
+                        creep.memory.harvest = false;
                     }
                 }
             } else {
@@ -132,7 +137,7 @@ var rolePioneer = {
             }
         }
         
-        if (creep.ticksToLive >= 1400) {
+        if (creep.ticksToLive >= CREEP_LIFE_TIME-100) {
             creep.memory.embark = true;
         }
     }

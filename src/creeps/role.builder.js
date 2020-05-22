@@ -72,25 +72,43 @@ var roleBuilder = {
         //repairs needed - except mining containers
         var repairs = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.hits < structure.hitsMax && structure.pos.findInRange(FIND_SOURCES, 2).length == 0);
+                return (
+                    structure.structureType != STRUCTURE_WALL && 
+                    structure.structureType != STRUCTURE_RAMPART && 
+                    structure.hits < structure.hitsMax && 
+                    structure.pos.findInRange(FIND_SOURCES, 2).length == 0);
             }
         });
         if (repairs)
         {
             creep.memory.building = repairs.id;
-        } else {
-        
-        
-            //construction sites
-            var targets = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-            if(targets) {
-                creep.memory.building = targets.id;
-            } else {
-                //upgrade if no construction site
-                creep.memory.building = creep.room.controller.id;
-            }
-            
+            return;
         }
+        
+        
+        //construction sites
+        var targets = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        if(targets) {
+            creep.memory.building = targets.id;
+            return;
+        }
+        
+        
+        //fortify walls
+        var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 
+            return (s.structureType == STRUCTURE_WALL || 
+            s.structureType == STRUCTURE_RAMPART) && 
+            s.hits < s.hitsMax; 
+        }});
+        if (walls.length > 0) {
+            walls = _.orderBy(walls, (s) => s.hits);
+            creep.memory.building = walls[0].id;
+        }
+        
+        //upgrade if no thing else to do
+        creep.memory.building = creep.room.controller.id;
+        
+
     }
     
 };

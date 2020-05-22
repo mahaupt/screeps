@@ -68,8 +68,15 @@ var roleMiner = {
 	    {
             //go to source and harvest
             var s = Game.getObjectById(creep.memory.source);
-            if(creep.harvest(s) == ERR_NOT_IN_RANGE) {
+            if(creep.harvest(s) != OK) {
                 creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
+            }
+            
+            //source depleted - time to renew?
+            if (creep.ticksToLive <= CREEP_LIFE_TIME/2) {
+                if (s.energy == 0 && s.ticksToRegeneration >= 50) {
+                    creep.memory.renewSelf = true;
+                }
             }
             
             //link abvl - carry to link immediately
@@ -80,7 +87,8 @@ var roleMiner = {
                 if (!l) { delete creep.memory.link; return; }
                 var xx = creep.transfer(l, RESOURCE_ENERGY);
                 
-                if (l.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                //link full, send to spawn
+                if (l.store.getFreeCapacity(RESOURCE_ENERGY) == 0 || creep.memory.renewSelf) {
                     baseCreep.sendLinkToSpawn(l);
                 }
                 
