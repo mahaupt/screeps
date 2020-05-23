@@ -32,9 +32,9 @@ var rolePioneer = {
         
         //wait for controller to be captured
         if (!creep.room.controller.my) {
-            
-            creep.moveTo(creep.room.controller);
-            
+            if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                rolePioneer.harvest(creep);
+            }
         } else {
             //harvest and build spawn
             if (!creep.memory.harvest && creep.store[RESOURCE_ENERGY] == 0) {
