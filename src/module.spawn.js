@@ -11,6 +11,11 @@ var moduleSpawn = {
         var haulerCount = counts.hauler || 0;
         
         var sourceCount = spawn.room.find(FIND_SOURCES).length;
+        var mineralCount = spawn.room.find(FIND_MINERALS, {
+            filter: (s) => {
+                return s.mineralAmount > 0 || s.ticksToRegeneration <= 50;
+            }
+        }).length;
         var containerCount = spawn.room.find(FIND_STRUCTURES, {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_CONTAINER;
@@ -19,9 +24,15 @@ var moduleSpawn = {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_LINK;
 	        }}).length;
+        var extractor_count = spawn.room.find(FIND_STRUCTURES, {
+	        filter: (structure) => {
+	            return structure.structureType == STRUCTURE_EXTRACTOR;
+	        }}).length;
+        //extractors that could be harvested
+        extractor_count = Math.min(extractor_count, mineralCount);
         
         
-        if (minerCount < sourceCount)
+        if (minerCount < sourceCount+extractor_count)
         {
             moduleSpawn.spawn(spawn, "miner");
         } else

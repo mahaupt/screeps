@@ -101,8 +101,9 @@ var roleBuilder = {
             s.hits < s.hitsMax; 
         }});
         if (walls.length > 0) {
-            walls = _.orderBy(walls, (s) => s.hits);
+            walls = _.sortBy(walls, (s) => s.hits);
             creep.memory.building = walls[0].id;
+            return;
         }
         
         //upgrade if no thing else to do

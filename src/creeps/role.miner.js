@@ -41,7 +41,7 @@ var roleMiner = {
         }
         
 	    //switching btn harvesting and dropping
-        if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
+        if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0) {
             creep.memory.harvesting = true;
         }
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
@@ -73,13 +73,22 @@ var roleMiner = {
             }
             
             //source depleted - time to renew?
-            if (creep.ticksToLive <= CREEP_LIFE_TIME/2) {
+            if (creep.ticksToLive <= CREEP_LIFE_TIME/3) {
                 if (s.energy == 0 && s.ticksToRegeneration >= 50) {
                     creep.memory.renewSelf = true;
                 }
             }
             
+            //mineral depleted - kill self
+            if (s instanceof Mineral) {
+                if (s.mineralAmount == 0 && s.ticksToRegeneration >= 3600) {
+                    creep.memory.killSelf = true;
+                    creep.memory.renewSelf = true;
+                }
+            }
+            
             //link abvl - carry to link immediately
+            //ENERGY ONLY
             if (creep.memory.link)
             {
                 //put stuff into link
@@ -95,9 +104,9 @@ var roleMiner = {
                 //switch to special mode if container storage full
                 if (l.store.getFreeCapacity(RESOURCE_ENERGY) > 0 && creep.memory.container)
                 {
-                    var c = Game.getObjectById(creep.memory.container);
+                    let c = Game.getObjectById(creep.memory.container);
     	            if (!c) { delete creep.memory.container; return; }
-                    if (c.store[RESOURCE_ENERGY] > LINK_CAPACITY) {
+                    if (c.store.getUsedCapacity(RESOURCE_ENERGY) > LINK_CAPACITY) {
                         creep.memory.containerLinkPurge = true;
                     }
                 }
@@ -111,11 +120,12 @@ var roleMiner = {
             if (creep.memory.container)
             {
                 //put stuff into container
-	            var c = Game.getObjectById(creep.memory.container);
+	            let c = Game.getObjectById(creep.memory.container);
 	            if (!c) { delete creep.memory.container; return; }
-                if (c.hits == c.hitsMax) 
+                if (c.hits == c.hitsMax || c.store[RESOURCE_ENERGY] == 0) 
                 { // if damaged keep energy and repair later
-                    creep.transfer(c, RESOURCE_ENERGY);
+                    let res_types = baseCreep.getStoredResourceTypes(creep.store);
+                    creep.transfer(c, res_types[0]);
                 }
             }
         }
@@ -127,22 +137,24 @@ var roleMiner = {
             {
 	            var c = Game.getObjectById(creep.memory.container);
 	            if (!c) { delete creep.memory.container; return; }
+                
 	            
-                //repair
-                if (c.hits < c.hitsMax) {
+                //repair needed and has energy
+                if (c.hits < c.hitsMax && c.store[RESOURCE_ENERGY] > 0) {
                     if (creep.repair(c) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
                     }
                 } 
-                else if (c.store.getFreeCapacity(RESOURCE_ENERGY) == 0) 
+                else if (c.store.getFreeCapacity() == 0) 
                 {   //full
                     //stop container mining temp. and assist transport chain
                     delete creep.memory.container;
 					creep.say("MC full!");
-					roleMiner.carryEnergyBackToBase(creep);
+					roleMiner.carryBackToBase(creep);
 				} else {
-                    //not in range mostl likely
-                    if (creep.transfer(c, RESOURCE_ENERGY)== ERR_NOT_IN_RANGE)
+                    //not in range mostl likely - move and tx
+                    var res_types = baseCreep.getStoredResourceTypes(creep.store);
+                    if (creep.transfer(c, res_types[0])== ERR_NOT_IN_RANGE)
                     {
                         creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
                     }
@@ -150,7 +162,7 @@ var roleMiner = {
 	            
             } else {
                 //no mining container
-	        	roleMiner.carryEnergyBackToBase(creep);
+	        	roleMiner.carryBackToBase(creep);
             }
         }
 	},
@@ -173,7 +185,9 @@ var roleMiner = {
             return;
         }
         
-        if (creep.store[RESOURCE_ENERGY] == 0) {
+        
+        
+        if (creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
             //pickup
             if (creep.withdraw(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(c, {visualizePathStyle: {stroke: '#ff0000'}});
@@ -186,28 +200,34 @@ var roleMiner = {
         }
         
         //terminating pouring
-        if (c.store[RESOURCE_ENERGY] == 0 || l.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+        if (c.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || 
+            l.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
             delete creep.memory.containerLinkPurge;
         }
     }, 
 	
-    //carry energy back to base into structures
-	carryEnergyBackToBase: function(creep) 
+    //carry back to base into structures
+	carryBackToBase: function(creep) 
 	{
+        var res_types = baseCreep.getStoredResourceTypes(creep.store);
+        
 		var targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
+                return (structure.structureType == STRUCTURE_STORAGE || 
+                    structure.structureType == STRUCTURE_EXTENSION ||
                     structure.structureType == STRUCTURE_SPAWN ||
                     structure.structureType == STRUCTURE_TOWER) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    structure.store.getFreeCapacity(res_types[0]) > 0;
             }
         });
-        if(targets.length > 0) {
-            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+
+        if(targets.length > 0) 
+        {
+            if(creep.transfer(targets[0], res_types[0]) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
             }
-        } else {
-            //maybe build construction sites
+        } else if (creep.store[RESOURCE_ENERGY] > 0) {
+            //maybe build construction sites - if energy avbl
             var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
     		if(targets.length > 0) {
     			if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
@@ -225,6 +245,17 @@ var roleMiner = {
     
 	pickOwnSource: function(creep) {
 		var sources = creep.room.find(FIND_SOURCES);
+        
+        //also add minerals if extractors present
+        if (
+            creep.room.find(
+                FIND_STRUCTURES, 
+                {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR}
+            ).length > 0) 
+        {
+            sources = sources.concat(creep.room.find(FIND_MINERALS));
+            
+        }
 		
 		//find new unoccupied source
 		var sourcePicked = {};
@@ -307,6 +338,7 @@ var roleMiner = {
     },
 	
 	
+    //todo: update multiroom
 	containerHasHauler: function(creep, containerid)
 	{
         //link acts as hauler
@@ -314,8 +346,7 @@ var roleMiner = {
         
 		for (var i in Memory.creeps)
 		{
-			if (//Memory.creeps[i].container == containerid && 
-				Memory.creeps[i].role == "hauler")
+			if (Memory.creeps[i].role == "hauler")
 			{
 				return true;
 			}

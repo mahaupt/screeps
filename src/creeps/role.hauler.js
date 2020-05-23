@@ -9,7 +9,7 @@ Memory Layout
 
 var roleHauler = {
 	run: function(creep) {		
-		if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0 || 
+		if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0 || 
 			!creep.memory.task) {
             creep.memory.harvesting = true;
 			delete creep.memory.target;
@@ -36,21 +36,36 @@ var roleHauler = {
 				delete creep.memory.task; 
 				return; 
 			}
+			
+			//select resource for pickup
 			var amount = s.amount || s.store[RESOURCE_ENERGY];
+			var resource = RESOURCE_ENERGY;
+			var multi_pickup = false;
+			if (creep.memory.task.t == "mc") 
+			{
+				amount = s.store.getUsedCapacity();
+				var res_types = baseCreep.getStoredResourceTypes(s.store);
+				resource = res_types[0];
+				multi_pickup = res_types.length > 1;
+			}
 			
 			var ret = null;
 			if (s instanceof Resource){
 				ret = creep.pickup(s);
 			} else {
-				ret = creep.withdraw(s, RESOURCE_ENERGY);
+				ret = creep.withdraw(s, resource);
 			}
 			
 	        if (ret  == ERR_NOT_IN_RANGE) {
 		    	creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
 	        }
+			
 	        
 	        //no more energy in container - stop and carry to base
-	        if (amount < creep.store.getFreeCapacity() && ret == OK || amount == 0)
+	        if (amount < creep.store.getFreeCapacity() && 
+				ret == OK && 
+				!multi_pickup || 
+				amount == 0)
 	        {
 		        creep.memory.harvesting = false;
 				moduleLogistics.deleteTask(creep.room, creep.memory.task);
@@ -61,7 +76,7 @@ var roleHauler = {
         {
 			//pick energy receiver
 	        if (!creep.memory.target) {
-				roleHauler.pickEnergyReceiver(creep);
+				roleHauler.pickReceiver(creep);
 			}
 			
 	        
@@ -72,7 +87,10 @@ var roleHauler = {
 				var resource = RESOURCE_ENERGY;
 				var stored_resources = baseCreep.getStoredResourceTypes(creep.store);
 				var multi_dropoff = false;
-				if (target instanceof StructureStorage) {
+				if (target instanceof StructureStorage || 
+					target instanceof StructureContainer || 
+					target instanceof StructureTerminal) 
+				{
 					multi_dropoff = stored_resources.length > 1;
 					resource = stored_resources[0];
 				}
@@ -114,30 +132,48 @@ var roleHauler = {
 	}, 
 
 
-	pickEnergyReceiver: function(creep) {
-		// Prio 1: SPAWNS, Extensions
-		var prio1 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-			filter: (structure) => {
-				return (structure.structureType == STRUCTURE_EXTENSION ||
-					structure.structureType == STRUCTURE_SPAWN) &&
-					structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-			}
-		});
+	pickReceiver: function(creep) {
+		var res_types = baseCreep.getStoredResourceTypes(creep.store);
+		var resource = res_types[0];
 		
-		//prio 2: towers
-		var prio2 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-			filter: (structure) => {
-				return (structure.structureType == STRUCTURE_TOWER && 
-					structure.store.getFreeCapacity(RESOURCE_ENERGY) > 10);
-			}
-		});
+		var prio1 = null;
+		var prio2 = null;
+		if (resource == RESOURCE_ENERGY) 
+		{
+			//CARRY ENERGY TO PRIORITY TARGETS
+			// Prio 1: SPAWNS, Extensions
+			prio1 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+				filter: (structure) => {
+					return (structure.structureType == STRUCTURE_EXTENSION ||
+						structure.structureType == STRUCTURE_SPAWN) &&
+						structure.store.getFreeCapacity(resource) > 0;
+				}
+			});
+			
+			//prio 2: towers
+			prio2 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+				filter: (structure) => {
+					return (structure.structureType == STRUCTURE_TOWER && 
+						structure.store.getFreeCapacity(resource) > 10);
+				}
+			});
+		} else {
+			//CARRY ANY OTHER RESOURCE TO TERMINAL
+			prio1 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+				filter: (structure) => {
+					return (structure.structureType == STRUCTURE_TERMINAL &&
+						structure.store.getFreeCapacity(resource) > 0);
+				}
+			});
+		}
 		
 		// Prio 3: Containers, Storage
 		var prio3 = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 			filter: (structure) => {
 				return (structure.structureType == STRUCTURE_STORAGE || 
-					(structure.structureType == STRUCTURE_CONTAINER && structure.pos.findInRange(FIND_SOURCES, 2).length == 0)) &&
-					structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+					(structure.structureType == STRUCTURE_CONTAINER && structure.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
+					structure.pos.findInRange(FIND_MINERALS, 2).length == 0)) &&
+					structure.store.getFreeCapacity(resource) > 0;
 			}
 		});
 		
@@ -168,9 +204,12 @@ var roleHauler = {
 				targets.push(prio3);
 		}
 		
-		
 		if(targets.length > 0) {
 			creep.memory.target = targets[0].id
+		}
+		
+		if (creep.name == "Hauler2208070") {
+			console.log("Hallo3");
 		}
 	}
 	

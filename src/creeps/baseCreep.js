@@ -133,6 +133,7 @@ var baseCreep = {
 		
 		if (role=='miner')
 		{
+			bodySize = Math.min(bodySize, 5);
 			nwork = Math.floor(1.5*bodySize);
 			ncarry = Math.max(Math.floor(0.5*bodySize), 1);
 			nmove = Math.max(Math.floor(0.5*bodySize), 1);
@@ -146,6 +147,7 @@ var baseCreep = {
 		} else 
 		if (role=='hauler')
 		{
+			bodySize = Math.min(bodySize, 8);
 			nwork=0;
 			ncarry = Math.min(2*bodySize, 25);
 			nmove = Math.min(2*bodySize-1, 25);
@@ -171,30 +173,13 @@ var baseCreep = {
 		} else 
 		if (role == 'soldier')
 		{
-			bodySize = Math.min(bodySize, 10);
+			bodySize = Math.min(bodySize, 16);
 			nwork=0;
 			ncarry=0;
-			ntough=2*bodySize; //10
-			nmove=2*bodySize; //50
-			nattack=bodySize; //80
-		} else 
-		if (role == 'ranger')
-		{
-			bodySize = Math.min(bodySize, 10);
-			nwork=0;
-			ncarry=0;
-			ntough=2*bodySize; //10
-			nmove=2*bodySize; //50
+			ntough=1*bodySize; //10
+			nmove=1*bodySize; //50
 			nrattack=bodySize; //150
-		} else 
-		if (role == 'healer')
-		{
-			bodySize = Math.min(bodySize, 10);
-			nwork=0;
-			ncarry=0;
-			ntough=2*bodySize; //10
-			nmove=2*bodySize; //50
-			nheal=bodySize; //150
+			nheal=1; // 250
 		}
 		//upgrader && builder == standard
 		
@@ -267,12 +252,6 @@ var baseCreep = {
 		if (availableEnergy >= 500 && availableEnergy <= 800)
 		{
 			size = 2;
-		}
-		
-		//role specific modifier
-		if (role == 'miner') {
-			//max body size
-			size = Math.min(size, 5);
 		}
 		
 		return size;
@@ -377,7 +356,8 @@ var baseCreep = {
 	}, 
 	
 	getStoredResourceTypes: function(store) {
-		 return _.filter(Object.keys(store), resource => store[resource] > 0);
+		if (!store) return [];
+		return _.filter(Object.keys(store), resource => store[resource] > 0);
 	}
 };
 

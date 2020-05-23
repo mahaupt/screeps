@@ -44,16 +44,22 @@ var moduleAutobuilder = {
 		//CONTAINERS
 		var containers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_CONTAINER);
 		var source_num = room.find(FIND_SOURCES).length;
+        var mineral_num = room.find(FIND_MINERALS).length;
 	    var containers_max = 5;
         
 	    if (containers_num < containers_max && extensions_num >= 4 && constr_sites_num < 2)
 	    {
 		    if (containers_num < source_num) {
 		    	moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0);
-		    } else {
+                constr_sites_num++;
+            } else if (containers_num < containers_max-mineral_num) {
 			    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER, false);
-		    }
-            constr_sites_num++;
+                constr_sites_num++;
+		    } else if (room.controller.level >= 6) {
+                //build container at 
+                moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0);
+                constr_sites_num++;
+            }
 	    }
         
         //Storage
@@ -119,6 +125,10 @@ var moduleAutobuilder = {
         
         //first - pick valid build positions
 	    var sources = room.find(FIND_SOURCES);
+        if (room.controller.level >= 6) {
+            sources = sources.concat(room.find(FIND_MINERALS));
+        }
+        
 	    for (var s of sources)
 	    {
 		    
@@ -470,7 +480,7 @@ var moduleAutobuilder = {
                 
                 //bugfix, dont build road on controller
                 //it strangely needs 25k to complete
-                if (t instanceof StructureController) {
+                if (!(t instanceof StructureContainer)) {
                     path.pop();
                 }
                 

@@ -85,7 +85,8 @@ var moduleLogistics = {
         //find mining containers without links
         var mcontainers = room.find(FIND_STRUCTURES, {filter: (s) => {
             return s.structureType == STRUCTURE_CONTAINER && 
-                s.pos.findInRange(FIND_SOURCES, 2).length>0 && 
+                (s.pos.findInRange(FIND_SOURCES, 2).length>0 || 
+                s.pos.findInRange(FIND_MINERALS, 2).length>0) && 
                 s.store.getUsedCapacity() >= s.store.getCapacity()*0.1 && 
                 s.pos.findInRange(FIND_STRUCTURES, 2, {filter: (t) => t.structureType == STRUCTURE_LINK}).length == 0;
         }});
