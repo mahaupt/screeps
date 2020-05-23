@@ -1,5 +1,6 @@
 /*
 Soldier
+leader = xyz
 target = room name to start attack
 
 */

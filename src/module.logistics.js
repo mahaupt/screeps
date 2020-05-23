@@ -5,8 +5,8 @@ var moduleLogistics = {
         }
         room.memory.ltasks_upd = true;
         
-        //ltasks = {p, t:, s:, v:, a: }
-        //prio, type, source, volume, accepted volume
+        //ltasks = {p, t:, s:, v:, a:, [r:, res:]}
+        //prio, type, source, volume, accepted volume, [receiver], [resource type]
         //moduleLogistics.updateTaskList(room);
         //moduleLogistics.sortTaskList(room);
     }, 

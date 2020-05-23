@@ -46,75 +46,9 @@ var rolePioneer = {
             
             if (creep.memory.harvest)
             {
-                //dropped energy
-        		if (baseCreep.pickupDroppedEnergy(creep, 4)) { return; }
-                
-                var source = creep.pos.findClosestByPath(FIND_SOURCES);
-                if (source)
-                {
-                    if (creep.harvest(source) != OK) {
-                        creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
-                    }
-                
-                    //source empty
-                    if (source.energy == 0) {
-                        creep.memory.harvest = false;
-                    }
-                }
+        		rolePioneer.harvest(creep);
             } else {
-                //upgrade controller if low ticks
-                if (creep.room.controller.ticksToDowngrade <= 2000) {
-                    creep.memory.upgradeController = true;
-                }
-                if (creep.room.controller.ticksToDowngrade >= 10000) {
-                    creep.memory.upgradeController = false;
-                }
-                
-                
-                //upgrade controller
-                if (creep.memory.upgradeController)
-                {
-                    if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
-                    {
-                        creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
-                    }
-                } 
-                else 
-                {
-                    //kill switch
-                    if (creep.room.controller.level >= 3) {
-                        creep.memory.killSelf = true;
-                    }
-                    
-                    //build spawn
-                    var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
-                    if (consite) {
-                        if (creep.build(consite) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(consite, {visualizePathStyle: {stroke: '#00ff00'}});
-                        }
-                    } else {
-                        //transfer energy to spawn
-                        var spawn = creep.pos.findClosestByPath(FIND_STRUCTURES, 
-                            {
-                                filter: (s) => s.structureType == STRUCTURE_SPAWN && 
-                                    s.store.getFreeCapacity(RESOURCE_ENERGY) > 0});
-                        if (spawn) {
-                            if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(spawn, {visualizePathStyle: {stroke: '#00ff00'}});
-                            }
-                            //switch renew back on
-                            if (creep.memory.noRenew) delete creep.memory.noRenew;
-                        } else {
-                            //upgrade controller
-                            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
-                            {
-                                creep.moveTo(creep.room.controller, 
-                                    {visualizePathStyle: {stroke: '#00ff00'}});
-                            }
-                        }
-                        
-                    }
-                }
+                rolePioneer.build(creep);
             }
             
             
@@ -122,6 +56,82 @@ var rolePioneer = {
         
         
     },
+    
+    harvest: function(creep)
+    {
+        if (baseCreep.pickupDroppedEnergy(creep, 4)) { return; }
+        
+        var source = creep.pos.findClosestByPath(FIND_SOURCES);
+        if (source)
+        {
+            if (creep.harvest(source) != OK) {
+                creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+            }
+        
+            //source empty
+            if (source.energy == 0) {
+                creep.memory.harvest = false;
+            }
+        }
+    }, 
+    
+    
+    build: function(creep)
+    {
+        //upgrade controller if low ticks
+        if (creep.room.controller.ticksToDowngrade <= 2000) {
+            creep.memory.upgradeController = true;
+        }
+        if (creep.room.controller.ticksToDowngrade >= 10000) {
+            creep.memory.upgradeController = false;
+        }
+        
+        
+        //upgrade controller
+        if (creep.memory.upgradeController)
+        {
+            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
+            {
+                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+            }
+        } 
+        else 
+        {
+            //kill switch
+            if (creep.room.controller.level >= 3) {
+                creep.memory.killSelf = true;
+            }
+            
+            //build spawn
+            var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            if (consite) {
+                if (creep.build(consite) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(consite, {visualizePathStyle: {stroke: '#00ff00'}});
+                }
+            } else {
+                //transfer energy to spawn
+                var spawn = creep.pos.findClosestByPath(FIND_STRUCTURES, 
+                    {
+                        filter: (s) => s.structureType == STRUCTURE_SPAWN && 
+                            s.store.getFreeCapacity(RESOURCE_ENERGY) > 0});
+                if (spawn) {
+                    if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(spawn, {visualizePathStyle: {stroke: '#00ff00'}});
+                    }
+                    //switch renew back on
+                    if (creep.memory.noRenew) delete creep.memory.noRenew;
+                } else {
+                    //upgrade controller
+                    if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
+                    {
+                        creep.moveTo(creep.room.controller, 
+                            {visualizePathStyle: {stroke: '#00ff00'}});
+                    }
+                }
+                
+            }
+        }
+    }, 
     
     
     prepareCreep: function(creep)
