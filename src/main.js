@@ -18,7 +18,7 @@ var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 var moduleTerminal = require('module.terminal');
 
-const profiler = require('screeps-profiler');
+/*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
 profiler.registerObject(moduleLogistics, 'moduleLogistics');
 profiler.registerObject(moduleSpawn, 'moduleSpawn');
@@ -34,13 +34,13 @@ profiler.registerObject(roleClaimer, 'roleClaimer');
 profiler.registerObject(roleSoldier, 'roleSoldier');
 profiler.registerObject(moduleStats, 'moduleStats');
 profiler.registerObject(moduleAutobuilder, 'moduleAutobuilder');
-profiler.registerObject(moduleDefense, 'moduleDefense');
+profiler.registerObject(moduleDefense, 'moduleDefense');*/
 
 console.log("reset detected");
 
-profiler.enable();
+//profiler.enable();
 module.exports.loop = function () {
-    profiler.wrap(function() {
+    //profiler.wrap(function() {
         for (var sname in Game.spawns)
         {
             var spawn = Game.spawns[sname];
@@ -94,5 +94,5 @@ module.exports.loop = function () {
     	        creep.memory.renewSelf = true;
             }
         }
-    });
+    //});
 };

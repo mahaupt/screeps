@@ -156,7 +156,7 @@ var baseCreep = {
 		{
 			nwork=0;
 			ncarry = 0;
-			nmove = 2;
+			nmove = 1;
 		} else 
 		if (role == 'pioneer')
 		{

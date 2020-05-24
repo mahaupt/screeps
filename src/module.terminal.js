@@ -18,7 +18,7 @@ var moduleTerminal = {
         }
         
         for (var res of res_types) {
-            if (room.terminal.store[res] < 500 || res == RESOURCE_ENERGY) continue;
+            if (room.terminal.store[res] < 1000 || res == RESOURCE_ENERGY) continue;
             
             var orders = Game.market.getAllOrders((order) => 
                 order.resourceType == res &&
@@ -32,7 +32,6 @@ var moduleTerminal = {
             {
                 var amount = Math.min(orders[0].remainingAmount, room.terminal.store[res]);
                 var ret = Game.market.deal(orders[0].id, amount, room.name);
-                console.log("Market deal: " + ret);
                 return;
             }
         }
