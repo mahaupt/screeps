@@ -177,9 +177,18 @@ var baseCreep = {
 			nwork=0;
 			ncarry=0;
 			ntough=1*bodySize; //10
-			nmove=1*bodySize; //50
+			nmove=1*bodySize+1; //50
 			nrattack=bodySize; //150
 			nheal=1; // 250
+		} else 
+		if (role == 'tank')
+		{
+			bodySize = Math.min(bodySize, 16);
+			nwork=0;
+			ncarry=0;
+			ntough=29; //10
+			nmove=17; //50
+			nheal=4; // 250
 		}
 		//upgrader && builder == standard
 		
@@ -341,6 +350,7 @@ var baseCreep = {
 	        creep.moveTo(pos, {
 				reusePath: 10, 
 				costCallback: baseCreep.avoidSourceCostCallback, 
+				swampCost: 3, 
 				visualizePathStyle: {stroke: '#ffff00'}
 			});
 		} else {

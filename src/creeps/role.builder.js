@@ -94,12 +94,12 @@ var roleBuilder = {
         }
         
         
-        //fortify walls
+        //fortify walls to 50k
         var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 
             return (s.structureType == STRUCTURE_WALL || 
             s.structureType == STRUCTURE_RAMPART) && 
             s.hits < s.hitsMax &&
-            s.hits < 1000000; 
+            s.hits < 50000; 
         }});
         if (walls.length > 0) {
             walls = _.sortBy(walls, (s) => s.hits);

@@ -30,8 +30,12 @@ var moduleSpawn = {
         //extractors that could be harvested
         extractor_count = Math.min(extractor_count, mineralCount);
         
+        var minerMultiplyer = 1;
+        if (spawn.room.controller.level <= 4) {
+            minerMultiplyer = 2;
+        }
         
-        if (minerCount < sourceCount+extractor_count && 
+        if (minerCount < sourceCount*minerMultiplyer+extractor_count && 
             !spawn.room.memory.attacked)
         {
             moduleSpawn.spawn(spawn, "miner");

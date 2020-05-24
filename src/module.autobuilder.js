@@ -134,9 +134,9 @@ var moduleAutobuilder = {
 		    moduleAutobuilder.buildRoads(room);
 	    }
         
-        //todo: building walls
-        if (constr_sites_num == 0) {
-            
+        //building walls from lvl 4
+        if (room.controller.level >= 4 && constr_sites_num == 0) {
+            moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_RAMPART, false);
         }
     },
     
@@ -341,13 +341,9 @@ var moduleAutobuilder = {
             {x:0, y:-1}
         ];
         
-        positions[STRUCTURE_WALL] = [
-            {x:6, y:7}, {x:5, y:7}, {x:4, y:7}, {x:3, y:7}, {x:2, y:7}, {x:1, y:7},
-            {x:6, y:6}, {x:6, y:5}, {x:6, y:4}, {x:6, y:3}, {x:6, y:2}
-        ];
-        
         positions[STRUCTURE_RAMPART] = [
-            {x:0, y:7}, {x:6, y:1}, {x:6, y:0}
+            {x:6, y:7}, {x:5, y:7}, {x:4, y:7}, {x:3, y:7}, {x:2, y:7}, {x:1, y:7}, {x:0, y:7}, 
+            {x:6, y:6}, {x:6, y:5}, {x:6, y:4}, {x:6, y:3}, {x:6, y:2}, {x:6, y:1}, {x:6, y:0}
         ];
         
         

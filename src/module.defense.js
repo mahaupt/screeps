@@ -25,11 +25,12 @@ var moduleDefense = {
 			//repair stuff if no hostiles and enough energy
 			if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
 				
-				//repair structures except walls
+				//repair structures except walls below 10k hps
 				var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-		            filter: (structure) => structure.hits < structure.hitsMax && 
+		            filter: (structure) => structure.hits < structure.hitsMax && (
 					structure.structureType != STRUCTURE_WALL && 
-					structure.structureType != STRUCTURE_RAMPART
+					structure.structureType != STRUCTURE_RAMPART || 
+					structure.hits < 10000)
 		        });
 		        if(closestDamagedStructure) {
 		            tower.repair(closestDamagedStructure);

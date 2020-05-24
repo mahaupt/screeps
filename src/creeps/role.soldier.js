@@ -10,7 +10,7 @@ tx = xcord of target
 ty = ycord of target
 
 target - object id of attack target
-
+passive = true/false
 */
 
 var roleSoldier = {
@@ -38,6 +38,7 @@ var roleSoldier = {
         creep.memory.tx = leader.memory.tx;
         creep.memory.ty = leader.memory.ty;
         creep.memory.target = leader.memory.target;
+        creep.memory.passive = leader.memory.passive;
         
         //shoot at target
         if (leader.memory.target) 
@@ -103,7 +104,7 @@ var roleSoldier = {
         //move to target room
         if (creep.room.name == creep.memory.troom) {
             //go destroy target
-            if (!creep.memory.target) {
+            if (!creep.memory.target && !creep.memory.passive) {
                 roleSoldier.pickTarget(creep);
             }
             
@@ -134,10 +135,15 @@ var roleSoldier = {
     
     pickTarget: function(creep)
     {
-        var target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
-        if (target)
+        var hostiles = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+        var structure = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+            filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+        
+        if (hostiles)
         {
-            creep.memory.target = target.id;
+            creep.memory.target = hostiles.id;
+        } else if (structure) {
+            creep.memory.target = structure.id;
         } else {
             //no targets - move home
             delete creep.memory.target;

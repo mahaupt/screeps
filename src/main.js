@@ -12,6 +12,7 @@ var roleScout = require('creeps_role.scout');
 var rolePioneer = require('creeps_role.pioneer');
 var roleClaimer = require('creeps_role.claimer');
 var roleSoldier = require('creeps_role.soldier');
+var roleTank = require('creeps_role.tank');
 
 var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
@@ -80,8 +81,10 @@ module.exports.loop = function () {
                     rolePioneer.run(creep);
                 } else if (creep.memory.role == 'claimer') {
                    roleClaimer.run(creep);
-               } else if (creep.memory.role == 'soldier') {
+                } else if (creep.memory.role == 'soldier') {
                    roleSoldier.run(creep);
+               } else if (creep.memory.role == 'tank') {
+                   roleTank.run(creep);
                 }
             /*}
             catch(err)
