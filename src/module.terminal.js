@@ -3,7 +3,7 @@ var moduleTerminal = {
         var res_types = baseCreep.getStoredResourceTypes(room.terminal.store);
         
         //check emough energy
-        if (room.terminal.store[RESOURCE_ENERGY] < 2500) {
+        if (room.terminal.store[RESOURCE_ENERGY] < 500) {
             var task = {
                 p: 4,
                 t: 't',
@@ -18,11 +18,11 @@ var moduleTerminal = {
         }
         
         for (var res of res_types) {
-            if (room.terminal.store[res] < 1000 || res == RESOURCE_ENERGY) continue;
+            if (room.terminal.store[res] < 500 || res == RESOURCE_ENERGY) continue;
             
             var orders = Game.market.getAllOrders((order) => 
                 order.resourceType == res &&
-                order.type == ORDER_SELL &&
+                order.type == ORDER_BUY &&
                 Game.market.calcTransactionCost(1000, room.name, order.roomName) < 500
             );
             
@@ -30,7 +30,9 @@ var moduleTerminal = {
             
             if (orders.length > 0)
             {
-                Game.market.deal(orders[0].id, orders[0].amount, room.name);
+                var amount = Math.min(orders[0].remainingAmount, room.terminal.store[res]);
+                var ret = Game.market.deal(orders[0].id, amount, room.name);
+                console.log("Market deal: " + ret);
                 return;
             }
         }

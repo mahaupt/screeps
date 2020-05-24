@@ -35,6 +35,8 @@ var roleSoldier = {
     {
         //copy leader memory
         creep.memory.troom = leader.memory.troom;
+        creep.memory.tx = leader.memory.tx;
+        creep.memory.ty = leader.memory.ty;
         creep.memory.target = leader.memory.target;
         
         //shoot at target

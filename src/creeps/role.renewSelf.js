@@ -77,6 +77,9 @@ var roleRenewSelf = {
 	
 	killSelfDecision: function(creep) 
 	{
+		//never kill self creeps
+		if (creep.memory.rome == 'soldier') return;
+		
 		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
         var possibleBodyParts = baseCreep.buildBody(creep.room, creep.memory.role, bodySize).length;
 

@@ -98,7 +98,8 @@ var roleBuilder = {
         var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 
             return (s.structureType == STRUCTURE_WALL || 
             s.structureType == STRUCTURE_RAMPART) && 
-            s.hits < s.hitsMax; 
+            s.hits < s.hitsMax &&
+            s.hits < 1000000; 
         }});
         if (walls.length > 0) {
             walls = _.sortBy(walls, (s) => s.hits);

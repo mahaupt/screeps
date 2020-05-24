@@ -135,7 +135,9 @@ var moduleAutobuilder = {
 	    }
         
         //todo: building walls
-        
+        if (constr_sites_num == 0) {
+            
+        }
     },
     
     
