@@ -18,7 +18,7 @@ var rolePioneer = {
         //prepare creep for embarkation
         if (!creep.memory.embark)
         {
-            rolePioneer.prepareCreep(creep);
+            baseCreep.prepareCreep(creep);
             creep.memory.noRenew = true;
             return;
         }
@@ -130,25 +130,6 @@ var rolePioneer = {
                 }
                 
             }
-        }
-    }, 
-    
-    
-    prepareCreep: function(creep)
-    {
-        //renew creeps
-        var spawns = creep.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN});
-
-        if (spawns.length > 0)
-        {
-            var xx = spawns[0].renewCreep(creep);
-            if (xx == ERR_NOT_IN_RANGE) {
-                creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
-            }
-        }
-        
-        if (creep.ticksToLive >= CREEP_LIFE_TIME-100) {
-            creep.memory.embark = true;
         }
     }
 };

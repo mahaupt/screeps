@@ -6,9 +6,6 @@ var moduleAutobuilder = {
             return;
         }
         
-        //slow down for cpu savings
-	    if (Game.time % 20 != 1) return;
-        
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
 	    //SPAWN
@@ -27,8 +24,9 @@ var moduleAutobuilder = {
 	    
         if (extensions_num < extensions_max && constr_sites_num < 2)
 	    {
-		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION, true);
-            constr_sites_num++;
+		    if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION, true)) {
+                constr_sites_num++;
+            }
 	    }
 	    
 	    //TOWERS
@@ -37,8 +35,9 @@ var moduleAutobuilder = {
         
         if (towers_num < towers_max && constr_sites_num < 2)
 	    {
-		    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER, true);
-            constr_sites_num++;
+		    if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER, true)) {
+                constr_sites_num++;
+            }
 	    }
 		
 		//CONTAINERS
@@ -50,15 +49,19 @@ var moduleAutobuilder = {
 	    if (containers_num < containers_max && extensions_num >= 4 && constr_sites_num < 2)
 	    {
 		    if (containers_num < source_num) {
-		    	moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0);
-                constr_sites_num++;
+		    	if (moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
+                    constr_sites_num++;
+                }
             } else if (containers_num < containers_max-mineral_num) {
-			    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER, false);
-                constr_sites_num++;
+			    if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER, false)) {
+                    constr_sites_num++;
+                }
 		    } else if (room.controller.level >= 6) {
+                console.log("terminal");
                 //build container at 
-                moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0);
-                constr_sites_num++;
+                if (moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
+                    constr_sites_num++;
+                }
             }
 	    }
         
@@ -68,8 +71,9 @@ var moduleAutobuilder = {
         
         if (storage_num < storage_max && constr_sites_num < 2)
         {
-            moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE, true);
-            constr_sites_num++;
+            if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE, true)) {
+                constr_sites_num++;
+            }
         }
         
         //Links
@@ -80,15 +84,17 @@ var moduleAutobuilder = {
         {
             //build base link
             if (links_num == 0) {
-                moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_LINK, true);
-                constr_sites_num++;
+                if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_LINK, true)) {
+                    constr_sites_num++;
+                }
             } else {
                 //build mining links
                 if (links_num-1 < source_num)
                 {
                     //todo - look 
-                    moduleAutobuilder.buildMiningStructure(room, STRUCTURE_LINK, 1);
-                    constr_sites_num++;
+                    if (moduleAutobuilder.buildMiningStructure(room, STRUCTURE_LINK, 1)) {
+                        constr_sites_num++;
+                    }
                 }
             }
         }
@@ -107,7 +113,20 @@ var moduleAutobuilder = {
                 }
             }
         }
-	    
+        
+        //Terminal
+        var terminal_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_TERMINAL);
+        var terminal_max = CONTROLLER_STRUCTURES[STRUCTURE_TERMINAL][room.controller.level];
+        if (terminal_num < terminal_max && constr_sites_num < 2) 
+        {
+            if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TERMINAL, true)) {
+                constr_sites_num++;
+            }
+        }
+        
+        //labs
+        
+        
 	    
 	    //build roads - nothing other to build
 	    if (containers_num > 1 && constr_sites_num == 0)
@@ -169,8 +188,9 @@ var moduleAutobuilder = {
         //build at position most far away first
         validPositions = _.sortBy(validPositions, s => -s.dist);
         if (validPositions.length > 0) {
-            room.createConstructionSite(validPositions[0].pos, type);
-            return true;
+            if (room.createConstructionSite(validPositions[0].pos, type) == OK) {
+                return true;
+            }
         }
         
         return false;
@@ -192,8 +212,10 @@ var moduleAutobuilder = {
                 if (removeRoads) {
                     moduleAutobuilder.removeRoads(room, buildPos);
                 }
+                return true;
             }
         }
+        return false;
     }, 
     
     
@@ -293,13 +315,19 @@ var moduleAutobuilder = {
         ];
         
         positions[STRUCTURE_CONTAINER] = [
-            {x:2, y:0}, {x:3, y:0}
+            {x:3, y:0}, {x:4, y:0}
         ];
         
-        positions[STRUCTURE_STORAGE] = positions[STRUCTURE_CONTAINER];
+        positions[STRUCTURE_STORAGE] = [
+            {x:2, y:0}
+        ];
+        
+        positions[STRUCTURE_TERMINAL] = [
+            {x:-2, y:0}
+        ];
         
         positions[STRUCTURE_TOWER] = [
-            {x:3, y:4}
+            {x:3, y:4}, {x:5, y:0}
         ];
         
         positions[STRUCTURE_LINK] = [

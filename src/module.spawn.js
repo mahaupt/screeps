@@ -1,6 +1,5 @@
 var moduleSpawn = {
     run: function(spawn) {
-        if (Game.time % 10 != 0) return;
         moduleSpawn.memCleanup();
         
         var roomCreeps = spawn.room.find(FIND_MY_CREEPS);
@@ -32,7 +31,8 @@ var moduleSpawn = {
         extractor_count = Math.min(extractor_count, mineralCount);
         
         
-        if (minerCount < sourceCount+extractor_count)
+        if (minerCount < sourceCount+extractor_count && 
+            !spawn.room.memory.attacked)
         {
             moduleSpawn.spawn(spawn, "miner");
         } else

@@ -358,6 +358,31 @@ var baseCreep = {
 	getStoredResourceTypes: function(store) {
 		if (!store) return [];
 		return _.filter(Object.keys(store), resource => store[resource] > 0);
+	}, 
+	
+	
+	prepareCreep: function(creep)
+    {
+        //renew creeps
+        var spawns = creep.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN});
+
+        if (spawns.length > 0)
+        {
+            var xx = spawns[0].renewCreep(creep);
+            if (xx == ERR_NOT_IN_RANGE) {
+                creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
+            }
+        }
+        
+        if (creep.ticksToLive >= CREEP_LIFE_TIME-20) {
+            creep.memory.embark = true;
+        }
+    }, 
+	
+	flee: function(creep)
+	{
+		//drop energy and flee to next tower
+		
 	}
 };
 

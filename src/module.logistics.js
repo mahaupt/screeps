@@ -31,6 +31,9 @@ var moduleLogistics = {
     //generates hauling tasks for transporting loot
     genLootTasks: function(room)
     {
+        //todo: if room is attacked, do careful lotting
+        //if (room.memory.attacked) return;
+        
         //get loot sources
         var res = room.find(FIND_DROPPED_RESOURCES);
         var ts = room.find(FIND_TOMBSTONES);

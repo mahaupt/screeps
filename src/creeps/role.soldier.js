@@ -37,6 +37,7 @@ var roleSoldier = {
         creep.memory.troom = leader.memory.troom;
         creep.memory.target = leader.memory.target;
         
+        //shoot at target
         if (leader.memory.target) 
         {
             var target = Game.getObjectById(leader.memory.target);
@@ -46,12 +47,32 @@ var roleSoldier = {
                 return;
             }
         }
+        
+        //if target room - prepare for embarkation
+        if (creep.memory.troom && !creep.memory.embark) {
+            baseCreep.prepareCreep(creep);
+            return;
+        } else if (!creep.memory.troom) {
+            delete creep.memory.embark;
+        }
+        
         //follow leader
         creep.moveTo(leader);
     }, 
     
     leader: function(creep)
     {
+        //target
+        if (creep.memory.target) {
+            var target = Game.getObjectById(creep.memory.target);
+            if (target) {
+                roleSoldier.attack(creep, target);
+                return;
+            } else {
+                delete creep.memory.target;
+            }
+        }
+        
         //no target room - go home
         if (!creep.memory.troom) 
         {
@@ -63,22 +84,35 @@ var roleSoldier = {
                 //idle around controller
                 creep.say("😴");
                 creep.moveTo(creep.room.controller);
+                roleSoldier.pickTarget(creep);
             }
+            delete creep.memory.embark;
             return;
         }
         
         
+        //if target room - prepare for embarkation
+        if (!creep.memory.embark) {
+            if (Game.time % 5 == 0) return; //slow down
+            baseCreep.prepareCreep(creep);
+            return;
+        }
+        
+        //move to target room
         if (creep.room.name == creep.memory.troom) {
             //go destroy target
             if (!creep.memory.target) {
                 roleSoldier.pickTarget(creep);
             }
-            var target = Game.getObjectById(creep.memory.target);
-            if (target) {
-                roleSoldier.attack(creep, target);
+            
+            //move in position
+            if (creep.memory.tx && creep.memory.ty) {
+                var pos = new RoomPosition(creep.memory.tx, creep.memory.ty, creep.room.name);
+                creep.moveTo(pos);
+                creep.say("🛡️");
             }
         } else {
-            if (Game.time % 5 == 0) return;
+            if (Game.time % 5 == 0) return; //slow down
             baseCreep.moveToRoom(creep, creep.memory.troom);
         }
     }, 
@@ -105,7 +139,7 @@ var roleSoldier = {
         } else {
             //no targets - move home
             delete creep.memory.target;
-            delete creep.memory.troom;
+            //delete creep.memory.troom;
         }
     }, 
     
@@ -114,6 +148,12 @@ var roleSoldier = {
         //heal self function
         if (creep.hits < creep.hitsMax) {
             creep.heal(creep);
+        } else {
+            //heal others
+            var targets = creep.pos.findInRange(FIND_MY_CREEPS, 1, {filter: (s) => s.hits < s.hitsMax });
+            if (targets.length > 0) {
+                creep.heal(targets[0]);
+            }
         }
     }, 
     

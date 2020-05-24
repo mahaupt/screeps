@@ -59,7 +59,7 @@ var roleHauler = {
 			resource = creep.memory.task.res;
 			amount =  s.store[resource];
 		} else 
-		if (creep.memory.task.t == "mc") 
+		if (creep.memory.task.t == "mc" || creep.memory.task.t == "loot") 
 		{
 			//mining container, pickup all resources
 			amount = s.store.getUsedCapacity();

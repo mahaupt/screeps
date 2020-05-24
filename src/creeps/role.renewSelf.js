@@ -61,7 +61,7 @@ var roleRenewSelf = {
         
         
         //renew successful or energy empty
-        if (creep.ticksToLive >= CREEP_LIFE_TIME-100)
+        if (creep.ticksToLive >= CREEP_LIFE_TIME-20)
         {
 	        creep.memory.renewSelf = false;
         }

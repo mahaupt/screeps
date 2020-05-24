@@ -46,6 +46,9 @@ var moduleDefense = {
 		var hostiles = room.find(FIND_HOSTILE_CREEPS);
 		if (hostiles.length > 0)
 		{
+			room.memory.attacked = true;
+			room.memory.attacked_time = Game.time;
+			
 			//check if hostiles are near creeps or structures
 			for (var i=0; i < hostiles.length; i++)
 			{
@@ -70,6 +73,14 @@ var moduleDefense = {
 					}
 					
 					break;
+				}
+			}
+		} 
+		else // if hostiles
+		{
+			if (room.memory.attacked) {
+				if (room.memory.attacked_time < Game.time - 1000) {
+					room.memory.attacked = false;
 				}
 			}
 		}

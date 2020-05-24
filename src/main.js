@@ -17,54 +17,75 @@ var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 
-
+const profiler = require('screeps-profiler');
+profiler.registerObject(baseCreep, 'baseCreep');
+profiler.registerObject(moduleLogistics, 'moduleLogistics');
+profiler.registerObject(moduleSpawn, 'moduleSpawn');
+profiler.registerObject(moduleStrategy, 'moduleStrategy');
+profiler.registerObject(roleMiner, 'roleMiner');
+profiler.registerObject(roleUpgrader, 'roleUpgrader');
+profiler.registerObject(roleBuilder, 'roleBuilder');
+profiler.registerObject(roleRenewSelf, 'roleRenewSelf');
+profiler.registerObject(roleHauler, 'roleHauler');
+profiler.registerObject(roleScout, 'roleScout');
+profiler.registerObject(rolePioneer, 'rolePioneer');
+profiler.registerObject(roleClaimer, 'roleClaimer');
+profiler.registerObject(roleSoldier, 'roleSoldier');
+profiler.registerObject(moduleStats, 'moduleStats');
+profiler.registerObject(moduleAutobuilder, 'moduleAutobuilder');
+profiler.registerObject(moduleDefense, 'moduleDefense');
 
 console.log("reset detected");
 
+profiler.enable();
 module.exports.loop = function () {
-    for (var sname in Game.spawns)
-    {
-        var spawn = Game.spawns[sname];
-        moduleStats.run(spawn.room);
-        moduleSpawn.run(spawn);
-        moduleAutobuilder.run(spawn.room);
-        moduleDefense.run(spawn.room);
-        moduleStrategy.run(spawn.room);
-        moduleLogistics.run(spawn.room);
-    }
-
-    for(var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        
-        //try {
-            if (creep.memory.renewSelf) {
-    	        roleRenewSelf.run(creep);
-            } else if(creep.memory.role == 'miner') {
-                roleMiner.run(creep);
-            } else if(creep.memory.role == 'upgrader') {
-                roleUpgrader.run(creep);
-            } else if(creep.memory.role == 'builder') {
-                roleBuilder.run(creep);
-            } else if(creep.memory.role == 'hauler') {
-    	        roleHauler.run(creep);
-            } else if (creep.memory.role == 'scout') {
-                roleScout.run(creep);
-            } else if (creep.memory.role == 'pioneer') {
-                rolePioneer.run(creep);
-            } else if (creep.memory.role == 'claimer') {
-               roleClaimer.run(creep);
-           } else if (creep.memory.role == 'soldier') {
-               roleSoldier.run(creep);
-            }
-        /*}
-        catch(err)
+    profiler.wrap(function() {
+        for (var sname in Game.spawns)
         {
-            console.log(err.message);
-        }*/
-        
-        if (creep.ticksToLive <= 100 && !creep.memory.noRenew)
-        {
-	        creep.memory.renewSelf = true;
+            var spawn = Game.spawns[sname];
+            moduleStats.run(spawn.room);
+            if (Game.time % 10 == 0)
+                moduleSpawn.run(spawn);
+            if (Game.time % 20 == 1)
+                moduleAutobuilder.run(spawn.room);
+            moduleDefense.run(spawn.room);
+            moduleStrategy.run(spawn.room);
+            moduleLogistics.run(spawn.room);
         }
-    }
+
+        for(var name in Game.creeps) {
+            var creep = Game.creeps[name];
+            
+            //try {
+                if (creep.memory.renewSelf) {
+        	        roleRenewSelf.run(creep);
+                } else if(creep.memory.role == 'miner') {
+                    roleMiner.run(creep);
+                } else if(creep.memory.role == 'upgrader') {
+                    roleUpgrader.run(creep);
+                } else if(creep.memory.role == 'builder') {
+                    roleBuilder.run(creep);
+                } else if(creep.memory.role == 'hauler') {
+        	        roleHauler.run(creep);
+                } else if (creep.memory.role == 'scout') {
+                    roleScout.run(creep);
+                } else if (creep.memory.role == 'pioneer') {
+                    rolePioneer.run(creep);
+                } else if (creep.memory.role == 'claimer') {
+                   roleClaimer.run(creep);
+               } else if (creep.memory.role == 'soldier') {
+                   roleSoldier.run(creep);
+                }
+            /*}
+            catch(err)
+            {
+                console.log(err.message);
+            }*/
+            
+            if (creep.ticksToLive <= 100 && !creep.memory.noRenew)
+            {
+    	        creep.memory.renewSelf = true;
+            }
+        }
+    });
 };
