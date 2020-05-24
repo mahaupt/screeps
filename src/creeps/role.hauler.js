@@ -26,7 +26,12 @@ var roleHauler = {
             creep.memory.harvesting = false;
 			
 			//finish task
-			moduleLogistics.dropTask(creep.room, creep.memory.task, creep.store.getCapacity());
+			moduleLogistics.dropTask(
+				creep.room, 
+				creep.memory.task, 
+				creep.store.getCapacity(), 
+				creep.store.getCapacity()
+			);
 			creep.memory.task.s = null;
 			
         }

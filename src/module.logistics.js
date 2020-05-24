@@ -117,7 +117,7 @@ var moduleLogistics = {
                 filter: (s) => 
                 { 
                     return s.structureType == STRUCTURE_TOWER && 
-                        s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                        s.store.getFreeCapacity(RESOURCE_ENERGY) > 10;
                 }
             }
         );
@@ -217,15 +217,21 @@ var moduleLogistics = {
         return null;
     }, 
     
-    dropTask: function(room, task, capacity)
+    dropTask: function(room, task, capacity, drawnCapacity=0)
     {
         var index = _.findIndex(room.memory.ltasks, (s) => { return s.s == task.s && s.t == task.t; });
         
         if (index >= 0)
         {
             room.memory.ltasks[index].a -= capacity;
+            room.memory.ltasks[index].v -= drawnCapacity;
             if (room.memory.ltasks[index].a < 0) {
                 room.memory.ltasks[index].a = 0;
+            }
+            if (room.memory.ltasks[index].v <= 0) 
+            {
+                //no more to transport - delete task
+                room.memory.ltasks.splice(index, 1);
             }
         }
     }, 

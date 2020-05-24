@@ -16,6 +16,7 @@ var roleSoldier = require('creeps_role.soldier');
 var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
+var moduleTerminal = require('module.terminal');
 
 const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -44,10 +45,16 @@ module.exports.loop = function () {
         {
             var spawn = Game.spawns[sname];
             moduleStats.run(spawn.room);
+            
             if (Game.time % 10 == 0)
                 moduleSpawn.run(spawn);
             if (Game.time % 20 == 1)
                 moduleAutobuilder.run(spawn.room);
+            if (spawn.room.terminal) {
+                if (Game.time % 100 == 2)
+                    moduleTerminal.run(spawn.room);
+            }
+            
             moduleDefense.run(spawn.room);
             moduleStrategy.run(spawn.room);
             moduleLogistics.run(spawn.room);
