@@ -192,6 +192,14 @@ module.exports = {
                         structure.store.getFreeCapacity(res_types[0]) > 0;
                 }
             });
+            
+            if (!t) {
+                t = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+            }
+
+            if (!t) {
+                t = creep.room.controller;
+            }
 
             if(t) 
             {
@@ -200,10 +208,25 @@ module.exports = {
         }
         
         var target = Game.getObjectById(creep.memory.target);
-        if (target && target.store.getFreeCapacity(res_types[0]) > 0) 
+        if (target) 
         {
-            if(creep.transfer(target, res_types[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
+            if (target instanceof ConstructionSite) {
+                if(creep.build(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                }
+            } else if (target instanceof StructureController) {
+                if(creep.upgradeController(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                }
+            } else {
+                //containers full
+                if (target.store.getFreeCapacity(res_types[0]) == 0) {
+                    delete creep.memory.target;
+                    return this.carryBackToBase(creep); //do it again with new target
+                }
+                if(creep.transfer(target, res_types[0]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
+                }
             }
         } else {
             delete creep.memory.target;

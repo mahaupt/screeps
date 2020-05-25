@@ -39,21 +39,21 @@ module.exports = {
             {
                 //build
                 if(creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
+                    creep.moveTo(target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                 }
             } 
             else if (target instanceof StructureController) 
             {
                 //upgrade
                 if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+                    creep.moveTo(creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                 }
             }
             else 
             {
                 //repair
                 if(creep.repair(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
+                    creep.moveTo(target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                 }
                 if (target.hits == target.hitsMax)
                 {

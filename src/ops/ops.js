@@ -1,6 +1,6 @@
 /*
 Ops List
-{type: 'scout', source: 'W3S16', target: 'W1S2', mem: {}}
+{type: 'scout', source: 'W3S16', target: 'W1S2', finished: false, mem: {}}
 
 */
 
@@ -16,9 +16,11 @@ module.exports = {
             Memory.ops = [];
         }
         
+        //remove finished
+        _.remove(Memory.ops, (s) => s.finished == true);
+        
         //run
         for(var i in Memory.ops) {
-            
             if (Memory.ops[i].type == 'attack') {
                 opsAttack.run(Memory.ops[i]);
             } else if (Memory.ops[i].type == 'claim') {
@@ -27,7 +29,7 @@ module.exports = {
                 opsDefend.run(Memory.ops[i]);
             } else if (Memory.ops[i].type == 'drain') {
                 opsDrain.run(Memory.ops[i]);
-            } else if (Memory.ops[i].type == 'drain') {
+            } else if (Memory.ops[i].type == 'scout') {
                 opsScout.run(Memory.ops[i]);
             }
         }
@@ -36,6 +38,6 @@ module.exports = {
     
     new: function(type, source, target, mem={}) 
     {
-        Memory.ops.push({type: type, source: source, target: target, mem: mem});
+        Memory.ops.push({type: type, source: source, target: target, finished: false, mem: mem});
     }
 };

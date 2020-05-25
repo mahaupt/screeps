@@ -53,13 +53,13 @@ module.exports = {
         
         if (source instanceof Source) {
 	        if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+                creep.moveTo(source, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
             }
         }
         else
         {
 	        if(creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+                creep.moveTo(source, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
             }
             
             //source empty - search other one
@@ -380,7 +380,7 @@ module.exports = {
         {
             var xx = spawns[0].renewCreep(creep);
             if (xx == ERR_NOT_IN_RANGE) {
-                creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
+                creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
             }
         }
         

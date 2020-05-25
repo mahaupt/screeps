@@ -34,8 +34,8 @@ module.exports =  {
             //move to room
             baseCreep.moveToRoom(creep, creep.memory.target);
             
-            if (!Memory.intel[creep.room.name] || 
-                Memory.intel[creep.room.name].time < Game.time-100) 
+            if (!Memory.intel.list[creep.room.name] || 
+                Memory.intel.list[creep.room.name].time < Game.time-100) 
             {
                 this.collectIntel(creep, creep.room);
             }
@@ -88,16 +88,21 @@ module.exports =  {
         intel.structs = struct.length;
         
         //save intel
-        if (!Memory.intel) Memory.intel = {};
-        if (Memory.intel[room.name]) delete Memory.intel[room.name];
-        Memory.intel[room.name] = intel;
+        if (Memory.intel.list[room.name]) delete Memory.intel.list[room.name];
+        Memory.intel.list[room.name] = intel;
+        
+        //if room is in req, remove from req
+        var index = Memory.intel.req.indexOf(room.name);
+        if (index >= 0) {
+            Memory.intel.req.splice(index, 1);
+        }
     }, 
     
     
     pickTarget: function(creep) 
     {
-        if (Memory.req_intel && Memory.req_intel.length > 0) {
-            creep.memory.target = Memory.req_intel.shift();
+        if (Memory.intel && Memory.intel.req && Memory.intel.req.length > 0) {
+            creep.memory.target = Memory.intel.req.shift();
         } else {
             creep.memory.renewSelf = true;
             creep.memory.killSelf = true;

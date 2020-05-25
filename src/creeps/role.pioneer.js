@@ -93,7 +93,7 @@ module.exports = {
         {
             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
             {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+                creep.moveTo(creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
             }
         } 
         else 
@@ -107,7 +107,7 @@ module.exports = {
             var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (consite) {
                 if (creep.build(consite) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(consite, {visualizePathStyle: {stroke: '#00ff00'}});
+                    creep.moveTo(consite, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                 }
             } else {
                 //transfer energy to spawn
@@ -117,7 +117,7 @@ module.exports = {
                             s.store.getFreeCapacity(RESOURCE_ENERGY) > 0});
                 if (spawn) {
                     if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(spawn, {visualizePathStyle: {stroke: '#00ff00'}});
+                        creep.moveTo(spawn, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
                     }
                     //switch renew back on
                     if (creep.memory.noRenew) delete creep.memory.noRenew;
@@ -126,7 +126,7 @@ module.exports = {
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
                     {
                         creep.moveTo(creep.room.controller, 
-                            {visualizePathStyle: {stroke: '#00ff00'}});
+                            {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                     }
                 }
                 

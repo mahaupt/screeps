@@ -35,7 +35,7 @@ module.exports = {
 			//carry energy to base
 	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#0000ff'}});
+	                creep.moveTo(targets[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 	            }
 	        } 
 			else 
@@ -45,14 +45,14 @@ module.exports = {
 		        {
 			        if (spawns[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
-				        creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
+				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 			        }
 			        creep.say("RIP");
 			        return;
 		        } else {
 			        if (spawns[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
 			        {
-				        creep.moveTo(spawns[0], {visualizePathStyle: {stroke: '#0000ff'}});
+				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 			        }
 		        }
 		    }
