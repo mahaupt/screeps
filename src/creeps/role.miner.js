@@ -18,200 +18,164 @@ module.exports = {
     run: function(creep) 
     {    
         baseCreep.init(creep);
-        
-	    //first - pick own source
-	    if (!creep.memory.source) {
-		    this.pickOwnSource(creep);
-	    }
-        
-        //periodically check mining link avbl
-        if (!creep.memory.link && creep.room.controller.level >= 5){
-            if (Game.time % 20 == 1) {
-                this.pickOwnLink(creep);
-            }
-        }
+        var source = this.getSource(creep);
+        var container = this.getContainer(creep, source);
+        var link = this.getLink(creep, source);
         
         //Special mode
         if (creep.memory.containerLinkPurge) {
-            this.containerLinkPurge(creep);
-            return;
+            if (this.containerLinkPurge(creep, container, link)) {
+                //busy
+                return;
+            }
         }
         
 	    //switching btn harvesting and dropping
         if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0) {
             creep.memory.harvesting = true;
-        }
+            
+            delete creep.memory.selfDropoff;
+            delete creep.memory.target;
+        } else 
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
-            
-            //check link avbl
-            if (!creep.memory.link && creep.room.controller.level >= 5)
-            {
-                this.pickOwnLink(creep);
-            }
-            
-            //try to pick own container for container harvesting
-            if (!creep.memory.container) {
-                this.pickOwnContainer(creep);
-            } else if (!this.containerHasHauler(creep, creep.memory.container)) 
-            {
-                //hauler died - go back to normal harvesting
-                delete creep.memory.container;
-            }
         }
         
         
 	    if(creep.memory.harvesting) 
 	    {
-            this.harvest(creep);
+            this.harvest(creep, source, container, link);
         }
         else 
         { 
-            this.dropoff(creep);
+            this.dropoff(creep, source, container, link);
         }
 	},
     
     
-    harvest: function(creep)
+    harvest: function(creep, source, container, link)
     {
-        //go to source and harvest
-        var s = Game.getObjectById(creep.memory.source);
-        if(creep.harvest(s) != OK) {
-            creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
-        }
-        
         //source depleted - time to renew?
         if (creep.ticksToLive <= CREEP_LIFE_TIME/3) {
-            if (s.energy == 0 && s.ticksToRegeneration >= 50) {
+            if (source.energy == 0 && source.ticksToRegeneration >= 50) {
                 creep.memory.renewSelf = true;
             }
         }
         
         //mineral depleted - kill self
-        if (s instanceof Mineral) {
-            if (s.mineralAmount == 0 && s.ticksToRegeneration >= 3600) {
+        if (source instanceof Mineral) {
+            if (source.mineralAmount == 0 && source.ticksToRegeneration >= 3600) {
                 creep.memory.killSelf = true;
                 creep.memory.renewSelf = true;
             }
         }
         
+        //HARVEST
+        if(creep.harvest(source) != OK) {
+            creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+        }
+        
         //link abvl - carry to link immediately
         //ENERGY ONLY
-        if (creep.memory.link)
+        if (link)
         {
-            //put stuff into link
-            var l = Game.getObjectById(creep.memory.link);
-            if (!l) { delete creep.memory.link; return; }
-            var xx = creep.transfer(l, RESOURCE_ENERGY);
+            //put energy into link
+            let ret = creep.transfer(link, RESOURCE_ENERGY);
             
             //link full, send to spawn
-            if (l.store.getFreeCapacity(RESOURCE_ENERGY) == 0 || creep.memory.renewSelf) {
-                baseCreep.sendLinkToSpawn(l);
+            if (link.store.getFreeCapacity(RESOURCE_ENERGY) == 0 || creep.memory.renewSelf) {
+                baseCreep.sendLinkToSpawn(link);
             }
             
             //switch to special mode if container storage full
-            if (l.store.getFreeCapacity(RESOURCE_ENERGY) > 0 && creep.memory.container)
+            if (link.store.getFreeCapacity(RESOURCE_ENERGY) > 0 && container)
             {
-                let c = Game.getObjectById(creep.memory.container);
-                if (!c) { delete creep.memory.container; return; }
-                if (c.store.getUsedCapacity(RESOURCE_ENERGY) > LINK_CAPACITY) {
+                if (container.store.getUsedCapacity(RESOURCE_ENERGY) > LINK_CAPACITY) {
                     creep.memory.containerLinkPurge = true;
                 }
             }
             
-            if (xx == OK) {
+            if (ret == OK) {
                 return;
             }
         }
         
         //container in range - carry to container immediately
-        if (creep.memory.container)
+        if (container)
         {
-            //put stuff into container
-            let c = Game.getObjectById(creep.memory.container);
-            if (!c) { delete creep.memory.container; return; }
-            if (c.hits == c.hitsMax || c.store[RESOURCE_ENERGY] == 0) 
-            { // if damaged keep energy and repair later
-                let res_types = baseCreep.getStoredResourceTypes(creep.store);
-                creep.transfer(c, res_types[0]);
-            }
+            //transfer res into containers
+            let res_types = baseCreep.getStoredResourceTypes(creep.store);
+            creep.transfer(container, res_types[0]);
         }
     }, 
     
     
-    dropoff: function(creep)
+    dropoff: function(creep, source, container, link)
     {
-        //MC damaged or full
-        if (creep.memory.container)
-        {
-            var c = Game.getObjectById(creep.memory.container);
-            if (!c) { delete creep.memory.container; return; }
-            
-            
-            //repair needed and has energy
-            if (c.hits < c.hitsMax && c.store[RESOURCE_ENERGY] > 0) {
-                if (creep.repair(c) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
-                }
-            } 
-            else if (c.store.getFreeCapacity() == 0) 
-            {   //full
-                //stop container mining temp. and assist transport chain
-                delete creep.memory.container;
-                creep.say("MC full!");
-                this.carryBackToBase(creep);
-            } else {
-                //not in range mostl likely - move and tx
-                var res_types = baseCreep.getStoredResourceTypes(creep.store);
-                if (creep.transfer(c, res_types[0])== ERR_NOT_IN_RANGE)
-                {
-                    creep.moveTo(c, {visualizePathStyle: {stroke: '#00ff00'}});
-                }
-            }
-            
-        } else {
-            //no mining container
+        if (creep.memory.selfDropoff) {
             this.carryBackToBase(creep);
+            return;
         }
+        
+        //Miner full - move in range for dropoff
+        if (link) {
+            if (link.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(link, {visualizePathStyle: {stroke: '#00ff00'}});
+                }
+                return;
+            } else {
+                baseCreep.sendLinkToSpawn(link);
+            }
+        }
+        
+        
+        if (container)
+        {
+            if (container.store.getFreeCapacity() > 0) {
+                var res_types = baseCreep.getStoredResourceTypes(creep.store);
+                if (creep.transfer(container, res_types[0])== ERR_NOT_IN_RANGE)
+                {
+                    creep.moveTo(container, {visualizePathStyle: {stroke: '#00ff00'}});
+                }
+                return;
+            } 
+        }
+        
+        //no link or container mining - turn on self dropoff
+        creep.memory.selfDropoff = true;
+        this.carryBackToBase(creep);
     }, 
     
     //special mode - picks up Energy from container
     //and drops into link
-    containerLinkPurge: function(creep)
+    containerLinkPurge: function(creep, container, link)
     {
-        var c = Game.getObjectById(creep.memory.container);
-        var l = Game.getObjectById(creep.memory.link);
-        
-        if (!c) { 
-            delete creep.memory.container;
+        if (!container || !link) { 
             delete creep.memory.containerLinkPurge;
-            return;
-        }
-        if (!l) {
-            delete creep.memory.link;
-            delete creep.memory.containerLinkPurge;
-            return;
-        }
-        
-        
-        
-        if (creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
-            //pickup
-            if (creep.withdraw(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(c, {visualizePathStyle: {stroke: '#ff0000'}});
-            }
-        } else {
-            //dropoff
-            if (creep.transfer(l, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(l, {visualizePathStyle: {stroke: '#00ff00'}});
-            }
+            return false;
         }
         
         //terminating pouring
-        if (c.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || 
-            l.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+        if (container.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || 
+            link.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
             delete creep.memory.containerLinkPurge;
+            return false;
         }
+        
+        if (creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
+            //pickup
+            if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(container, {visualizePathStyle: {stroke: '#ff0000'}});
+            }
+        } else {
+            //dropoff
+            if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(link, {visualizePathStyle: {stroke: '#00ff00'}});
+            }
+        }
+        
+        return true;
     }, 
 	
     //carry back to base into structures
@@ -219,34 +183,30 @@ module.exports = {
 	{
         var res_types = baseCreep.getStoredResourceTypes(creep.store);
         
-		var targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_STORAGE || 
-                    structure.structureType == STRUCTURE_EXTENSION ||
-                    structure.structureType == STRUCTURE_SPAWN ||
-                    structure.structureType == STRUCTURE_TOWER) &&
-                    structure.store.getFreeCapacity(res_types[0]) > 0;
-            }
-        });
-
-        if(targets.length > 0) 
-        {
-            if(creep.transfer(targets[0], res_types[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
-            }
-        } else if (creep.store[RESOURCE_ENERGY] > 0) {
-            //maybe build construction sites - if energy avbl
-            var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-    		if(targets.length > 0) {
-    			if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-    				creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#00ff00'}});
-    			}
-    		} else {
-    		    //upgrade if no construction site
-    		    if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+        if (!creep.memory.target) {
+    		var t = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_STORAGE || 
+                        structure.structureType == STRUCTURE_EXTENSION ||
+                        structure.structureType == STRUCTURE_SPAWN) &&
+                        structure.store.getFreeCapacity(res_types[0]) > 0;
                 }
-    		}
+            });
+
+            if(t) 
+            {
+                creep.memory.target = t.id;
+            }
+        }
+        
+        var target = Game.getObjectById(creep.memory.target);
+        if (target && target.store.getFreeCapacity(res_types[0]) > 0) 
+        {
+            if(creep.transfer(target, res_types[0]) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
+            }
+        } else {
+            delete creep.memory.target;
         }
 	}, 
 	
@@ -299,31 +259,26 @@ module.exports = {
 		return false;
 	}, 
 	
-	pickOwnContainer: function(creep) {
+	pickOwnContainer: function(creep, source) {
 		//search containers
-		if (!creep.memory.source) return false;
-		var s = Game.getObjectById(creep.memory.source);
-		var container = this.getMiningStructure(s, STRUCTURE_CONTAINER);
+		var container = this.getMiningStructure(source, STRUCTURE_CONTAINER);
         if (container) {
-            if (this.containerHasHauler(creep, container.id))
-            {
-                creep.memory.container = container.id;
-                return true;
-            }
+            creep.memory.container = container.id;
+            return true;
 		}
 		
 		return false;
 	},
     
-    pickOwnLink: function(creep) {
-        if (!creep.memory.source) return false;
-		var s = Game.getObjectById(creep.memory.source);
+    pickOwnLink: function(creep, source) {
+        //only use links for sources
+        if (!(source instanceof Source)) return false;
         
         //check if there is a link around spawn
         var spawnlink = baseCreep.getSpawnLink(creep.room);
         if (!spawnlink) return false;
         
-        var link = this.getMiningStructure(s, STRUCTURE_LINK);
+        var link = this.getMiningStructure(source, STRUCTURE_LINK);
         if (link) {
             creep.memory.link = link.id;
             return true;
@@ -344,22 +299,53 @@ module.exports = {
 		}
         return false;
     },
-	
-	
-    //todo: update multiroom
-	containerHasHauler: function(creep, containerid)
-	{
-        //link acts as hauler
-        if (creep.memory.link) return true;
+    
+    
+    getSource: function(creep)
+    {
+        if (!creep.memory.source) {
+            this.pickOwnSource(creep);
+        }
         
-		for (var i in Memory.creeps)
-		{
-			if (Memory.creeps[i].role == "hauler")
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+        return Game.getObjectById(creep.memory.source);
+    }, 
+    
+    getContainer: function(creep, source)
+    {
+        if (!creep.memory.container) {
+            if (Game.time % 20 != 2) return null;
+            if (!this.pickOwnContainer(creep, source)) {
+                return null;
+            }
+        }
+        
+        var container = Game.getObjectById(creep.memory.container);
+        if (container) {
+            return container;
+        } else {
+            delete creep.memory.container;
+            return null;
+        }
+    }, 
+    
+    getLink: function(creep, source)
+    {
+        if (creep.room.controller.level < 5) return null;
+        
+        if (!creep.memory.link) {
+            if (Game.time % 20 != 3) return null;
+            if (!this.pickOwnLink(creep, source)) {
+                return null;
+            }
+        }
+        
+        var link = Game.getObjectById(creep.memory.link);
+        if (link) {
+            return link;
+        } else {
+            delete creep.memory.link;
+            return null;
+        }
+    }
     
 };

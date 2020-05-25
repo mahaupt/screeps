@@ -68,14 +68,13 @@ module.exports = {
     
     pickBuildTarget: function(creep) {
         
-        //repairs needed - except mining containers
+        //repairs needed
         var repairs = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (
                     structure.structureType != STRUCTURE_WALL && 
                     structure.structureType != STRUCTURE_RAMPART && 
-                    structure.hits < structure.hitsMax && 
-                    structure.pos.findInRange(FIND_SOURCES, 2).length == 0);
+                    structure.hits < structure.hitsMax);
             }
         });
         if (repairs)
