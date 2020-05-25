@@ -18,6 +18,7 @@ var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 var moduleTerminal = require('module.terminal');
+var moduleLabs = require('module.labs');
 
 /*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');

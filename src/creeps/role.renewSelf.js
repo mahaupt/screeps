@@ -1,4 +1,4 @@
-var roleRenewSelf = {
+module.exports = {
 	
 	/** @param {Creep} creep **/
 	run: function(creep) {		
@@ -30,7 +30,7 @@ var roleRenewSelf = {
 	        //recycle self to build better creep
 	        if (!creep.memory.killSelf)
 	        {
-		        roleRenewSelf.killSelfDecision(creep);
+		        this.killSelfDecision(creep);
 	        }
 	        
 			//carry energy to base
@@ -94,6 +94,4 @@ var roleRenewSelf = {
 			}
         }
 	}
-}
-
-module.exports = roleRenewSelf;
+};

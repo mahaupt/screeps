@@ -13,19 +13,19 @@ target - object id of attack target
 passive = true/false
 */
 
-var roleSoldier = {
+module.exports = {
     run: function(creep) {
         baseCreep.init(creep);
         
-        var leader = roleSoldier.getLeader(creep);
+        var leader = this.getLeader(creep);
         
-        roleSoldier.healSelf(creep);
+        this.healSelf(creep);
         if (creep.memory.grp_lead == 'self')
         {
             creep.say('⭐');
-            roleSoldier.leader(creep);
+            this.leader(creep);
         } else {
-            roleSoldier.sheep(creep, leader);
+            this.sheep(creep, leader);
         }
         
     }, 
@@ -46,7 +46,7 @@ var roleSoldier = {
             var target = Game.getObjectById(leader.memory.target);
             if (target)
             {
-                roleSoldier.attack(creep, target);
+                this.attack(creep, target);
                 return;
             }
         }
@@ -69,7 +69,7 @@ var roleSoldier = {
         if (creep.memory.target) {
             var target = Game.getObjectById(creep.memory.target);
             if (target) {
-                roleSoldier.attack(creep, target);
+                this.attack(creep, target);
                 return;
             } else {
                 delete creep.memory.target;
@@ -87,7 +87,7 @@ var roleSoldier = {
                 //idle around controller
                 creep.say("😴");
                 creep.moveTo(creep.room.controller);
-                roleSoldier.pickTarget(creep);
+                this.pickTarget(creep);
             }
             delete creep.memory.embark;
             return;
@@ -105,7 +105,7 @@ var roleSoldier = {
         if (creep.room.name == creep.memory.troom) {
             //go destroy target
             if (!creep.memory.target && !creep.memory.passive) {
-                roleSoldier.pickTarget(creep);
+                this.pickTarget(creep);
             }
             
             //move in position
@@ -194,5 +194,3 @@ var roleSoldier = {
         }
     }, 
 };
-
-module.exports = roleSoldier;

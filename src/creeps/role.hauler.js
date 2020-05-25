@@ -7,8 +7,10 @@ Memory Layout
 .target = target.id
 */
 
-var roleHauler = {
-	run: function(creep) {		
+module.exports = {
+	run: function(creep) {
+		baseCreep.init(creep);
+				
 		if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0 || 
 			!creep.memory.task) {
             creep.memory.harvesting = true;
@@ -38,11 +40,11 @@ var roleHauler = {
         
         if (creep.memory.harvesting && creep.memory.task)
         {
-	        roleHauler.pickup(creep);
+	        this.pickup(creep);
         } 
         else 
         {
-			roleHauler.dropoff(creep);
+			this.dropoff(creep);
 	    }
 	}, 
 	
@@ -52,6 +54,12 @@ var roleHauler = {
 		if (!s) { 
 			delete creep.memory.task; 
 			return; 
+		}
+		
+		//travel to room
+		if (s.room.name != creep.room.name) {
+			baseCreep.moveToRoom(creep, s.room.name);
+			return;
 		}
 		
 		//select resource for pickup
@@ -106,7 +114,7 @@ var roleHauler = {
 	{
 		//pick energy receiver
 		if (!creep.memory.target) {
-			roleHauler.pickReceiver(creep);
+			this.pickReceiver(creep);
 		}
 		
 		
@@ -241,6 +249,3 @@ var roleHauler = {
 	
 	
 };
-
-
-module.exports = roleHauler;

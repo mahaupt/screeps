@@ -1,4 +1,4 @@
-var roleTank = {
+module.exports = {
     run: function(creep) {
         baseCreep.init(creep);
         
@@ -62,6 +62,4 @@ var roleTank = {
             }
         }
     },
-}
-
-module.exports = roleTank;
+};

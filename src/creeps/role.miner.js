@@ -13,30 +13,27 @@ Priorities of dropoff
 - Carry to base if Container full or no hauler avbl
 */
 
-var roleMiner = {
+module.exports = {
 
-    /** @param {Creep} creep **/
     run: function(creep) 
     {    
+        baseCreep.init(creep);
+        
 	    //first - pick own source
 	    if (!creep.memory.source) {
-		    if (!roleMiner.pickOwnSource(creep))
-		    {
-			    console.log("Creep " + creep.name + " didn't find any source");
-				Game.notify("Creep " + creep.name + " didn't find any source");
-		    }
+		    this.pickOwnSource(creep);
 	    }
         
-        //periodically check link avbl
+        //periodically check mining link avbl
         if (!creep.memory.link && creep.room.controller.level >= 5){
             if (Game.time % 20 == 1) {
-                roleMiner.pickOwnLink(creep);
+                this.pickOwnLink(creep);
             }
         }
         
         //Special mode
         if (creep.memory.containerLinkPurge) {
-            roleMiner.containerLinkPurge(creep);
+            this.containerLinkPurge(creep);
             return;
         }
         
@@ -50,13 +47,13 @@ var roleMiner = {
             //check link avbl
             if (!creep.memory.link && creep.room.controller.level >= 5)
             {
-                roleMiner.pickOwnLink(creep);
+                this.pickOwnLink(creep);
             }
             
             //try to pick own container for container harvesting
             if (!creep.memory.container) {
-                roleMiner.pickOwnContainer(creep);
-            } else if (!roleMiner.containerHasHauler(creep, creep.memory.container)) 
+                this.pickOwnContainer(creep);
+            } else if (!this.containerHasHauler(creep, creep.memory.container)) 
             {
                 //hauler died - go back to normal harvesting
                 delete creep.memory.container;
@@ -66,11 +63,11 @@ var roleMiner = {
         
 	    if(creep.memory.harvesting) 
 	    {
-            roleMiner.harvest(creep);
+            this.harvest(creep);
         }
         else 
         { 
-            roleMiner.dropoff(creep);
+            this.dropoff(creep);
         }
 	},
     
@@ -162,7 +159,7 @@ var roleMiner = {
                 //stop container mining temp. and assist transport chain
                 delete creep.memory.container;
                 creep.say("MC full!");
-                roleMiner.carryBackToBase(creep);
+                this.carryBackToBase(creep);
             } else {
                 //not in range mostl likely - move and tx
                 var res_types = baseCreep.getStoredResourceTypes(creep.store);
@@ -174,7 +171,7 @@ var roleMiner = {
             
         } else {
             //no mining container
-            roleMiner.carryBackToBase(creep);
+            this.carryBackToBase(creep);
         }
     }, 
     
@@ -306,9 +303,9 @@ var roleMiner = {
 		//search containers
 		if (!creep.memory.source) return false;
 		var s = Game.getObjectById(creep.memory.source);
-		var container = roleMiner.getMiningStructure(s, STRUCTURE_CONTAINER);
+		var container = this.getMiningStructure(s, STRUCTURE_CONTAINER);
         if (container) {
-            if (roleMiner.containerHasHauler(creep, container.id))
+            if (this.containerHasHauler(creep, container.id))
             {
                 creep.memory.container = container.id;
                 return true;
@@ -326,7 +323,7 @@ var roleMiner = {
         var spawnlink = baseCreep.getSpawnLink(creep.room);
         if (!spawnlink) return false;
         
-        var link = roleMiner.getMiningStructure(s, STRUCTURE_LINK);
+        var link = this.getMiningStructure(s, STRUCTURE_LINK);
         if (link) {
             creep.memory.link = link.id;
             return true;
@@ -366,5 +363,3 @@ var roleMiner = {
 	}
     
 };
-
-module.exports = roleMiner;

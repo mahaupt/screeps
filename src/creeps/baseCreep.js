@@ -1,11 +1,11 @@
-var baseCreep = {
+module.exports = {
 	getName: function(room, role)
 	{
 		var baseName = role + "-#";
 		var name = "";
 		
 		do {
-			name = baseName + baseCreep.getRandomString(3);
+			name = baseName + this.getRandomString(3);
 		} while (Game.creeps[name]);
 		
 		return name;
@@ -287,7 +287,7 @@ var baseCreep = {
 	sendLinkToSpawn: function(link) 
     {
 		if (link.cooldown > 0) return false;
-        var spawnlink = baseCreep.getSpawnLink(link.room);
+        var spawnlink = this.getSpawnLink(link.room);
         if (spawnlink) 
         {
             //spawnlink has full capacity
@@ -349,7 +349,7 @@ var baseCreep = {
 		if (travelSafe) {
 	        creep.moveTo(pos, {
 				reusePath: 10, 
-				costCallback: baseCreep.avoidSourceCostCallback, 
+				costCallback: this.avoidSourceCostCallback, 
 				swampCost: 3, 
 				visualizePathStyle: {stroke: '#ffff00'}
 			});
@@ -395,6 +395,3 @@ var baseCreep = {
 		
 	}
 };
-
-
-module.exports = baseCreep;

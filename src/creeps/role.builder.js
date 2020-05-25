@@ -1,4 +1,4 @@
-var roleBuilder = {
+module.exports = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -29,7 +29,7 @@ var roleBuilder = {
             
             if (!creep.memory.building)
             {
-                roleBuilder.pickBuildTarget(creep);
+                this.pickBuildTarget(creep);
             }
             
             
@@ -114,5 +114,3 @@ var roleBuilder = {
     }
     
 };
-
-module.exports = roleBuilder;

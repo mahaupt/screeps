@@ -1,7 +1,7 @@
 // Game.spawns.Spawn1.spawnCreep([WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], "Pioneer", {memory: {role: 'pioneer', target: 'W7N3'}})
 // [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
 
-var rolePioneer = {
+module.exports = {
     run: function(creep)
     {
         baseCreep.init(creep);
@@ -33,7 +33,7 @@ var rolePioneer = {
         //wait for controller to be captured
         if (!creep.room.controller.my) {
             if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                rolePioneer.harvest(creep);
+                this.harvest(creep);
             }
         } else {
             //harvest and build spawn
@@ -46,9 +46,9 @@ var rolePioneer = {
             
             if (creep.memory.harvest)
             {
-        		rolePioneer.harvest(creep);
+        		this.harvest(creep);
             } else {
-                rolePioneer.build(creep);
+                this.build(creep);
             }
             
             
@@ -133,6 +133,3 @@ var rolePioneer = {
         }
     }
 };
-
-
-module.exports = rolePioneer;

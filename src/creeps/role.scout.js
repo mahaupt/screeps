@@ -6,14 +6,14 @@ Memory Layout
 .home = creep home room name
 */
 
-var roleScout =  {
+module.exports =  {
     run: function(creep) {
         baseCreep.init(creep);
         
         //no target - go home
         if (!creep.memory.target) 
         {
-            roleScout.pickTarget(creep);
+            this.pickTarget(creep);
             
             if (creep.room.name != creep.memory.home) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
@@ -36,11 +36,11 @@ var roleScout =  {
             if (!Memory.intel[creep.room.name] || 
                 Memory.intel[creep.room.name].time < Game.time-100) 
             {
-                roleScout.collectIntel(creep, creep.room);
+                this.collectIntel(creep, creep.room);
             }
         } else {
             //scout
-            roleScout.collectIntel(creep, creep.room);
+            this.collectIntel(creep, creep.room);
             
             delete creep.memory.target;
         }
@@ -106,6 +106,3 @@ var roleScout =  {
     
     
 };
-
-
-module.exports = roleScout;

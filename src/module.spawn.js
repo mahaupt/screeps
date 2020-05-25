@@ -1,6 +1,6 @@
-var moduleSpawn = {
+module.exports = {
     run: function(spawn) {
-        moduleSpawn.memCleanup();
+        this.memCleanup();
         
         var roomCreeps = spawn.room.find(FIND_MY_CREEPS);
         var counts = _.countBy(roomCreeps, 'memory.role');
@@ -38,28 +38,28 @@ var moduleSpawn = {
         if (minerCount < sourceCount*minerMultiplyer+extractor_count && 
             !spawn.room.memory.attacked)
         {
-            moduleSpawn.spawn(spawn, "miner");
+            this.spawn(spawn, "miner");
         } else
         if (haulerCount < containerCount && 
             haulerCount < sourceCount &&
             haulerCount < sourceCount - linkCount+2) 
         {
-            moduleSpawn.spawn(spawn, "hauler");
+            this.spawn(spawn, "hauler");
         } else 
         if (upgraderCount < 1)
         {
-            moduleSpawn.spawn(spawn, "upgrader");
+            this.spawn(spawn, "upgrader");
         } else 
         if (builderCount < sourceCount)
         {
-            moduleSpawn.spawn(spawn, "builder");
+            this.spawn(spawn, "builder");
         } else  
         
         if (spawn.memory.spawnList)
         {
             if (spawn.memory.spawnList.length > 0)
             {
-                var ret = moduleSpawn.spawn(
+                var ret = this.spawn(
                     spawn, 
                     spawn.memory.spawnList[0].role, 
                     spawn.memory.spawnList[0].mem || {});
@@ -111,5 +111,3 @@ var moduleSpawn = {
         }
     } 
 };
-
-module.exports = moduleSpawn;

@@ -1,4 +1,4 @@
-var moduleStrategy = {
+module.exports = {
     pioneerCount: 5,
     
     run: function(room)
@@ -14,7 +14,7 @@ var moduleStrategy = {
         if (_.size(Memory.intel) < 3) {
             var exits = Game.map.describeExits(room.name);
             for (var i in exits) {
-                moduleStrategy.requestIntel(exits[i]);
+                this.requestIntel(exits[i]);
             }
         }
         
@@ -25,7 +25,7 @@ var moduleStrategy = {
                 //make sure there is a scout
                 var scout = _.find(Memory.creeps, (s)=>s.role == 'scout');
                 if (!scout) {
-                    moduleStrategy.spawnScout(room);
+                    this.spawnScout(room);
                     Memory.intel_sc_cdown = Game.time + 50;
                 }
             }
@@ -34,7 +34,7 @@ var moduleStrategy = {
         
         //capturing
         if (room.memory.strat_capture) {
-            moduleStrategy.captureRoom(room);
+            this.captureRoom(room);
         }
     },
     
@@ -68,7 +68,7 @@ var moduleStrategy = {
             s.structureType == STRUCTURE_SPAWN});
         if (spawn.length > 0)
         {
-            moduleStrategy.createPioneerGroup(spawn[0]);
+            this.createPioneerGroup(spawn[0]);
         }
     },
     
@@ -76,7 +76,7 @@ var moduleStrategy = {
     {
         var pioneers = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == 'pioneer'});
         
-        if (pioneers.length >= moduleStrategy.pioneerCount) 
+        if (pioneers.length >= this.pioneerCount) 
         {
             //pioneers have spawned - spawn claimer and go
             var spawn = room.find(FIND_STRUCTURES, {filter: (s) => 
@@ -107,7 +107,7 @@ var moduleStrategy = {
     createPioneerGroup: function(spawn)
     {
         console.log("creating pioneer spawn...");
-        for (var i=0; i < moduleStrategy.pioneerCount; i++) {
+        for (var i=0; i < this.pioneerCount; i++) {
             moduleSpawn.addSpawnList(spawn, "pioneer");
         }
     }, 
@@ -166,5 +166,3 @@ var moduleStrategy = {
     
     
 };
-
-module.exports = moduleStrategy;

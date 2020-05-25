@@ -1,4 +1,4 @@
-var moduleLogistics = {
+module.exports = {
     run: function(room) {
         if (!room.memory.ltasks) {
             room.memory.ltasks = [];
@@ -7,17 +7,17 @@ var moduleLogistics = {
         
         //ltasks = {p, t:, s:, v:, a:, [r:, res:]}
         //prio, type, source, volume, accepted volume, [receiver], [resource type]
-        //moduleLogistics.updateTaskList(room);
-        //moduleLogistics.sortTaskList(room);
+        //this.updateTaskList(room);
+        //this.sortTaskList(room);
     }, 
     
     updateTaskList: function(room)
     {
-        moduleLogistics.removeInvalidTasks(room);
-        moduleLogistics.genLootTasks(room);
-        moduleLogistics.genLinkTask(room);
-        moduleLogistics.genContainerTasks(room);
-        moduleLogistics.genSpawnDistributionTask(room);
+        this.removeInvalidTasks(room);
+        this.genLootTasks(room);
+        this.genLinkTask(room);
+        this.genContainerTasks(room);
+        this.genSpawnDistributionTask(room);
     }, 
     
     removeInvalidTasks: function(room)
@@ -54,7 +54,7 @@ var moduleLogistics = {
                 task.v = amount;
                 task.a = 0;
                 
-                moduleLogistics.insertOrUpdate(room, task);
+                this.insertOrUpdate(room, task);
             }
         }
     }, 
@@ -77,8 +77,9 @@ var moduleLogistics = {
             task.s = links[i].id;
             task.v = links[i].store.getUsedCapacity(RESOURCE_ENERGY);
             task.a = 0;
+            task.res = RESOURCE_ENERGY;
             
-            moduleLogistics.insertOrUpdate(room, task);
+            this.insertOrUpdate(room, task);
         }
     }, 
     
@@ -103,7 +104,7 @@ var moduleLogistics = {
             task.v = mcontainers[i].store.getUsedCapacity();
             task.a = 0;
             
-            moduleLogistics.insertOrUpdate(room, task);
+            this.insertOrUpdate(room, task);
         }
         
     },
@@ -162,10 +163,11 @@ var moduleLogistics = {
             task.s = source.id;
             task.v = energyNeeded;
             task.a = 0;
+            task.res = RESOURCE_ENERGY;
             
-            moduleLogistics.insertOrUpdate(room, task, true);
+            this.insertOrUpdate(room, task, true);
         } else {
-            moduleLogistics.removeTaskGroup(room, "s");
+            this.removeTaskGroup(room, "s");
         }
     },
     
@@ -202,10 +204,10 @@ var moduleLogistics = {
     getTask: function(room, capacity)
     {
         if (room.memory.ltasks_upd) {
-            moduleLogistics.updateTaskList(room);
+            this.updateTaskList(room);
             room.memory.ltasks_upd = false;
         }
-        moduleLogistics.sortTaskList(room);
+        this.sortTaskList(room);
         
         var index = _.findIndex(room.memory.ltasks, (s) => { return s.v > s.a;});
         
@@ -245,6 +247,3 @@ var moduleLogistics = {
     
     
 };
-
-
-module.exports = moduleLogistics;

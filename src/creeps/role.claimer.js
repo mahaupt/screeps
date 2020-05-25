@@ -1,7 +1,7 @@
 // Game.spawns.Spawn1.spawnCreep([CLAIM, MOVE], "Claimer", {memory: {role: 'claimer', target: 'W7N3'}})
 // [CLAIM, MOVE]
 
-var rolePioneer = {
+module.exports = {
     run: function(creep)
     {
         baseCreep.init(creep);
@@ -39,6 +39,3 @@ var rolePioneer = {
         
     },
 };
-
-
-module.exports = rolePioneer;

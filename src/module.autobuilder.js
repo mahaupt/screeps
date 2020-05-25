@@ -1,47 +1,47 @@
-var moduleAutobuilder = {
+module.exports = {
     run: function(room) {
         //Base building calculation
         if (Memory.pBLocation) {
-            moduleAutobuilder.pickFirstBasePos(room);
+            this.pickFirstBasePos(room);
             return;
         }
         
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
 	    //SPAWN
-	    var spawn_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_SPAWN);
+	    var spawn_num = this.getTotalStructures(room, STRUCTURE_SPAWN);
 	    var spawn_max = 1;
         if (spawn_num == 0) {
-            //moduleAutobuilder.pickFirstBasePos(room);
+            //this.pickFirstBasePos(room);
             return;
         } else if (spawn_num < spawn_max) {
             //todo: additional spawns
         }
 	    
 	    //EXTENSIONS
-	    var extensions_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_EXTENSION);
+	    var extensions_num = this.getTotalStructures(room, STRUCTURE_EXTENSION);
 	    var extensions_max = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][room.controller.level];
 	    
         if (extensions_num < extensions_max && constr_sites_num < 2)
 	    {
-		    if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_EXTENSION, true)) {
+		    if (this.buildAroundSpawn(room, STRUCTURE_EXTENSION, true)) {
                 constr_sites_num++;
             }
 	    }
 	    
 	    //TOWERS
-	    var towers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_TOWER);
+	    var towers_num = this.getTotalStructures(room, STRUCTURE_TOWER);
 	    var towers_max = CONTROLLER_STRUCTURES[STRUCTURE_TOWER][room.controller.level];
         
         if (towers_num < towers_max && constr_sites_num < 2)
 	    {
-		    if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TOWER, true)) {
+		    if (this.buildAroundSpawn(room, STRUCTURE_TOWER, true)) {
                 constr_sites_num++;
             }
 	    }
 		
 		//CONTAINERS
-		var containers_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_CONTAINER);
+		var containers_num = this.getTotalStructures(room, STRUCTURE_CONTAINER);
 		var source_num = room.find(FIND_SOURCES).length;
         var mineral_num = room.find(FIND_MINERALS).length;
 	    var containers_max = 5;
@@ -49,42 +49,41 @@ var moduleAutobuilder = {
 	    if (containers_num < containers_max && extensions_num >= 4 && constr_sites_num < 2)
 	    {
 		    if (containers_num < source_num) {
-		    	if (moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
+		    	if (this.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
                     constr_sites_num++;
                 }
             } else if (containers_num < containers_max-mineral_num) {
-			    if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_CONTAINER, false)) {
+			    if (this.buildAroundSpawn(room, STRUCTURE_CONTAINER, false)) {
                     constr_sites_num++;
                 }
-		    } else if (room.controller.level >= 6) {
-                console.log("terminal");
+		    } else if (room.controller.level >= 6 && mineral_num >= 1) {
                 //build container at 
-                if (moduleAutobuilder.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
+                if (this.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
                     constr_sites_num++;
                 }
             }
 	    }
         
         //Storage
-        var storage_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_STORAGE);
+        var storage_num = this.getTotalStructures(room, STRUCTURE_STORAGE);
         var storage_max = CONTROLLER_STRUCTURES[STRUCTURE_STORAGE][room.controller.level];
         
         if (storage_num < storage_max && constr_sites_num < 2)
         {
-            if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_STORAGE, true)) {
+            if (this.buildAroundSpawn(room, STRUCTURE_STORAGE, true)) {
                 constr_sites_num++;
             }
         }
         
         //Links
-        var links_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_LINK);
+        var links_num = this.getTotalStructures(room, STRUCTURE_LINK);
         var links_max = CONTROLLER_STRUCTURES[STRUCTURE_LINK][room.controller.level];
         
         if (links_num < links_max && constr_sites_num < 2)
         {
             //build base link
             if (links_num == 0) {
-                if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_LINK, true)) {
+                if (this.buildAroundSpawn(room, STRUCTURE_LINK, true)) {
                     constr_sites_num++;
                 }
             } else {
@@ -92,7 +91,7 @@ var moduleAutobuilder = {
                 if (links_num-1 < source_num)
                 {
                     //todo - look 
-                    if (moduleAutobuilder.buildMiningStructure(room, STRUCTURE_LINK, 1)) {
+                    if (this.buildMiningStructure(room, STRUCTURE_LINK, 1)) {
                         constr_sites_num++;
                     }
                 }
@@ -101,7 +100,7 @@ var moduleAutobuilder = {
         
         
         //Extractor
-        var extractor_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_EXTRACTOR);
+        var extractor_num = this.getTotalStructures(room, STRUCTURE_EXTRACTOR);
         var extractor_max = CONTROLLER_STRUCTURES[STRUCTURE_EXTRACTOR][room.controller.level];
         if (extractor_num < extractor_max && constr_sites_num < 2) 
         {
@@ -115,11 +114,11 @@ var moduleAutobuilder = {
         }
         
         //Terminal
-        var terminal_num = moduleAutobuilder.getTotalStructures(room, STRUCTURE_TERMINAL);
+        var terminal_num = this.getTotalStructures(room, STRUCTURE_TERMINAL);
         var terminal_max = CONTROLLER_STRUCTURES[STRUCTURE_TERMINAL][room.controller.level];
         if (terminal_num < terminal_max && constr_sites_num < 2) 
         {
-            if (moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_TERMINAL, true)) {
+            if (this.buildAroundSpawn(room, STRUCTURE_TERMINAL, true)) {
                 constr_sites_num++;
             }
         }
@@ -131,12 +130,12 @@ var moduleAutobuilder = {
 	    //build roads - nothing other to build
 	    if (containers_num > 1 && constr_sites_num == 0)
 	    {
-		    moduleAutobuilder.buildRoads(room);
+		    this.buildRoads(room);
 	    }
         
         //building walls from lvl 4
         if (room.controller.level >= 4 && constr_sites_num == 0) {
-            moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_RAMPART, false);
+            //this.buildAroundSpawn(room, STRUCTURE_RAMPART, false);
         }
     },
     
@@ -209,10 +208,10 @@ var moduleAutobuilder = {
         //build around spawn 0
         if (spawns.length > 0)
         {
-	        var buildPos = moduleAutobuilder.getNextFreeBasePos(room, type, spawns[0].pos);
+	        var buildPos = this.getNextFreeBasePos(room, type, spawns[0].pos);
 	        if (room.createConstructionSite(buildPos, type) == OK) {
                 if (removeRoads) {
-                    moduleAutobuilder.removeRoads(room, buildPos);
+                    this.removeRoads(room, buildPos);
                 }
                 return true;
             }
@@ -243,7 +242,8 @@ var moduleAutobuilder = {
             //terrain not plain
             if (target[i].type == 'terrain')
             {
-                if (target[i].terrain != 'plain')
+                if (target[i].terrain != 'plain' && 
+                    target[i].terrain != 'swamp')
                 {
                     return false;
                     break;
@@ -271,7 +271,7 @@ var moduleAutobuilder = {
     
     getNextFreeBasePos: function(room, type, centerPos)
     {
-        var deltas = moduleAutobuilder.getPositionDeltas(type);
+        var deltas = this.getPositionDeltas(type);
         for (var i=0; i < deltas.length; i++)
         {
             var p1 = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y-deltas[i].y, room.name);
@@ -281,16 +281,16 @@ var moduleAutobuilder = {
             
             var ignoreRoads = type != STRUCTURE_ROAD;
             
-            if (moduleAutobuilder.checkPositionFree(room, p1, ignoreRoads)) {
+            if (this.checkPositionFree(room, p1, ignoreRoads)) {
                 return p1;
             }
-            if (moduleAutobuilder.checkPositionFree(room, p2, ignoreRoads)) {
+            if (this.checkPositionFree(room, p2, ignoreRoads)) {
                 return p2;
             }
-            if (moduleAutobuilder.checkPositionFree(room, p3, ignoreRoads)) {
+            if (this.checkPositionFree(room, p3, ignoreRoads)) {
                 return p3;
             }
-            if (moduleAutobuilder.checkPositionFree(room, p4, ignoreRoads)) {
+            if (this.checkPositionFree(room, p4, ignoreRoads)) {
                 return p4;
             }
         }
@@ -370,7 +370,7 @@ var moduleAutobuilder = {
             var x = Math.floor(Math.random()*48)+1;
             var y = Math.floor(Math.random()*48)+1;
             var pos = new RoomPosition(x, y, room.name);
-            var points = moduleAutobuilder.valueBasePos(room, pos);
+            var points = this.valueBasePos(room, pos);
             Memory.pBCalcs++;
             
             if (Memory.pBPoints < points)
@@ -523,10 +523,8 @@ var moduleAutobuilder = {
             
             //roads around spawn
             if (builtRoads == 0) {
-                    moduleAutobuilder.buildAroundSpawn(room, STRUCTURE_ROAD, false);
+                    this.buildAroundSpawn(room, STRUCTURE_ROAD, false);
             }
         }
     }
 };
-
-module.exports = moduleAutobuilder;

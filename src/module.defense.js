@@ -1,4 +1,4 @@
-var moduleDefense = {
+module.exports = {
 	run: function(room)
 	{
 		
@@ -86,7 +86,4 @@ var moduleDefense = {
 			}
 		}
 	}
-}
-
-
-module.exports = moduleDefense;
+};

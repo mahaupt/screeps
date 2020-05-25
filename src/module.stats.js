@@ -1,6 +1,6 @@
-var moduleStats =  {
+module.exports =  {
     run: function(room) {
-        moduleStats.getTotalEnergyLevel(room);
+        this.getTotalEnergyLevel(room);
     },
     
     
@@ -26,5 +26,3 @@ var moduleStats =  {
     
     
 };
-
-module.exports = moduleStats;

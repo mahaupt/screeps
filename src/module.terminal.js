@@ -1,14 +1,14 @@
-var moduleTerminal = {
+module.exports = {
     run: function(room) {
         var res_types = baseCreep.getStoredResourceTypes(room.terminal.store);
         
         //check emough energy
-        if (room.terminal.store[RESOURCE_ENERGY] < 500) {
+        if (room.terminal.store[RESOURCE_ENERGY] < 1000) {
             var task = {
-                p: 4,
+                p: 3,
                 t: 't',
                 s: room.storage.id,
-                v: 500,
+                v: 1000,
                 a: 0,
                 r: room.terminal.id,
                 res: RESOURCE_ENERGY
@@ -37,6 +37,3 @@ var moduleTerminal = {
         }
     }
 };
-
-
-module.exports = moduleTerminal;
