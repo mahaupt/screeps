@@ -14,7 +14,7 @@ Priorities of dropoff
 */
 
 module.exports = {
-
+    name: 'miner', 
     run: function(creep) 
     {    
         baseCreep.init(creep);

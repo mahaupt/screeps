@@ -1,6 +1,5 @@
 module.exports = {
-
-    /** @param {Creep} creep **/
+    name: 'claimer', 
     run: function(creep) {
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.harvesting = true;

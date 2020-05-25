@@ -1,5 +1,6 @@
 module.exports = {
     run: function(creep) {
+        name: 'tank', 
         baseCreep.init(creep);
         
         //heal self

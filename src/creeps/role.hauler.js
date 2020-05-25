@@ -8,6 +8,7 @@ Memory Layout
 */
 
 module.exports = {
+	name: 'hauler', 
 	run: function(creep) {
 		baseCreep.init(creep);
 				

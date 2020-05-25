@@ -7,6 +7,7 @@ Memory Layout
 */
 
 module.exports =  {
+    name: 'scout', 
     run: function(creep) {
         baseCreep.init(creep);
         

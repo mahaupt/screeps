@@ -1,6 +1,5 @@
 module.exports = {
-	
-	/** @param {Creep} creep **/
+	name: 'renewSelf', 
 	run: function(creep) {		
 		//go back to spawn
         var targets = creep.room.find(FIND_STRUCTURES, {

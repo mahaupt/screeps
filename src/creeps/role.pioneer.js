@@ -2,6 +2,7 @@
 // [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
 
 module.exports = {
+    name: 'pioneer', 
     run: function(creep)
     {
         baseCreep.init(creep);

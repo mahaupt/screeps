@@ -14,6 +14,7 @@ passive = true/false
 */
 
 module.exports = {
+    name: 'soldier', 
     run: function(creep) {
         baseCreep.init(creep);
         
