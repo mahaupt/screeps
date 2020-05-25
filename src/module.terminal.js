@@ -30,7 +30,7 @@ module.exports = {
             
             if (orders.length > 0)
             {
-                var amount = Math.min(orders[0].remainingAmount, room.terminal.store[res]);
+                var amount = Math.min(orders[0].remainingAmount, room.terminal.store[res], 1000);
                 var ret = Game.market.deal(orders[0].id, amount, room.name);
                 return;
             }
