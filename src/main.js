@@ -44,6 +44,7 @@ console.log("reset detected");
 //profiler.enable();
 module.exports.loop = function () {
     //profiler.wrap(function() {
+        //MODULES per Room
         for (var sname in Game.spawns)
         {
             var spawn = Game.spawns[sname];
@@ -62,7 +63,11 @@ module.exports.loop = function () {
             moduleStrategy.run(spawn.room);
             moduleLogistics.run(spawn.room);
         }
-
+        
+        //OPS
+        Ops.run();
+        
+        //CREEPS
         for(var name in Game.creeps) {
             var creep = Game.creeps[name];
             

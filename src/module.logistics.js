@@ -141,27 +141,30 @@ module.exports = {
         containers = _.sortBy(containers, (s)=>-s.store[RESOURCE_ENERGY]);
         
         //get energy of fullest container
-        var contStorage = 0;
+        var energyAvbl = 0;
         if (containers.length > 0)
         {
-            contStorage = containers[0].store[RESOURCE_ENERGY];
+            energyAvbl = containers[0].store[RESOURCE_ENERGY];
         }
         
         if (room.storage && 
-            room.storage.store[RESOURCE_ENERGY] > contStorage)
+            room.storage.store[RESOURCE_ENERGY] > energyAvbl)
         {
             source = room.storage;
+            energyAvbl = room.storage.store[RESOURCE_ENERGY];
         } else if (containers.length > 0) {
             source = containers[0];
         }
         
         if (source) {
+            
+            var energyForTransport = Math.min(energyNeeded, energyAvbl);
              
             var task = {};
-            task.p = 4;
+            task.p = 5;
             task.t = "s";
             task.s = source.id;
-            task.v = energyNeeded;
+            task.v = energyForTransport;
             task.a = 0;
             task.res = RESOURCE_ENERGY;
             

@@ -5,7 +5,7 @@ module.exports = {
         //check emough energy
         if (room.terminal.store[RESOURCE_ENERGY] < 1000) {
             var task = {
-                p: 3,
+                p: 4,
                 t: 't',
                 s: room.storage.id,
                 v: 1000,
