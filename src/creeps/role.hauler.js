@@ -152,11 +152,9 @@ module.exports = {
 			if (target.store.getFreeCapacity(resource) == 0) {
 				delete creep.memory.target;
 			}
-			//target will be full i next tick
+			//transfer complete - search new target
 			if (ret == OK && !multi_dropoff) {
-				if (target.store.getFreeCapacity(resource) <= creep.store[resource]) {
-					delete creep.memory.target;
-				}
+				delete creep.memory.target;
 			}
 		}
 		else 

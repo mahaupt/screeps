@@ -173,13 +173,11 @@ module.exports = {
     
     spawnPioneerGroup: function(ops, mem = {})
     {
-        var spawns = Game.rooms[ops.source].find(
-            FIND_STRUCTURES, 
-            {filter: (s) => s.structureType == STRUCTURE_SPAWN}
-        );
-        if (spawns.length > 0) {
+        var room = Game.rooms[ops.source];
+        
+        if (room) {
             for (var i=0; i < this.pioneerGroupSize; i++) {
-                moduleSpawn.addSpawnList(spawns[0], "pioneer", mem);
+                moduleSpawn.addSpawnList(room, "pioneer", mem);
             }
         }
     }

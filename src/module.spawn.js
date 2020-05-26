@@ -2,28 +2,29 @@ module.exports = {
     run: function(spawn) {
         this.memCleanup();
         
-        var roomCreeps = spawn.room.find(FIND_MY_CREEPS);
+        var room = spawn.room;
+        var roomCreeps = room.find(FIND_MY_CREEPS);
         var counts = _.countBy(roomCreeps, 'memory.role');
         var minerCount = counts.miner || 0;
         var upgraderCount = counts.upgrader || 0;
         var builderCount = counts.builder || 0;
         var haulerCount = counts.hauler || 0;
         
-        var sourceCount = spawn.room.find(FIND_SOURCES).length;
-        var mineralCount = spawn.room.find(FIND_MINERALS, {
+        var sourceCount = room.find(FIND_SOURCES).length;
+        var mineralCount = room.find(FIND_MINERALS, {
             filter: (s) => {
                 return s.mineralAmount > 0 || s.ticksToRegeneration <= 50;
             }
         }).length;
-        var containerCount = spawn.room.find(FIND_STRUCTURES, {
+        var containerCount = room.find(FIND_STRUCTURES, {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_CONTAINER;
 	        }}).length;
-        var linkCount = spawn.room.find(FIND_STRUCTURES, {
+        var linkCount = room.find(FIND_STRUCTURES, {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_LINK;
 	        }}).length;
-        var extractor_count = spawn.room.find(FIND_STRUCTURES, {
+        var extractor_count = room.find(FIND_STRUCTURES, {
 	        filter: (structure) => {
 	            return structure.structureType == STRUCTURE_EXTRACTOR;
 	        }}).length;
@@ -55,16 +56,16 @@ module.exports = {
             this.spawn(spawn, "builder");
         } else  
         
-        if (spawn.memory.spawnList)
+        if (room.memory.spawnList)
         {
-            if (spawn.memory.spawnList.length > 0)
+            if (room.memory.spawnList.length > 0)
             {
                 var ret = this.spawn(
                     spawn, 
-                    spawn.memory.spawnList[0].role, 
-                    spawn.memory.spawnList[0].mem || {});
+                    room.memory.spawnList[0].role, 
+                    room.memory.spawnList[0].mem || {});
                 if (ret) {
-                    spawn.memory.spawnList.shift();
+                    room.memory.spawnList.shift();
                 }
             }
         }
@@ -90,14 +91,14 @@ module.exports = {
         }
     },
     
-    addSpawnList: function(spawn, role, memory={})
+    addSpawnList: function(room, role, memory={})
     {
-        if (!spawn.memory.spawnList) {
-            spawn.memory.spawnList = [];
+        if (!room.memory.spawnList) {
+            room.memory.spawnList = [];
         }
         
         var s = {role: role, mem: memory};
-        spawn.memory.spawnList.push(s);
+        room.memory.spawnList.push(s);
     }, 
     
     memCleanup: function() {
