@@ -178,7 +178,13 @@ module.exports = {
     //if ignoreSource=true, only compares task type
     insertOrUpdate: function(room, task, ignoreSource=false)
     {
-        var index = _.findIndex(room.memory.ltasks, (s) => { return (s.s == task.s || ignoreSource) && s.t == task.t; });
+        var index = _.findIndex(
+            room.memory.ltasks, 
+            (s) => { 
+                return (s.s == task.s || ignoreSource) && 
+                    s.t == task.t && 
+                    (!task.r || s.r == task.r); 
+        });
         
         if (index >= 0)
         {

@@ -58,6 +58,9 @@ module.exports.loop = function () {
                 if (Game.time % 100 == 2)
                     moduleTerminal.run(spawn.room);
             }
+            if (Game.time % 100 == 4) {
+                moduleLabs.run(spawn.room);
+            }
             
             moduleDefense.run(spawn.room);
             moduleStrategy.run(spawn.room);

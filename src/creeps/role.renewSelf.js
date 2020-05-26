@@ -50,7 +50,9 @@ module.exports = {
 			        creep.say("RIP");
 			        return;
 		        } else {
-			        if (spawns[0].renewCreep(creep) == ERR_NOT_IN_RANGE)
+					var ret = spawns[0].renewCreep(creep);
+					creep.say(ret);
+			        if (ret == ERR_NOT_IN_RANGE)
 			        {
 				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 			        }
