@@ -1,8 +1,9 @@
 global.baseCreep = require('creeps_baseCreep');
 global.moduleLogistics = require('module.logistics');
 global.moduleSpawn = require('module.spawn');
-global.moduleStrategy = require('module.strategy');
 global.Ops = require('ops_ops');
+global.Labs = require('labs_labs');
+global.Test = require('labs_labs.production');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
@@ -19,7 +20,6 @@ var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
 var moduleTerminal = require('module.terminal');
-var moduleLabs = require('module.labs');
 
 /*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -59,11 +59,10 @@ module.exports.loop = function () {
                     moduleTerminal.run(spawn.room);
             }
             if (Game.time % 100 == 4) {
-                moduleLabs.run(spawn.room);
+                Labs.run(spawn.room);
             }
             
             moduleDefense.run(spawn.room);
-            moduleStrategy.run(spawn.room);
             moduleLogistics.run(spawn.room);
         }
         

@@ -106,6 +106,10 @@ module.exports = {
             //transfer res into containers
             let res_types = baseCreep.getStoredResourceTypes(creep.store);
             creep.transfer(container, res_types[0]);
+            
+            if (!link) {
+                this.addContainerTransportTask(container);
+            }
         }
     }, 
     
@@ -137,6 +141,9 @@ module.exports = {
                 if (creep.transfer(container, res_types[0])== ERR_NOT_IN_RANGE)
                 {
                     creep.moveTo(container, {visualizePathStyle: {stroke: '#00ff00'}});
+                }
+                if (!link) {
+                    this.addContainerTransportTask(container);
                 }
                 return;
             } 
@@ -368,6 +375,23 @@ module.exports = {
         } else {
             delete creep.memory.link;
             return null;
+        }
+    },
+    
+    addContainerTransportTask: function(container)
+    {
+        var res_types = baseCreep.getStoredResourceTypes(container.store);
+        if (res_types.length > 0 && 
+            container.store.getUsedCapacity(res_types[0]) >= 200) 
+        {
+            moduleLogistics.addTransportTask(
+                container.room, 
+                container, 
+                null, 
+                container.store.getUsedCapacity(res_types[0]), 
+                res_types[0], 
+                5, 
+                "mc");
         }
     }
     

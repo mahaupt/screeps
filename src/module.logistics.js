@@ -5,7 +5,7 @@ module.exports = {
         }
         room.memory.ltasks_upd = true;
         
-        //ltasks = {p, t:, s:, v:, a:, [r:, res:]}
+        //ltasks = {prio, type:, src:, vol:, acc:, [rec:, res:]}
         //prio, type, source, volume, accepted volume, [receiver], [resource type]
         //this.updateTaskList(room);
         //this.sortTaskList(room);
@@ -13,10 +13,10 @@ module.exports = {
     
     updateTaskList: function(room)
     {
-        this.removeInvalidTasks(room);
+        //this.removeInvalidTasks(room);
         this.genLootTasks(room);
-        this.genLinkTask(room);
-        this.genContainerTasks(room);
+        //this.genLinkTask(room);
+        //this.genContainerTasks(room);
         this.genSpawnDistributionTask(room);
     }, 
     
@@ -24,8 +24,8 @@ module.exports = {
     {
         //also remove inactive MC and Links
         _.remove(room.memory.ltasks, (s) => { 
-            return ((s.t == 'mc' || s.t == 'l') && s.a == 0) || 
-                Game.getObjectById(s.s) == null; });
+            return ((s.type == 'mc' || s.type == 'l') && s.acc == 0) || 
+                Game.getObjectById(s.src) == null; });
     }, 
     
     //generates hauling tasks for transporting loot
@@ -44,15 +44,16 @@ module.exports = {
         for (var i=0; i < targets.length; i++)
         {
             var amount = targets[i].amount || targets[i].store.getUsedCapacity();
+            if (amount < 10) continue;
             
             if (amount > 0)
             {
                 var task = {};
-                task.p = 6;
-                task.t = "loot";
-                task.s = targets[i].id;
-                task.v = amount;
-                task.a = 0;
+                task.prio = 6;
+                task.type = "loot";
+                task.src = targets[i].id;
+                task.vol = amount;
+                task.acc = 0;
                 
                 this.insertOrUpdate(room, task);
             }
@@ -72,11 +73,11 @@ module.exports = {
         for (var i=0; i<links.length; i++)
         {
             var task = {};
-            task.p = 7;
-            task.t = "l";
-            task.s = links[i].id;
-            task.v = links[i].store.getUsedCapacity(RESOURCE_ENERGY);
-            task.a = 0;
+            task.prio = 7;
+            task.type = "l";
+            task.src = links[i].id;
+            task.vol = links[i].store.getUsedCapacity(RESOURCE_ENERGY);
+            task.acc = 0;
             task.res = RESOURCE_ENERGY;
             
             this.insertOrUpdate(room, task);
@@ -98,11 +99,11 @@ module.exports = {
         for (var i=0; i < mcontainers.length; i++)
         {
             var task = {};
-            task.p = 5;
-            task.t = "mc";
-            task.s = mcontainers[i].id;
-            task.v = mcontainers[i].store.getUsedCapacity();
-            task.a = 0;
+            task.prio = 5;
+            task.type = "mc";
+            task.src = mcontainers[i].id;
+            task.vol = mcontainers[i].store.getUsedCapacity();
+            task.acc = 0;
             
             this.insertOrUpdate(room, task);
         }
@@ -161,11 +162,11 @@ module.exports = {
             var energyForTransport = Math.min(energyNeeded, energyAvbl);
              
             var task = {};
-            task.p = 5;
-            task.t = "s";
-            task.s = source.id;
-            task.v = energyForTransport;
-            task.a = 0;
+            task.prio = 5;
+            task.type = "s";
+            task.src = source.id;
+            task.vol = energyForTransport;
+            task.acc = 0;
             task.res = RESOURCE_ENERGY;
             
             this.insertOrUpdate(room, task, true);
@@ -181,32 +182,54 @@ module.exports = {
         var index = _.findIndex(
             room.memory.ltasks, 
             (s) => { 
-                return (s.s == task.s || ignoreSource) && 
-                    s.t == task.t && 
-                    (!task.r || s.r == task.r); 
+                return (s.src == task.src || ignoreSource) && 
+                    s.type == task.type && 
+                    (!task.rec || s.rec == task.rec); 
         });
         
         if (index >= 0)
         {
             //update
-            var accepted = room.memory.ltasks[index].a;
+            var accepted = room.memory.ltasks[index].acc;
             room.memory.ltasks[index] = task;
-            room.memory.ltasks[index].a = accepted;
+            room.memory.ltasks[index].acc = accepted;
         } else {
             //insert
             room.memory.ltasks.push(task);
         }
     }, 
     
+    addTransportTask: function(room, source, receiver, amount, resource, prio=4, type='t')
+    {
+        if (source && source.id) {
+            source = source.id;
+        }
+        
+        if (receiver && receiver.id) {
+            receiver = receiver.id;
+        }
+        
+        var task = {
+            prio: prio,
+            type: type,
+            src: source,
+            vol: amount,
+            acc: 0,
+            rec: receiver,
+            res: resource
+        };
+        moduleLogistics.insertOrUpdate(room, task);
+    }, 
+    
     removeTaskGroup: function(room, taskgroup)
     {
-        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { return s.t != taskgroup; });
+        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { return s.type != taskgroup; });
     },
     
     
     sortTaskList: function(room)
     {
-        room.memory.ltasks = _.sortBy(room.memory.ltasks, (s) => -(s.p*1000000+s.v-s.a));
+        room.memory.ltasks = _.sortBy(room.memory.ltasks, (s) => -(s.prio*1000000+s.vol-s.acc));
     },
     
     
@@ -218,10 +241,10 @@ module.exports = {
         }
         this.sortTaskList(room);
         
-        var index = _.findIndex(room.memory.ltasks, (s) => { return s.v > s.a;});
+        var index = _.findIndex(room.memory.ltasks, (s) => { return s.vol > s.acc;});
         
         if (index >= 0) {
-            room.memory.ltasks[index].a += capacity;
+            room.memory.ltasks[index].acc += capacity;
             return room.memory.ltasks[index];
         }
         
@@ -230,16 +253,16 @@ module.exports = {
     
     dropTask: function(room, task, capacity, drawnCapacity=0)
     {
-        var index = _.findIndex(room.memory.ltasks, (s) => { return s.s == task.s && s.t == task.t; });
+        var index = _.findIndex(room.memory.ltasks, (s) => { return s.src == task.src && s.type == task.type; });
         
         if (index >= 0)
         {
-            room.memory.ltasks[index].a -= capacity;
-            room.memory.ltasks[index].v -= drawnCapacity;
-            if (room.memory.ltasks[index].a < 0) {
-                room.memory.ltasks[index].a = 0;
+            room.memory.ltasks[index].acc -= capacity;
+            room.memory.ltasks[index].vol -= drawnCapacity;
+            if (room.memory.ltasks[index].acc < 0) {
+                room.memory.ltasks[index].acc = 0;
             }
-            if (room.memory.ltasks[index].v <= 0) 
+            if (room.memory.ltasks[index].vol <= 0) 
             {
                 //no more to transport - delete task
                 room.memory.ltasks.splice(index, 1);
@@ -250,7 +273,7 @@ module.exports = {
     deleteTask: function(room, task)
     {
         room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { 
-            return !(s.s == task.s && s.t == task.t); 
+            return !(s.src == task.src && s.type == task.type && s.rec == task.rec); 
         });
     }
     

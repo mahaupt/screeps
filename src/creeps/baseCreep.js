@@ -293,8 +293,12 @@ module.exports = {
             //spawnlink has full capacity
             if (spawnlink.store.getFreeCapacity(RESOURCE_ENERGY) == LINK_CAPACITY)
             {
-                link.transferEnergy(spawnlink);
-                return true;
+                if (link.transferEnergy(spawnlink) == OK) 
+				{
+					var amt = Math.round(link.store[RESOURCE_ENERGY] * (1-LINK_LOSS_RATIO));
+					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY);
+					return true;
+				}
             } else {
                 //console.log("Spawnlink full");
             }

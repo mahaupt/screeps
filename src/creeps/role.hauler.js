@@ -19,10 +19,8 @@ module.exports = {
 			
 			//pick new task
 			creep.memory.task = moduleLogistics.getTask(creep.room, creep.store.getCapacity());
-			if (creep.memory.task) {
-				if (creep.memory.task.r) {
-					creep.memory.target = creep.memory.task.r;
-				}
+			if (creep.memory.task && creep.memory.task.rec) {
+				creep.memory.target = creep.memory.task.rec;
 			}
         }
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
@@ -35,7 +33,7 @@ module.exports = {
 				creep.store.getCapacity(), 
 				creep.store.getCapacity()
 			);
-			creep.memory.task.s = null;
+			creep.memory.task.src = null;
 			
         }
         
@@ -60,8 +58,9 @@ module.exports = {
 	
 	pickup: function(creep) 
 	{
-		var s = Game.getObjectById(creep.memory.task.s);
+		var s = Game.getObjectById(creep.memory.task.src);
 		if (!s) { 
+			moduleLogistics.deleteTask(room, creep.memory.task);
 			delete creep.memory.task; 
 			return; 
 		}
@@ -73,16 +72,10 @@ module.exports = {
 		}
 		
 		//select resource for pickup
-		var amount = s.amount || s.store[RESOURCE_ENERGY];
-		var resource = RESOURCE_ENERGY;
+		var resource = creep.memory.task.res || RESOURCE_ENERGY;
+		var amount = s.amount || s.store[resource];
 		var multi_pickup = false;
-		if (creep.memory.task.res) 
-		{
-			//prefedined resource for pickup
-			resource = creep.memory.task.res;
-			amount =  s.store[resource];
-		} else 
-		if (creep.memory.task.t == "mc" || creep.memory.task.t == "loot") 
+		if (creep.memory.task.type == "mc" || creep.memory.task.type == "loot") 
 		{
 			//mining container, pickup all resources
 			if (s instanceof Resource) {
@@ -131,8 +124,14 @@ module.exports = {
 		var target = Game.getObjectById(creep.memory.target);
 		if (target) 
 		{
+			//move to room
+			if (target.room.name != creep.room.name) {
+				baseCreep.moveToRoom(creep, target.room.name);
+				return;
+			}
+			
 			//select resource for transfer if target is storage
-			var resource = RESOURCE_ENERGY;
+			var resource = creep.memory.task.res || RESOURCE_ENERGY;
 			var stored_resources = baseCreep.getStoredResourceTypes(creep.store);
 			var multi_dropoff = false;
 			if (target.structureType == STRUCTURE_TERMINAL || 
@@ -184,12 +183,10 @@ module.exports = {
 		var target = null;
 		
 		//if quick purge - select storage if avbl
-		if (creep.memory.task) {
-			if (creep.memory.task.t == "l") {
-				if (creep.room.storage) {
-					creep.memory.target = creep.room.storage.id;
-					return;
-				}
+		if (creep.memory.task && creep.memory.task.type == "l") {
+			if (creep.room.storage) {
+				creep.memory.target = creep.room.storage.id;
+				return;
 			}
 		}
 		
