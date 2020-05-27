@@ -296,7 +296,7 @@ module.exports = {
                 if (link.transferEnergy(spawnlink) == OK) 
 				{
 					var amt = Math.round(link.store[RESOURCE_ENERGY] * (1-LINK_LOSS_RATIO));
-					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY);
+					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
 					return true;
 				}
             } else {

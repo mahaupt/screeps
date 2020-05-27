@@ -3,7 +3,6 @@ global.moduleLogistics = require('module.logistics');
 global.moduleSpawn = require('module.spawn');
 global.Ops = require('ops_ops');
 global.Labs = require('labs_labs');
-global.Test = require('labs_labs.production');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
@@ -58,10 +57,8 @@ module.exports.loop = function () {
                 if (Game.time % 100 == 2)
                     moduleTerminal.run(spawn.room);
             }
-            if (Game.time % 100 == 4) {
-                Labs.run(spawn.room);
-            }
             
+            Labs.run(spawn.room);
             moduleDefense.run(spawn.room);
             moduleLogistics.run(spawn.room);
         }

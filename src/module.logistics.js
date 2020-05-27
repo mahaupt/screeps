@@ -44,9 +44,8 @@ module.exports = {
         for (var i=0; i < targets.length; i++)
         {
             var amount = targets[i].amount || targets[i].store.getUsedCapacity();
-            if (amount < 10) continue;
             
-            if (amount > 0)
+            if (amount > 10)
             {
                 var task = {};
                 task.prio = 6;

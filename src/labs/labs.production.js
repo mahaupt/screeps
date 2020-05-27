@@ -1,41 +1,59 @@
+// {res_a: , res_b: , prod: , amount: , started: false, lab_a: , lab_b: , lab_prod: }
+
 module.exports = {
     startProduction: function(room, res, amount)
     {
-        if (this.resourceAvailable(res, amount)) {
+        if (this.resourceAvailable(room, res, amount)) {
             return;
         }
         if (this.isBaseMineral(res)) {
-            this.buyResource(res, amount);
+            //moduleTerminal.addBuyList(room, res, amount);
+            console.log("Buying " + res);
             return;
         }
         
         //start production
         var base = this.getBaseMinerals(res);
-        this.startProduction(base.a, amount);
-        this.startProduction(base.b, amount);
+        this.startProduction(room, base.a, amount);
+        this.startProduction(room, base.b, amount);
         
         //insert into production queue
         this.insertProductionQueue(room, base.a, base.b, res, amount);
+        console.log("Producing " + res);
     }, 
     
     insertProductionQueue: function(room, res_a, res_b, res_prod, amount)
     {
-        if (!room.memory.labs.production) {
-            room.memory.labs.production = [];
+        if (!room.memory.labs.list) {
+            room.memory.labs.list = [];
         }
         
         var task = {
             res_a: res_a,
             res_b: res_b,
             prod: res_prod,
-            amount: amount
+            amount: amount,
+            started: false,
+            lab_a: null,
+            lab_b: null,
+            lab_prod: null
         };
         
-        room.memory.labs.production.push(task);
+        room.memory.labs.list.push(task);
     }, 
     
-    resourceAvailable: function(res, amount)
+    resourceAvailable: function(room, res, amount)
     {
+        var source = room.terminal || room.storage;
+        if (!source) return false;
+        
+        var avbl_amount = source.store[res];
+        if (avbl_amount >= amount) {
+            return true;
+        } else {
+            return false;
+        }
+        
         return false;
     },
     
@@ -71,5 +89,6 @@ module.exports = {
                 }
             }
         }
+        console.log("nothing found for " + res);
     }
 };

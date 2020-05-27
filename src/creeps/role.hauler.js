@@ -60,7 +60,7 @@ module.exports = {
 	{
 		var s = Game.getObjectById(creep.memory.task.src);
 		if (!s) { 
-			moduleLogistics.deleteTask(room, creep.memory.task);
+			moduleLogistics.deleteTask(creep.room, creep.memory.task);
 			delete creep.memory.task; 
 			return; 
 		}
