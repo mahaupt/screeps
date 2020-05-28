@@ -57,19 +57,22 @@ module.exports = {
 				var nconstr = hostiles[i].pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 4).length;
 				var nstruct = hostiles[i].pos.findInRange(FIND_STRUCTURES, 4).length;
 				
-				//console.log("Danger-level: " + (ncreeps+nconstr+nstruct));
-				if (ncreeps+nconstr+nstruct > 0)
+				//activate safe mode if more then 3 hostiles or no towers
+				if (ncreeps+nconstr+nstruct > 0 && 
+					(hostiles.length > 3 || towers.length == 0))
 				{
 					//try activate safe mode
 					//console.log("danger!");
 					if (!room.controller.safeMode) {
 						if (room.controller.activateSafeMode() == OK)
 						{
-							Game.notify("Hostiles detected! Safe mode activated!");
-							console.log("Hostiles detected! Safe mode activated!");
+							let msg = room.name + ": Hostiles detected! Safe mode activated!";
+							Game.notify(msg);
+							console.log(msg);
 						} else {
-							Game.notify("Hostiles detected! Safe mode failed!");
-							console.log("Hostiles detected! Safe mode failed!");
+							let msg = room.name + ": Hostiles detected! Safe mode failed!";
+							Game.notify(msg);
+							console.log(msg);
 						}
 					}
 					
@@ -80,7 +83,7 @@ module.exports = {
 		else // if hostiles
 		{
 			if (room.memory.attacked) {
-				if (room.memory.attacked_time < Game.time - 1000) {
+				if (room.memory.attacked_time+150 < Game.time) {
 					room.memory.attacked = false;
 				}
 			}

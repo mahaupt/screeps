@@ -385,11 +385,9 @@ module.exports = {
             var xx = spawns[0].renewCreep(creep);
             if (xx == ERR_NOT_IN_RANGE) {
                 creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
-            }
-        }
-        
-        if (creep.ticksToLive >= CREEP_LIFE_TIME-20) {
-            creep.memory.embark = true;
+            } else if (xx == ERR_FULL) {
+				creep.memory.embark = true;
+			}
         }
     }, 
 	

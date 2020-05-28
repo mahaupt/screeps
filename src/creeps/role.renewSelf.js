@@ -51,21 +51,20 @@ module.exports = {
 			        return;
 		        } else {
 					var ret = spawns[0].renewCreep(creep);
-					creep.say(ret);
 			        if (ret == ERR_NOT_IN_RANGE)
 			        {
 				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
-			        }
+			        } else if (ret == ERR_FULL)
+					{
+						//renew successful
+						creep.memory.renewSelf = false;
+					}
 		        }
 		    }
         }
         
         
-        //renew successful or energy empty
-        if (creep.ticksToLive >= CREEP_LIFE_TIME-20)
-        {
-	        creep.memory.renewSelf = false;
-        }
+        //energy empty
         if (targets.length > 0)
         {
 	        if (creep.store[RESOURCE_ENERGY] == 0 && creep.room.energyAvailable < 10)
