@@ -84,7 +84,7 @@ module.exports = {
 		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
         var possibleBodyParts = baseCreep.buildBody(creep.room, creep.memory.role, bodySize).length;
 
-		if (possibleBodyParts > creep.body.length)
+		if (possibleBodyParts > baseCreep.getCreepBodyStrength(creep))
         {
 	        creep.memory.killSelf = true;
 			

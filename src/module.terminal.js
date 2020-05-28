@@ -25,7 +25,7 @@ module.exports = {
         {
             for (var i in room.memory.buy_list) {
                 var buy = room.memory.buy_list[i];
-                let amount = this.buyResource(room, buy.res, buy.amount);
+                let amount = this.buyResource(room, buy.res, buy.amount, buy.max_price);
                 if (amount > 0) {
                     buy.amount -= amount;
                     if (buy.amount <= 0) {
@@ -37,7 +37,7 @@ module.exports = {
         }
     }, 
     
-    addBuyList: function(room, res, amount)
+    addBuyList: function(room, res, amount, max_price=0.15)
     {
         if (!room.memory.buy_list) {
             room.memory.buy_list = [];
@@ -45,7 +45,8 @@ module.exports = {
         
         var buy = {
             res: res,
-            amount: amount
+            amount: amount,
+            max_price: max_price
         };
         
         room.memory.buy_list.push(buy);

@@ -195,9 +195,9 @@ module.exports = {
         lab.room.memory.labs.labs[mem.lab_b].amount -= LAB_REACTION_AMOUNT;
         
         //sync to production list
-        var index = _.findIndex(lab.room.memory.labs.list, (s) => s.started == true && s.lab_prod == lab.id);
+        var index = _.findIndex(lab.room.memory.labs.production, (s) => s.started == true && s.lab_prod == lab.id);
         if (index >= 0) {
-            lab.room.memory.labs.list[index].amount = mem.amount;
+            lab.room.memory.labs.production[index].amount = mem.amount;
         }
     }
 };

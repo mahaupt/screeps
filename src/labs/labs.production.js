@@ -4,11 +4,11 @@ module.exports = {
     run: function(room) 
     {
         //assign labs to production
-        if (room.memory.labs.list && room.memory.labs.list.length > 0)
+        if (room.memory.labs.production && room.memory.labs.production.length > 0)
         {
             //check if already started
-            var prod = room.memory.labs.list[0];
-            if (prod.amount <= 0) { room.memory.labs.list.shift(); return; }
+            var prod = room.memory.labs.production[0];
+            if (prod.amount <= 0) { room.memory.labs.production.shift(); return; }
             if (prod.started) { return; }
             
             var free_labs = this.getFreeLabTrio(room);
@@ -63,7 +63,7 @@ module.exports = {
         }
         if (this.isBaseMineral(res)) {
             Terminal.addBuyList(room, res, amount);
-            console.log("Buying " + res);
+            console.log(room.name + ": Buying " + res);
             return;
         }
         
@@ -74,13 +74,13 @@ module.exports = {
         
         //insert into production queue
         this.insertProductionQueue(room, base.a, base.b, res, amount, boost_creeps);
-        console.log("Producing " + res);
+        console.log(room.name + ": Producing " + res);
     }, 
     
     insertProductionQueue: function(room, res_a, res_b, res_prod, amount, boost_creeps)
     {
-        if (!room.memory.labs.list) {
-            room.memory.labs.list = [];
+        if (!room.memory.labs.production) {
+            room.memory.labs.production = [];
         }
         
         var task = {
@@ -95,7 +95,7 @@ module.exports = {
             boost_creeps: boost_creeps
         };
         
-        room.memory.labs.list.push(task);
+        room.memory.labs.production.push(task);
     }, 
     
     

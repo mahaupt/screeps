@@ -48,6 +48,7 @@ module.exports = {
             if (amount > 10)
             {
                 var task = {};
+                task.id = "";
                 task.prio = 6;
                 task.type = "loot";
                 task.src = targets[i].id;
@@ -72,6 +73,7 @@ module.exports = {
         for (var i=0; i<links.length; i++)
         {
             var task = {};
+            task.id = "";
             task.prio = 7;
             task.type = "l";
             task.src = links[i].id;
@@ -98,6 +100,7 @@ module.exports = {
         for (var i=0; i < mcontainers.length; i++)
         {
             var task = {};
+            task.id = "";
             task.prio = 5;
             task.type = "mc";
             task.src = mcontainers[i].id;
@@ -161,6 +164,7 @@ module.exports = {
             var energyForTransport = Math.min(energyNeeded, energyAvbl);
              
             var task = {};
+            task.id = "";
             task.prio = 5;
             task.type = "s";
             task.src = source.id;
@@ -184,17 +188,27 @@ module.exports = {
             (s) => { 
                 return (s.src == task.src || ignoreSource) && 
                     s.type == task.type && 
-                    (!task.rec || s.rec == task.rec); 
+                    (!task.rec || s.rec == task.rec) &&
+                    (!task.res || s.res == task.res); 
         });
         
         if (index >= 0)
         {
             //update
+            var id = room.memory.ltasks[index].id;
             var accepted = room.memory.ltasks[index].acc;
             room.memory.ltasks[index] = task;
+            room.memory.ltasks[index].id = id;
             room.memory.ltasks[index].acc = accepted;
         } else {
+            //find unique id
+            var id = "";
+            do {
+                id = baseCreep.getRandomString(5);
+            } while (0 <= _.findIndex(room.memory.ltasks, (s) => s.id == id));
+            
             //insert
+            task.id = id;
             room.memory.ltasks.push(task);
         }
     }, 
@@ -210,6 +224,7 @@ module.exports = {
         }
         
         var task = {
+            id: "",
             prio: prio,
             type: type,
             src: source,
@@ -253,7 +268,7 @@ module.exports = {
     
     dropTask: function(room, task, capacity, drawnCapacity=0)
     {
-        var index = _.findIndex(room.memory.ltasks, (s) => { return s.src == task.src && s.type == task.type; });
+        var index = _.findIndex(room.memory.ltasks, (s) => { return s.id == task.id; });
         
         if (index >= 0)
         {
@@ -272,9 +287,7 @@ module.exports = {
     
     deleteTask: function(room, task)
     {
-        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { 
-            return !(s.src == task.src && s.type == task.type && s.rec == task.rec); 
-        });
+        _.remove(room.memory.ltasks, (s) => s.id == task.id);
     }
     
     

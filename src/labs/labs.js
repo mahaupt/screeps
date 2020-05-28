@@ -26,6 +26,7 @@ module.exports = {
         //assign production to labs
         if (Game.time % 20 != 5) return;
         this.Production.run(room);
+        this.Boost.run(room);
         this.memCleanup(room);
     },
     

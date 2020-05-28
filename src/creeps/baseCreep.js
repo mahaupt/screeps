@@ -266,6 +266,21 @@ module.exports = {
 		return size;
 	}, 
 	
+	//get equivalent body size considering boosts
+	getCreepBodyStrength: function(creep) {
+		var bodySize = 0;
+		for (var i in creep.body) 
+		{
+			var add = 1;
+			if (creep.body[i].boost) {
+				var effect = BOOSTS[creep.body[i].type][creep.body[i].boost];
+				add *= effect[Object.keys(effect)[0]];
+			}
+			bodySize += add;
+		}
+		return bodySize;
+	}, 
+	
 	getSpawnLink: function(room) {
         var spawn = room.find(FIND_STRUCTURES, {
 	        filter: (structure) => {
