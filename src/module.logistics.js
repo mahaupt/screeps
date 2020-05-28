@@ -59,7 +59,7 @@ module.exports = {
         }
     }, 
     
-    //generates hauling tasks for emtying base links
+    //deprecated
     genLinkTask: function(room)
     {
         //find base links
@@ -83,7 +83,7 @@ module.exports = {
         }
     }, 
     
-    //
+    //deprecated
     genContainerTasks: function(room)
     {
         //find mining containers without links
@@ -166,6 +166,7 @@ module.exports = {
             task.src = source.id;
             task.vol = energyForTransport;
             task.acc = 0;
+            task.rec = null;
             task.res = RESOURCE_ENERGY;
             
             this.insertOrUpdate(room, task, true);
@@ -198,7 +199,7 @@ module.exports = {
         }
     }, 
     
-    addTransportTask: function(room, source, receiver, amount, resource, prio=4, type='t')
+    addTransportTask: function(room, source, receiver, amount, resource, prio=5, type='t')
     {
         if (source && source.id) {
             source = source.id;

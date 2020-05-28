@@ -47,7 +47,7 @@ module.exports = {
 			        {
 				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 			        }
-			        creep.say("RIP");
+			        creep.say("☠");
 			        return;
 		        } else {
 					var ret = spawns[0].renewCreep(creep);
@@ -59,6 +59,7 @@ module.exports = {
 						//renew successful
 						creep.memory.renewSelf = false;
 					}
+					creep.say("❤");
 		        }
 		    }
         }

@@ -1,13 +1,68 @@
 // {res_a: , res_b: , prod: , amount: , started: false, lab_a: , lab_b: , lab_prod: }
 
 module.exports = {
-    startProduction: function(room, res, amount)
+    run: function(room) 
     {
-        if (this.resourceAvailable(room, res, amount)) {
+        //assign labs to production
+        if (room.memory.labs.list && room.memory.labs.list.length > 0)
+        {
+            //check if already started
+            var prod = room.memory.labs.list[0];
+            if (prod.amount <= 0) { room.memory.labs.list.shift(); return; }
+            if (prod.started) { return; }
+            
+            var free_labs = this.getFreeLabTrio(room);
+            if (free_labs) {
+                prod.started = true;
+                prod.lab_prod = free_labs[0].id;
+                prod.lab_a = free_labs[1].id;
+                prod.lab_b = free_labs[2].id;
+                
+                // Product
+                Labs.Lab.startWork(
+                    free_labs[0], 
+                    room.memory.labs.labs[free_labs[0].id], 
+                    prod.prod, 
+                    prod.amount, 
+                    true,
+                    free_labs[1].id, 
+                    free_labs[2].id, 
+                    prod.boost_creeps
+                );
+                    
+                // Resource A
+                Labs.Lab.startWork(
+                    free_labs[1], 
+                    room.memory.labs.labs[free_labs[1].id], 
+                    prod.res_a, 
+                    prod.amount, 
+                    false
+                );
+                
+                // Resource B
+                Labs.Lab.startWork(
+                    free_labs[2], 
+                    room.memory.labs.labs[free_labs[2].id], 
+                    prod.res_b, 
+                    prod.amount, 
+                    false
+                );
+            }
+            
+        }
+    }, 
+    
+    startProduction: function(room, res, amount, boost_creeps=false)
+    {
+        if (Labs.resourceAvailable(room, res, amount)) {
+            if (boost_creeps) {
+                Labs.Boost.startBoost(room, res, amount);
+            }
+            //else, do nothing - finished
             return;
         }
         if (this.isBaseMineral(res)) {
-            //moduleTerminal.addBuyList(room, res, amount);
+            Terminal.addBuyList(room, res, amount);
             console.log("Buying " + res);
             return;
         }
@@ -18,11 +73,11 @@ module.exports = {
         this.startProduction(room, base.b, amount);
         
         //insert into production queue
-        this.insertProductionQueue(room, base.a, base.b, res, amount);
+        this.insertProductionQueue(room, base.a, base.b, res, amount, boost_creeps);
         console.log("Producing " + res);
     }, 
     
-    insertProductionQueue: function(room, res_a, res_b, res_prod, amount)
+    insertProductionQueue: function(room, res_a, res_b, res_prod, amount, boost_creeps)
     {
         if (!room.memory.labs.list) {
             room.memory.labs.list = [];
@@ -36,30 +91,11 @@ module.exports = {
             started: false,
             lab_a: null,
             lab_b: null,
-            lab_prod: null
+            lab_prod: null, 
+            boost_creeps: boost_creeps
         };
         
         room.memory.labs.list.push(task);
-    }, 
-    
-    resourceAvailable: function(room, res, amount)
-    {
-        var source = room.terminal || room.storage;
-        if (!source) return false;
-        
-        var avbl_amount = source.store[res];
-        if (avbl_amount >= amount) {
-            return true;
-        } else {
-            return false;
-        }
-        
-        return false;
-    },
-    
-    buyResource: function(res, amount)
-    {
-        console.log("Buying " + amount + " " + res);
     }, 
     
     
@@ -90,5 +126,40 @@ module.exports = {
             }
         }
         console.log("nothing found for " + res);
-    }
+    }, 
+    
+    
+    getFreeLabTrio: function(room)
+    {
+        var prod_lab = room.find(FIND_STRUCTURES, 
+            {filter: (s) => { 
+                return s.structureType == STRUCTURE_LAB &&
+                    s.mineralType == undefined &&
+                    room.memory.labs.labs[s.id].state == Labs.Lab.IDLE && 
+                    s.pos.findInRange(FIND_STRUCTURES, 2, 
+                        {filter: (s2) => s2.structureType == STRUCTURE_LAB && 
+                            s2.mineralType == undefined && 
+                            room.memory.labs.labs[s2.id].state == Labs.Lab.IDLE}
+                    ).length >= 3;
+            }}
+        );
+        if (prod_lab.length > 0) 
+        {
+            //get resource labs in range
+            var res_labs = prod_lab[0].pos.findInRange(
+                FIND_STRUCTURES, 
+                2, 
+                {filter: (s2) => s2.structureType == STRUCTURE_LAB && 
+                s2.id != prod_lab[0].id && 
+                s2.mineralType == undefined && 
+                room.memory.labs.labs[s2.id].state == Labs.Lab.IDLE}
+            );
+            
+            if (res_labs.length >= 2) 
+            {
+                return [prod_lab[0], res_labs[0], res_labs[1]];
+            }
+        }
+        return false;
+    }, 
 };

@@ -51,6 +51,12 @@ module.exports = {
             {
                 mem.state = this.REACTION;
                 mem.resource_request = 0;
+                
+                //no reaction, just boosting
+                if (!mem.is_producing && mem.boost_creep) 
+                {
+                    mem.state = this.BOOST;
+                }
             }
         }
         if (mem.state == this.REACTION)
@@ -68,8 +74,7 @@ module.exports = {
                 {
                     //update mem state
                     mem.amount -= LAB_REACTION_AMOUNT;
-                    lab.room.memory.labs.labs[lab_a.id].amount -= LAB_REACTION_AMOUNT;
-                    lab.room.memory.labs.labs[lab_b.id].amount -= LAB_REACTION_AMOUNT;
+                    this.syncLabProgress(lab, mem);
                     
                     //reaction finished
                     if (mem.amount <= 0) 
@@ -77,13 +82,43 @@ module.exports = {
                         mem.state = this.EMPTYING;
                         lab.room.memory.labs.labs[lab_a.id].state = this.EMPTYING;
                         lab.room.memory.labs.labs[lab_b.id].state = this.EMPTYING;
+                        
+                        //enable boosting
+                        if (mem.boost_creep) {
+                            mem.state = this.BOOST;
+                        }
                     }
                 }
             }
         }
         if (mem.state == this.BOOST)
         {
-            //todo: send creep ping and wait for boost to finish
+            let amount = lab.store[lab.mineralType] || 0;
+            
+            //send creep ping and wait for boost to finish
+            if (mem.resource_request + this.tx_timeout < Game.time) {
+                mem.resource_request = Game.time;
+                var creeps = Labs.Boost.getCreepDemandList(lab.room, mem.mineralType, amount);
+                
+                //no creeps for boost - abort
+                if (creeps.length == 0) {
+                    mem.state = this.EMPTYING;
+                }
+                
+                //call creeps for boost
+                for (var id of creeps) {
+                    var c = Game.getObjectById(id);
+                    if (!c) continue;
+                    c.memory.boostSelf = true;
+                    c.memory.boostLab = lab.id;
+                }
+            }
+            
+            //lab empty - reset
+            if (amount == 0) 
+            {
+                mem.state = this.EMPTYING;
+            }
         }
         if (mem.state == this.EMPTYING)
         {
@@ -125,6 +160,7 @@ module.exports = {
         mem.amount = 0;
         mem.lab_a = null;
         mem.lab_b = null;
+        mem.boost_creep = false;
         
         //still full check?
         if (lab.store[lab.mineralType] > 0) {
@@ -133,7 +169,8 @@ module.exports = {
     }, 
     
     
-    startWork: function(lab, mem, resource, amount, is_producing, lab_a = null, lab_b = null)
+    startWork: function(lab, mem, resource, amount, is_producing, 
+        lab_a = null, lab_b = null, boost_creep = false)
     {
         mem.state = this.FILLING;
         mem.ready = false;
@@ -143,9 +180,24 @@ module.exports = {
         mem.lab_b = lab_b;
         mem.is_producing = is_producing;
         mem.resource_request = 0;
+        mem.boost_creep = boost_creep;
         
         if (mem.is_producing) {
             mem.state = this.REACTION;
+        }
+    }, 
+    
+    //writes lab progress to production list memory
+    syncLabProgress: function(lab, mem)
+    {
+        //sync to other labs
+        lab.room.memory.labs.labs[mem.lab_a].amount -= LAB_REACTION_AMOUNT;
+        lab.room.memory.labs.labs[mem.lab_b].amount -= LAB_REACTION_AMOUNT;
+        
+        //sync to production list
+        var index = _.findIndex(lab.room.memory.labs.list, (s) => s.started == true && s.lab_prod == lab.id);
+        if (index >= 0) {
+            lab.room.memory.labs.list[index].amount = mem.amount;
         }
     }
 };

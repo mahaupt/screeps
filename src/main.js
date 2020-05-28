@@ -3,22 +3,23 @@ global.moduleLogistics = require('module.logistics');
 global.moduleSpawn = require('module.spawn');
 global.Ops = require('ops_ops');
 global.Labs = require('labs_labs');
+global.Terminal = require('module.terminal');
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
 var roleBuilder = require('creeps_role.builder');
-var roleRenewSelf = require('creeps_role.renewSelf');
 var roleHauler = require('creeps_role.hauler');
 var roleScout = require('creeps_role.scout');
 var rolePioneer = require('creeps_role.pioneer');
 var roleClaimer = require('creeps_role.claimer');
 var roleSoldier = require('creeps_role.soldier');
 var roleTank = require('creeps_role.tank');
+var roleRenewSelf = require('creeps_role.renewSelf');
+var roleBoostSelf = require('creeps_role.boostSelf');
 
 var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
-var moduleTerminal = require('module.terminal');
 
 /*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -38,7 +39,7 @@ profiler.registerObject(moduleStats, 'moduleStats');
 profiler.registerObject(moduleAutobuilder, 'moduleAutobuilder');
 profiler.registerObject(moduleDefense, 'moduleDefense');*/
 
-console.log("reset detected");
+if (!MODE_SIMULATION) console.log("reset detected");
 
 //profiler.enable();
 module.exports.loop = function () {
@@ -54,8 +55,8 @@ module.exports.loop = function () {
             if (Game.time % 20 == 1)
                 moduleAutobuilder.run(spawn.room);
             if (spawn.room.terminal) {
-                if (Game.time % 100 == 2)
-                    moduleTerminal.run(spawn.room);
+                if (Game.time % 20 == 4)
+                    Terminal.run(spawn.room);
             }
             
             Labs.run(spawn.room);
@@ -73,6 +74,8 @@ module.exports.loop = function () {
             //try {
                 if (creep.memory.renewSelf) {
         	        roleRenewSelf.run(creep);
+                } else if (creep.memory.boostSelf) {
+                    roleBoostSelf.run(creep);
                 } else if(creep.memory.role == 'miner') {
                     roleMiner.run(creep);
                 } else if(creep.memory.role == 'upgrader') {
