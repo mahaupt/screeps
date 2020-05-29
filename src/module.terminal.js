@@ -4,8 +4,8 @@ module.exports = {
         var res_types = baseCreep.getStoredResourceTypes(room.terminal.store);
         
         //request Energy
-        if (room.terminal.store[RESOURCE_ENERGY] < 1000) {
-            let amount = 1000 - room.terminal.store[RESOURCE_ENERGY];
+        if (room.terminal.store[RESOURCE_ENERGY] < 3000) {
+            let amount = 3000 - room.terminal.store[RESOURCE_ENERGY];
             moduleLogistics.addTransportTask(room, room.storage, room.terminal, amount, RESOURCE_ENERGY);
             return;
         }
@@ -17,7 +17,7 @@ module.exports = {
         for (var res of res_types) 
         {
             if (room.terminal.store[res] < 50000 || res == RESOURCE_ENERGY) continue;
-            if (this.sellResource(room, res, 1000) > 0) return;
+            if (this.sellResource(room, res, 3000) > 0) return;
         }
         
         //buy resources
@@ -90,7 +90,7 @@ module.exports = {
         
         if (orders.length > 0)
         {
-            amount = Math.min(orders[0].remainingAmount, amount);
+            amount = Math.min(orders[0].remainingAmount, amount, 3000);
             var ret = Game.market.deal(orders[0].id, amount, room.name);
             if (ret == OK) {
                 console.log(room.name + ": bought " + amount + " " + res);

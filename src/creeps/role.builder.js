@@ -1,6 +1,8 @@
 module.exports = {
     name: 'builder', 
-    run: function(creep) {
+    run: function(creep) 
+    {
+        
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.harvesting = true;
             delete creep.memory.source;

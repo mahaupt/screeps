@@ -212,7 +212,7 @@ module.exports = {
 				target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 					filter: (structure) => {
 						return (structure.structureType == STRUCTURE_TOWER && 
-							structure.store.getFreeCapacity(resource) > 10);
+							structure.store.getFreeCapacity(resource) > 50);
 					}
 				});
 			}

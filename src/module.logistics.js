@@ -181,7 +181,7 @@ module.exports = {
     
     //insert or update task
     //if ignoreSource=true, only compares task type
-    insertOrUpdate: function(room, task, ignoreSource=false)
+    insertOrUpdate: function(room, task, ignoreSource=false, force_new=false)
     {
         var index = _.findIndex(
             room.memory.ltasks, 
@@ -192,7 +192,7 @@ module.exports = {
                     (!task.res || s.res == task.res); 
         });
         
-        if (index >= 0)
+        if (index >= 0 && !force_new)
         {
             //update
             var id = room.memory.ltasks[index].id;
@@ -213,7 +213,7 @@ module.exports = {
         }
     }, 
     
-    addTransportTask: function(room, source, receiver, amount, resource, prio=5, type='t')
+    addTransportTask: function(room, source, receiver, amount, resource, prio=5, type='t', force_new = false)
     {
         if (source && source.id) {
             source = source.id;
@@ -233,7 +233,11 @@ module.exports = {
             rec: receiver,
             res: resource
         };
-        moduleLogistics.insertOrUpdate(room, task);
+        moduleLogistics.insertOrUpdate(room, task, false, force_new);
+        
+        /*if (task.type == "l") {
+            console.log(room.name + "/" + Game.time + ": l task inserted");
+        }*/
     }, 
     
     removeTaskGroup: function(room, taskgroup)
@@ -270,6 +274,8 @@ module.exports = {
     {
         var index = _.findIndex(room.memory.ltasks, (s) => { return s.id == task.id; });
         
+        
+        
         if (index >= 0)
         {
             room.memory.ltasks[index].acc -= capacity;
@@ -281,6 +287,9 @@ module.exports = {
             {
                 //no more to transport - delete task
                 room.memory.ltasks.splice(index, 1);
+                /*if (task.type == "l") {
+                    console.log(room.name + "/" + Game.time + ": l task finished");
+                }*/
             }
         }
     }, 
@@ -288,6 +297,9 @@ module.exports = {
     deleteTask: function(room, task)
     {
         _.remove(room.memory.ltasks, (s) => s.id == task.id);
+        /*if (task.type == "l") {
+            console.log(room.name + "/" + Game.time + ": l task deleted");
+        }*/
     }
     
     

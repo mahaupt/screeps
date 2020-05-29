@@ -311,14 +311,11 @@ module.exports = {
                 if (link.transferEnergy(spawnlink) == OK) 
 				{
 					var amt = Math.round(link.store[RESOURCE_ENERGY] * (1-LINK_LOSS_RATIO));
-					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
+					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l", true);
 					return true;
 				}
             } else {
                 //console.log("Spawnlink full");
-				// TEMP FIX: resend transport task
-				let amt = spawnlink.store.getUsedCapacity(RESOURCE_ENERGY);
-				moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
             }
         }
         return false;

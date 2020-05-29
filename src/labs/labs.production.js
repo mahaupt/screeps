@@ -26,8 +26,7 @@ module.exports = {
                     prod.amount, 
                     true,
                     free_labs[1].id, 
-                    free_labs[2].id, 
-                    prod.boost_creeps
+                    free_labs[2].id
                 );
                     
                 // Resource A
@@ -52,12 +51,9 @@ module.exports = {
         }
     }, 
     
-    startProduction: function(room, res, amount, boost_creeps=false)
+    startProduction: function(room, res, amount)
     {
         if (Labs.resourceAvailable(room, res, amount)) {
-            if (boost_creeps) {
-                Labs.Boost.startBoost(room, res, amount);
-            }
             //else, do nothing - finished
             return;
         }
@@ -73,11 +69,11 @@ module.exports = {
         this.startProduction(room, base.b, amount);
         
         //insert into production queue
-        this.insertProductionQueue(room, base.a, base.b, res, amount, boost_creeps);
+        this.insertProductionQueue(room, base.a, base.b, res, amount);
         console.log(room.name + ": Producing " + res);
     }, 
     
-    insertProductionQueue: function(room, res_a, res_b, res_prod, amount, boost_creeps)
+    insertProductionQueue: function(room, res_a, res_b, res_prod, amount)
     {
         if (!room.memory.labs.production) {
             room.memory.labs.production = [];
@@ -91,8 +87,7 @@ module.exports = {
             started: false,
             lab_a: null,
             lab_b: null,
-            lab_prod: null, 
-            boost_creeps: boost_creeps
+            lab_prod: null
         };
         
         room.memory.labs.production.push(task);

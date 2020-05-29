@@ -9,15 +9,10 @@ module.exports = {
         
         creep.say("🦾");
         var ret = lab.boostCreep(creep);
-        
+        var res = lab.mineralType;
         if (ret == ERR_NOT_IN_RANGE) {
             creep.moveTo(lab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
-        } else if (ret == OK) {
-            let rem_amt = Labs.Boost.removeDemand(creep, res, LAB_BOOST_MINERAL);
-            if (rem_amt <= 0) {
-                this.reset(creep);
-            }
-        } else if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_FULL) {
+        } else if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_NOT_FOUND) {
             this.reset(creep);
         }
         

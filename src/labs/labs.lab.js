@@ -5,7 +5,7 @@ module.exports = {
     BOOST: "boost",
     EMPTYING: "emptying",
     
-    tx_timeout: 150,
+    tx_timeout: 100,
     
     run: function(lab, mem)
     {
@@ -82,11 +82,6 @@ module.exports = {
                         mem.state = this.EMPTYING;
                         lab.room.memory.labs.labs[lab_a.id].state = this.EMPTYING;
                         lab.room.memory.labs.labs[lab_b.id].state = this.EMPTYING;
-                        
-                        //enable boosting
-                        if (mem.boost_creep) {
-                            mem.state = this.BOOST;
-                        }
                     }
                 }
             }

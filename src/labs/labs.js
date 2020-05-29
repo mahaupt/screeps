@@ -28,6 +28,33 @@ module.exports = {
         this.Production.run(room);
         this.Boost.run(room);
         this.memCleanup(room);
+        
+        
+        //autoproduce
+        if (labs.length >= 3 && 
+            (!room.memory.labs.production || room.memory.labs.production.length == 0)) 
+        {
+            if (!this.resourceAvailable(room, "GO", 1500)) {
+                Labs.Production.startProduction(room, "GO", 3000);
+                return;
+            }
+            /*if (!this.resourceAvailable(room, "UH", 1500)) {
+                Labs.Production.startProduction(room, "UH", 3000);
+                return;
+            }
+            if (!this.resourceAvailable(room, "KO", 1500)) {
+                Labs.Production.startProduction(room, "KO", 3000);
+                return;
+            }
+            if (!this.resourceAvailable(room, "LO", 1500)) {
+                Labs.Production.startProduction(room, "LO", 3000);
+                return;
+            }
+            if (!this.resourceAvailable(room, "ZO", 1500)) {
+                Labs.Production.startProduction(room, "ZO", 3000);
+                return;
+            }*/
+        }
     },
     
     
