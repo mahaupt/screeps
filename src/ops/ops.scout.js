@@ -17,18 +17,29 @@ module.exports = {
         if (ops.mem.cooldown > Game.time) return;
         ops.mem.cooldown = Game.time + 500;
         
+        
+        //get room path and look for hostiles
+        var path = Game.map.findRoute(ops.source, ops.target);
+        for (let i in path) {
+            if (Memory.intel && Memory.intel.list && Memory.intel.list[path[i].room]) {
+                if (Memory.intel.list[path[i].room].threat == "core" || 
+                Memory.intel.list[path[i].room].threat == "player")
+                {
+                    // enemy or core blocks path
+                    ops.finished = true;
+                    console.log("Scout ops " + ops.source + " to " + ops.target + " aborted. Enemy in path.");
+                    return;
+                }
+            }
+        }
+        
+        
         //if not completed, spawn new creep
         var scouts = _.sum(Memory.creeps, (s) => s.role == "scout");
         if (scouts < 2) 
         {
             //spawn new scout
-            var spawns = Game.rooms[ops.source].find(
-                FIND_STRUCTURES, 
-                {filter: (s) => s.structureType == STRUCTURE_SPAWN}
-            );
-            if (spawns.length > 0) {
-                moduleSpawn.addSpawnList(spawns[0], "scout", {target: ops.target});
-            }
+            moduleSpawn.addSpawnList(Game.rooms[ops.source], "scout", {target: ops.target});
         } 
         else 
         {

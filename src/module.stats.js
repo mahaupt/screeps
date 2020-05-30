@@ -5,6 +5,11 @@ module.exports =  {
     
     
     getTotalEnergyLevel: function(room) {
+        if (!room.memory.stats) {
+            room.memory.stats = {};
+        }
+        
+        
         var capacity = room.energyCapacityAvailable;
         var energy = room.energyAvailable;
         
@@ -20,8 +25,26 @@ module.exports =  {
             energy += s.store[RESOURCE_ENERGY];
         }
         
-        room.memory.total_energy = energy;
-        room.memory.total_capacity = capacity;
+        room.memory.stats.energy = energy;
+        room.memory.stats.capacity = capacity;
+        
+        //stats and time dependent collecting
+        if (Game.time % 1000 == 9) {
+            if (!room.memory.stats.energy_1k) {
+                room.memory.stats.energy_1k = energy;
+            }
+            
+            room.memory.stats.energy_1k_dx = room.memory.stats.energy - room.memory.stats.energy_1k;
+            room.memory.stats.energy_1k = energy;
+        }
+        if (Game.time % 10000 == 9) {
+            if (!room.memory.stats.energy_10k) {
+                room.memory.stats.energy_10k = energy;
+            }
+            
+            room.memory.stats.energy_10k_dx = room.memory.stats.energy - room.memory.stats.energy_10k;
+            room.memory.stats.energy_10k = energy;
+        }
     }, 
     
     

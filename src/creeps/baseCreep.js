@@ -324,8 +324,8 @@ module.exports = {
     }, 
 	
 	skipDueEnergyLevels: function(creep) {
-        var energy = creep.room.memory.total_energy;
-        var cap = creep.room.memory.total_capacity;
+        var energy = creep.room.memory.stats.energy;
+        var cap = creep.room.memory.stats.capacity;
         var ratio = energy / cap;
         
         if (cap > 800 && ratio <= 0.1)

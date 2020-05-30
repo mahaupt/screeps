@@ -9,6 +9,8 @@ const opsClaim = require('ops_ops.claim');
 const opsDefend = require('ops_ops.defend');
 const opsDrain = require('ops_ops.drain');
 const opsScout = require('ops_ops.scout');
+const opsScoutVicinity  = require('ops_ops.scout_vicinity');
+const opsRoomLifetime = require('ops_ops.room_lifetime');
 
 module.exports = {
     run: function() {
@@ -31,6 +33,10 @@ module.exports = {
                 opsDrain.run(Memory.ops[i]);
             } else if (Memory.ops[i].type == 'scout') {
                 opsScout.run(Memory.ops[i]);
+            } else if (Memory.ops[i].type == 'scout_vicinity') {
+                opsScoutVicinity.run(Memory.ops[i]);
+            } else if (Memory.ops[i].type == 'room_lifetime') {
+                opsRoomLifetime.run(Memory.ops[i]);
             }
         }
     }, 

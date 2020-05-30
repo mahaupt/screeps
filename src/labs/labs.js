@@ -31,6 +31,7 @@ module.exports = {
         
         
         //autoproduce
+        if (Game.market.credits < 10000) return;
         if (labs.length >= 3 && 
             (!room.memory.labs.production || room.memory.labs.production.length == 0)) 
         {
