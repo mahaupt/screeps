@@ -6,6 +6,7 @@ module.exports = {
     EMPTYING: "emptying",
     
     tx_timeout: 100,
+    boost_timeout: 500,
     
     run: function(lab, mem)
     {
@@ -76,12 +77,28 @@ module.exports = {
                     mem.amount -= LAB_REACTION_AMOUNT;
                     this.syncLabProgress(lab, mem);
                     
+                    //create hauling task
+                    let stored_amt = lab.store[lab.mineralType] || 0;
+                    if (stored_amt > 200 && 
+                        mem.resource_request + this.tx_timeout < Game.time) 
+                    {
+                        mem.resource_request = Game.time;
+                        moduleLogistics.addTransportTask(
+                            lab.room, 
+                            lab, 
+                            lab.room.terminal, 
+                            stored_amt, 
+                            lab.mineralType
+                        );
+                    }
+                    
                     //reaction finished
                     if (mem.amount <= 0) 
                     {
                         mem.state = this.EMPTYING;
                         lab.room.memory.labs.labs[lab_a.id].state = this.EMPTYING;
                         lab.room.memory.labs.labs[lab_b.id].state = this.EMPTYING;
+                        mem.resource_request = 0;
                     }
                 }
             }
@@ -90,24 +107,15 @@ module.exports = {
         {
             let amount = lab.store[lab.mineralType] || 0;
             
-            //send creep ping and wait for boost to finish
-            if (mem.resource_request + this.tx_timeout < Game.time) {
+            //start timer
+            if (mem.resource_request == 0) {
                 mem.resource_request = Game.time;
-                var creeps = Labs.Boost.getCreepDemandList(lab.room, mem.mineralType, amount);
-                
-                //no creeps for boost - abort
-                if (creeps.length == 0) {
-                    mem.state = this.EMPTYING;
-                }
-                
-                //call creeps for boost
-                for (var id of creeps) {
-                    var c = Game.getObjectById(id);
-                    if (!c) continue;
-                    c.memory.boostSelf = true;
-                    c.memory.boostLab = lab.id;
-                }
+            } else if (mem.resource_request + this.boost_timeout < Game.time) 
+            {
+                //timeout - empty lab
+                mem.state = this.EMPTYING;
             }
+            
             
             //lab empty - reset
             if (amount == 0) 

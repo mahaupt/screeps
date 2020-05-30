@@ -4,8 +4,7 @@ module.exports = {
 		//go back to spawn
         var targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                    structure.structureType == STRUCTURE_SPAWN) &&
+                return (structure.structureType == STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             }
         });
@@ -25,13 +24,25 @@ module.exports = {
 		} 
 		else
         {
-			//spawn in room
 	        //recycle self to build better creep
 	        if (!creep.memory.killSelf)
 	        {
 		        this.killSelfDecision(creep);
 	        }
+			
 	        
+			//unboost self
+			var index = _.findIndex(creep.body, (s) => s.boost);
+			if (index >= 0) {
+				var nextlab = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_LAB && s.cooldown == 0 });
+				if (nextlab) {
+					if (nextlab.unboostCreep(creep) == ERR_NOT_IN_RANGE) 
+					{
+						creep.moveTo(nextlab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+						return;
+					}
+				}
+			}
 			//carry energy to base
 	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -84,7 +95,7 @@ module.exports = {
 		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
         var possibleBodyParts = baseCreep.buildBody(creep.room, creep.memory.role, bodySize).length;
 
-		if (possibleBodyParts > baseCreep.getCreepBodyStrength(creep))
+		if (possibleBodyParts > creep.body.length > 0)
         {
 	        creep.memory.killSelf = true;
 			

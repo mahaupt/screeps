@@ -316,6 +316,8 @@ module.exports = {
 				}
             } else {
                 //console.log("Spawnlink full");
+				var amt = spawnlink.store[RESOURCE_ENERGY];
+				moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
             }
         }
         return false;
@@ -402,9 +404,35 @@ module.exports = {
                 creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
             } else if (xx == ERR_FULL) {
 				creep.memory.embark = true;
+				return true;
 			}
         }
+		return false;
     }, 
+	
+	//find labs to boost creep
+	boostCreep: function(creep, res_array)
+	{
+		var found_labs = false;
+		
+		for(var res of res_array) 
+		{
+			var amt = Labs.Boost.calcDemand(creep, res);
+			var lab = Labs.Boost.findBoostLab(creep.room, res, amt);
+			if (lab) {
+				found_labs = true;
+				if (!creep.memory.boostLabs) {
+					creep.memory.boostLabs = [];
+				}
+				creep.memory.boostLabs.push(lab.id);
+			}
+		}
+		
+		if (found_labs) {
+			creep.memory.boostSelf = true;
+		}
+		return found_labs;
+	}, 
 	
 	flee: function(creep)
 	{

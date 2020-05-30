@@ -15,6 +15,7 @@ passive = true/false
 
 module.exports = {
     name: 'soldier', 
+    boost_res: ['GO', 'KO', 'ZO'], 
     run: function(creep) {
         baseCreep.init(creep);
         
@@ -54,7 +55,10 @@ module.exports = {
         
         //if target room - prepare for embarkation
         if (creep.memory.troom && !creep.memory.embark) {
-            baseCreep.prepareCreep(creep);
+            if (baseCreep.prepareCreep(creep)) {
+                //prepared - search for boost
+                baseCreep.boostCreep(creep, this.boost_res);
+            }
             return;
         } else if (!creep.memory.troom) {
             delete creep.memory.embark;
@@ -98,7 +102,10 @@ module.exports = {
         //if target room - prepare for embarkation
         if (!creep.memory.embark) {
             if (Game.time % 5 == 0) return; //slow down
-            baseCreep.prepareCreep(creep);
+            if (baseCreep.prepareCreep(creep)) {
+                //prepared - search for boost
+                baseCreep.boostCreep(creep, this.boost_res);
+            }
             return;
         }
         

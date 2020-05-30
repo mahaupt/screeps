@@ -1,4 +1,6 @@
 module.exports = {
+    name: "tank", 
+    boost_res: ['GO', 'LO', 'ZO'],
     run: function(creep) {
         name: 'tank', 
         baseCreep.init(creep);
@@ -26,7 +28,9 @@ module.exports = {
         
         //if target room - prepare for embarkation
         if (!creep.memory.embark) {
-            baseCreep.prepareCreep(creep);
+            if (baseCreep.prepareCreep(creep)) {
+                baseCreep.boostCreep(creep, this.boost_res);
+            }
             return;
         }
         

@@ -17,10 +17,10 @@ module.exports = {
         
         var lab = this.findFreeLab(room);
         
-        if (lab && false) 
+        if (lab) 
         {
             //assign lab for boosting
-            Labs.startWork(lab, room.memory.labs.labs[lab.id], res, amount, 
+            Labs.Lab.startWork(lab, room.memory.labs.labs[lab.id], res, amount, 
                 false, null, null, true);
         } else {
             //no free labs, add to list and check later
@@ -45,7 +45,7 @@ module.exports = {
             if (lab)
             {
                 var boost = room.memory.labs.boost[i];
-                Labs.startWork(lab, room.memory.labs.labs[lab.id], boost.res, boost.amt, 
+                Labs.Lab.startWork(lab, room.memory.labs.labs[lab.id], boost.res, boost.amt, 
                     false, null, null, true);
                 room.memory.labs.boost.splice(i, 1);
                 return;
@@ -69,6 +69,19 @@ module.exports = {
         return false;
         
         //maybe find remote lab to not block production
+    }, 
+    
+    findBoostLab: function(room, res, amount) {
+        var labs = room.find(FIND_MY_STRUCTURES, {filter: (s) => { 
+            return s.structureType == STRUCTURE_LAB &&
+                s.mineralType == res && 
+                room.memory.labs.labs[s.id].state == Labs.Lab.BOOST; }}
+        );
+        
+        if (labs.length > 0) {
+            return labs[0];
+        }
+        return false;
     }, 
     
     //calculate res demand to fully boost a creep
