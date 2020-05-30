@@ -24,6 +24,7 @@ module.exports =  {
                 //idle around controller
                 creep.say("😴");
                 creep.moveTo(creep.room.controller);
+                delete creep.memory.noRenew;
             }
             return;
         }
@@ -31,6 +32,8 @@ module.exports =  {
         
         //has target - go scout
         if (creep.room.name != creep.memory.target) {
+            creep.memory.noRenew = true;
+            
             //move to room
             baseCreep.moveToRoom(creep, creep.memory.target);
             

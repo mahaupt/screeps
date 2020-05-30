@@ -174,7 +174,6 @@ module.exports = {
 		if (role == 'soldier')
 		{
 			bodySize = Math.min(bodySize, 16);
-			bodySize = 1;
 			nwork=0;
 			ncarry=0;
 			ntough=1*bodySize; //10
@@ -187,9 +186,9 @@ module.exports = {
 			bodySize = Math.min(bodySize, 16);
 			nwork=0;
 			ncarry=0;
-			ntough=1;//29; //10
-			nmove=1;//17; //50
-			nheal=1;//4; // 250
+			ntough=bodySize*2;//29; //10
+			nmove=bodySize;//17; //50
+			nheal=Math.round(bodySize/2);//4; // 250
 		}
 		//upgrader && builder == standard
 		
