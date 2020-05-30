@@ -50,17 +50,29 @@ module.exports = {
                 
             } else {
                 //retreat
-                creep.move(RIGHT);
-                creep.say("🏃");
+                var exit = Game.map.findExit(creep.room.name, creep.memory.room_before_troom);
+                if (exit >= 0) {
+                    var closest_exit = creep.pos.findClosestByPath(exit);
+                    creep.moveTo(closest_exit);
+                    creep.say("🏃");
+                } else {
+                    creep.say("panic");
+                }
             }
         } else {
+            
+            //save room before target room
+            creep.memory.room_before_troom = creep.room.name;
+            
             if (creep.hits == creep.hitsMax) {
                 baseCreep.moveToRoom(creep, creep.memory.troom);
             } else {
                 //wait for heal
                 creep.say("🏃");
-                if (!creep.memory.one_more_step && creep.fatigue == 0) {
-                    if (creep.move(RIGHT) == OK) {
+                if (!creep.memory.one_more_step && creep.fatigue == 0) 
+                {
+                    var direction = creep.pos.getDirectionTo(25, 25);
+                    if (creep.move(direction) == OK) {
                         creep.memory.one_more_step = true;
                     }
                 }

@@ -65,7 +65,7 @@ module.exports = {
         }
         
         //follow leader
-        creep.moveTo(leader);
+        creep.moveTo(leader, {ignoreCreeps: true});
     }, 
     
     leader: function(creep)
