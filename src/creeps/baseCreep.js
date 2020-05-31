@@ -438,16 +438,20 @@ module.exports = {
 		
 		
 		if (ret == ERR_NO_PATH) {
-			/*creep.moveTo(creep.room.getPositionAt(25, 25), {range: 5});
+			creep.moveTo(creep.room.getPositionAt(25, 25), {range: 5});
 			
 			//mark room as blocked if walls exist
 			var r = creep.room.name;
-			var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_WALL});
+			var walls = creep.room.find(
+				FIND_STRUCTURES, 
+				{filter: (s) => s.structureType == STRUCTURE_WALL}
+			);
 			
 			if (walls.length > 0 && Memory.intel.list[r]) {
 				Memory.intel.list[r].blocked = true;
+				Game.notify(creep.name + ": couldnt find way through room " + creep.room.name + " and marked as blocked");
 				delete creep.memory.roomPath;
-			}*/
+			}
 		}
     }, 
 	
