@@ -2,7 +2,7 @@
 /*
 Memory Layout
 .role = "hauler"
-.harvesting = true/false
+.pickup = true/false
 .renewSelf = true/false
 .task = HAULING TASK
 .target = target.id
@@ -12,42 +12,34 @@ module.exports = {
 	name: 'hauler', 
 	run: function(creep) {
 		baseCreep.init(creep);
+		
+		if (!creep.memory.tasks) {
+			creep.memory.tasks = [];
+		}
 				
-		if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0 || 
-			!creep.memory.task) {
-            creep.memory.harvesting = true;
-			delete creep.memory.target;
+		if (creep.memory.tasks.length == 0) 
+		{
+            creep.memory.pickup = true;
 			
 			//pick new task
-			creep.memory.task = moduleLogistics.getTask(creep.room, creep.store.getCapacity());
-			if (creep.memory.task && creep.memory.task.rec) {
-				creep.memory.target = creep.memory.task.rec;
-			}
+			creep.memory.tasks = Logistics.getNewTasks(creep.room, creep.store.getCapacity());
+			creep.memory.task_ptr = 0;
         }
-        if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
-            creep.memory.harvesting = false;
-			
-			//finish task
-			moduleLogistics.dropTask(
-				creep.room, 
-				creep.memory.task, 
-				creep.store.getCapacity(), 
-				creep.store.getCapacity()
-			);
-			creep.memory.task.src = null;
-			
-        }
+		
         
-		if (creep.memory.task) 
+		if (creep.memory.tasks.length > 0) 
 		{
+			var taskid = creep.memory.tasks[creep.memory.task_ptr];
+			var task = Logistics.getTask(creep.room, taskid);
+			
 			//has task - do things
-	        if (creep.memory.harvesting)
+	        if (creep.memory.pickup)
 	        {
-		        this.pickup(creep);
+		        this.pickup(creep, task);
 	        } 
 	        else 
 	        {
-				this.dropoff(creep);
+				this.dropoff(creep, task);
 		    }
 		} 
 		else 
@@ -57,12 +49,13 @@ module.exports = {
 		}
 	}, 
 	
-	pickup: function(creep) 
+	pickup: function(creep, task) 
 	{
-		var s = Game.getObjectById(creep.memory.task.src);
+		//source is available check
+		var s = Game.getObjectById(task.src);
 		if (!s) { 
-			moduleLogistics.deleteTask(creep.room, creep.memory.task);
-			delete creep.memory.task; 
+			Logistics.deleteTask(creep.room, task.id);
+			this.removeTask(creep, task.id);
 			return; 
 		}
 		
@@ -73,10 +66,10 @@ module.exports = {
 		}
 		
 		//select resource for pickup
-		var resource = creep.memory.task.res || RESOURCE_ENERGY;
+		var resource = task.res || RESOURCE_ENERGY;
 		var amount = s.amount || s.store[resource];
 		var multi_pickup = false;
-		if (creep.memory.task.type == "mc" || creep.memory.task.type == "loot") 
+		if (task.type == "mc" || task.type == "loot") 
 		{
 			//mining container, pickup all resources
 			if (s instanceof Resource) {
@@ -114,7 +107,7 @@ module.exports = {
 	}, 
 	
 	
-	dropoff: function(creep) 
+	dropoff: function(creep, task) 
 	{
 		//pick energy receiver
 		if (!creep.memory.target) {
@@ -258,6 +251,22 @@ module.exports = {
 		
 		if(target) {
 			creep.memory.target = target.id
+		}
+	}, 
+	
+	removeTask: function(creep, taskid)
+	{
+		var index = _.findIndex(creep.memory.tasks, (s) => s == taskid);
+		if (index >= 0) {
+			creep.memory.tasks.splice(index, 1);
+		}
+	}, 
+	
+	nextTask: function(creep)
+	{
+		creep.memory.task_ptr++;
+		if (creep.memory.task_ptr >= creep.memory.tasks.length) {
+			
 		}
 	}
 	
