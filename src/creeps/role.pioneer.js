@@ -4,7 +4,7 @@ role = 'builder'
 home = home room name
 
 troom = target room
-harvest = true / false
+harvesting = true / false
 
 */
 
@@ -45,14 +45,14 @@ module.exports = {
             }
         } else {
             //harvest and build spawn
-            if (!creep.memory.harvest && creep.store[RESOURCE_ENERGY] == 0) {
-                creep.memory.harvest = true;
-            } else if (creep.memory.harvest && creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
-                creep.memory.harvest = false;
+            if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
+                creep.memory.harvesting = true;
+            } else if (creep.memory.harvesting && creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+                creep.memory.harvesting = false;
             }
             
             
-            if (creep.memory.harvest)
+            if (creep.memory.harvesting)
             {
         		this.harvest(creep);
             } else {
@@ -78,7 +78,7 @@ module.exports = {
         
             //source empty
             if (source.energy == 0) {
-                creep.memory.harvest = false;
+                creep.memory.harvesting = false;
             }
         }
     }, 

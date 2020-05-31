@@ -72,7 +72,7 @@ module.exports = {
         
         //HARVEST
         if(creep.harvest(source) != OK) {
-            creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+            creep.moveTo(source, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
         }
         
         //link abvl - carry to link immediately
@@ -125,7 +125,7 @@ module.exports = {
         if (link) {
             if (link.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(link, {visualizePathStyle: {stroke: '#00ff00'}});
+                    creep.moveTo(link, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
                 }
                 return;
             } else {
@@ -140,7 +140,7 @@ module.exports = {
                 var res_types = baseCreep.getStoredResourceTypes(creep.store);
                 if (creep.transfer(container, res_types[0])== ERR_NOT_IN_RANGE)
                 {
-                    creep.moveTo(container, {visualizePathStyle: {stroke: '#00ff00'}});
+                    creep.moveTo(container, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
                 }
                 if (!link) {
                     this.addContainerTransportTask(container);
@@ -173,12 +173,12 @@ module.exports = {
         if (creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
             //pickup
             if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(container, {visualizePathStyle: {stroke: '#ff0000'}});
+                creep.moveTo(container, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
             }
         } else {
             //dropoff
             if (creep.transfer(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(link, {visualizePathStyle: {stroke: '#00ff00'}});
+                creep.moveTo(link, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
             }
         }
         

@@ -173,10 +173,10 @@ module.exports = {
 		} else 
 		if (role == 'soldier')
 		{
-			bodySize = Math.min(bodySize, 10);
+			bodySize = Math.min(bodySize, 8);
 			nwork=0;
 			ncarry=0;
-			ntough=bodySize; //10
+			ntough=3*bodySize; //10
 			nmove=2*bodySize+1; //50
 			nattack=bodySize; //80
 			nheal=1; // 250
@@ -189,6 +189,21 @@ module.exports = {
 			ntough=bodySize*2;//29; //10
 			nmove=bodySize;//17; //50
 			nheal=Math.round(bodySize/2);//4; // 250
+		} else 
+		if (role == 'harvester')
+		{
+			bodySize = Math.min(bodySize, 16);
+			nwork=Math.ceil(0.5*bodySize);
+			ncarry=bodySize;
+			nmove=Math.ceil(1.5*bodySize);
+		}
+		if (role == 'healer')
+		{
+			bodySize = Math.min(bodySize, 25);
+			nwork = 0;
+			ncarry = 0;
+			nmove= bodySize; //50
+			nheal = bodySize; //250
 		}
 		//upgrader && builder == standard
 		
@@ -343,6 +358,8 @@ module.exports = {
 		var room = Game.rooms[rname];
 		
 		if (!room) return;
+		
+		if (room.find(FIND_HOSTILE_STRUCTURES).length <= 0) return;
 		
 		var sources = room.find(FIND_SOURCES);
 		var minerals = room.find(FIND_MINERALS);

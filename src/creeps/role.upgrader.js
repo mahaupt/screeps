@@ -11,7 +11,7 @@ module.exports = {
     name: 'claimer', 
     run: function(creep) {
         //flee
-        if (creep.room.memory.attacked) {
+        if (creep.room.memory.attacked_time + 30 > Game.time) {
             var tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
             if (tower) {
                 creep.moveTo(tower, {range: 2, visualizePathStyle: {stroke: '#00ff00'}});

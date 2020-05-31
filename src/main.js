@@ -4,6 +4,7 @@ global.moduleSpawn = require('module.spawn');
 global.Ops = require('ops_ops');
 global.Labs = require('labs_labs');
 global.Terminal = require('module.terminal');
+global.Logistics = global.moduleLogistics;
 
 var roleMiner = require('creeps_role.miner');
 var roleUpgrader = require('creeps_role.upgrader');
@@ -20,6 +21,7 @@ var roleBoostSelf = require('creeps_role.boostSelf');
 var moduleStats = require('module.stats');
 var moduleAutobuilder = require('module.autobuilder');
 var moduleDefense = require('module.defense');
+var moduleEvents = require('module.events');
 
 /*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -44,24 +46,38 @@ if (!MODE_SIMULATION) console.log("reset detected");
 //profiler.enable();
 module.exports.loop = function () {
     //profiler.wrap(function() {
-        //MODULES per Room
+    
+    
+        //MODULES per ROOM
+        for (var r in Game.rooms) 
+        {
+            var room = Game.rooms[r];
+            
+            moduleEvents.run(room);
+            
+            //OWN ROOM MODULES
+            if (room.controller && room.controller.my) 
+            {
+                moduleStats.run(room);
+                
+                if (Game.time % 20 == 1)
+                    moduleAutobuilder.run(room);
+                if (room.terminal && Game.time % 20 == 4) {
+                    Terminal.run(room);
+                }
+                
+                Labs.run(room);
+                moduleDefense.run(room);
+                moduleLogistics.run(room);
+            }
+        }
+    
+        //MODULES per Spawn
         for (var sname in Game.spawns)
         {
             var spawn = Game.spawns[sname];
-            moduleStats.run(spawn.room);
-            
             if (Game.time % 10 == 0)
                 moduleSpawn.run(spawn);
-            if (Game.time % 20 == 1)
-                moduleAutobuilder.run(spawn.room);
-            if (spawn.room.terminal) {
-                if (Game.time % 20 == 4)
-                    Terminal.run(spawn.room);
-            }
-            
-            Labs.run(spawn.room);
-            moduleDefense.run(spawn.room);
-            moduleLogistics.run(spawn.room);
         }
         
         //OPS
