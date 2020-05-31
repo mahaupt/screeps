@@ -173,15 +173,15 @@ module.exports = {
 		} else 
 		if (role == 'soldier')
 		{
-			bodySize = Math.min(bodySize, 16);
+			bodySize = Math.min(bodySize, 10);
 			nwork=0;
 			ncarry=0;
-			ntough=1*bodySize; //10
-			nmove=1*bodySize+1; //50
-			nrattack=bodySize; //150
+			ntough=bodySize; //10
+			nmove=2*bodySize+1; //50
+			nattack=bodySize; //80
 			nheal=1; // 250
 		} else 
-		if (role == 'tank')
+		if (role == 'drainer')
 		{
 			bodySize = Math.min(bodySize, 16);
 			nwork=0;

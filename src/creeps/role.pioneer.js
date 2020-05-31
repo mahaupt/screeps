@@ -1,5 +1,12 @@
-// Game.spawns.Spawn1.spawnCreep([WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], "Pioneer", {memory: {role: 'pioneer', target: 'W7N3'}})
-// [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
+/*
+Memory Layout
+role = 'builder'
+home = home room name
+
+troom = target room
+harvest = true / false
+
+*/
 
 module.exports = {
     name: 'pioneer', 
@@ -8,7 +15,7 @@ module.exports = {
         baseCreep.init(creep);
         
         //wait for target
-        if (!creep.memory.target)
+        if (!creep.memory.troom)
         {
             //idle around controller
             creep.say("😴");
@@ -25,9 +32,9 @@ module.exports = {
         }
         
         //move to target room
-        if (creep.room.name != creep.memory.target)
+        if (creep.room.name != creep.memory.troom)
         {
-            baseCreep.moveToRoom(creep, creep.memory.target);
+            baseCreep.moveToRoom(creep, creep.memory.troom);
             return;
         }
         

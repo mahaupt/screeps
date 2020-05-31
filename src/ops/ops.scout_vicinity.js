@@ -43,7 +43,12 @@ module.exports = {
         ops.mem.init = true;
         ops.mem.scout_timeout = 0;
         
-        ops.mem.nearby = this.getRoomsNearby(ops.source, 3);
+        var range = 3;
+        if (ops.mem.range) {
+            range = ops.mem.range;
+        }
+        
+        ops.mem.nearby = this.getRoomsNearby(ops.source, range);
         ops.mem.nearby_id = 0;
     }, 
     

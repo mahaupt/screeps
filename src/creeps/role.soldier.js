@@ -175,12 +175,9 @@ module.exports = {
     {
         creep.say("⚔️");
         
-        var range = creep.pos.getRangeTo(target);
-        if (range > 1) {
+        var ret = creep.attack(target);
+        if (ret == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
-        }
-        if (range <= 3) {
-            creep.rangedMassAttack();
         }
     }, 
     

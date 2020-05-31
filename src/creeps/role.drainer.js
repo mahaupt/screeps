@@ -1,6 +1,6 @@
 /*
 Memory Layout
-role = 'tank'
+role = 'drainer'
 home = home room name
 
 
@@ -13,7 +13,7 @@ one_more_step = true/false
 */
 
 module.exports = {
-    name: "tank", 
+    name: "drainer", 
     boost_res: ['GO', 'LO', 'ZO'],
     run: function(creep) {
         baseCreep.init(creep);

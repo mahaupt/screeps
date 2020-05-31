@@ -1,3 +1,14 @@
+/*
+Memory Layout
+role = 'builder'
+home = home room name
+
+harvesting = true/false
+source = source id / container id
+building = id of building
+*/
+
+
 module.exports = {
     name: 'builder', 
     run: function(creep) 

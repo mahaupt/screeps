@@ -1,3 +1,12 @@
+/*
+Memory Layout
+role = 'upgrader'
+home = home room name
+
+harvesting = true/false
+source = source id / container id
+*/
+
 module.exports = {
     name: 'claimer', 
     run: function(creep) {

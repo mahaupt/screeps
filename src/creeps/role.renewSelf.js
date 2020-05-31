@@ -62,7 +62,7 @@ module.exports = {
 			        return;
 		        } else {
 					var ret = spawns[0].renewCreep(creep);
-			        if (ret == ERR_NOT_IN_RANGE)
+			        if (ret == ERR_NOT_IN_RANGE || ret == ERR_BUSY)
 			        {
 				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 			        } else if (ret == ERR_FULL)

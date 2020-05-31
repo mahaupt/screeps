@@ -1,3 +1,11 @@
+/*
+Memory Layout
+role = 'claimer'
+home = home room name
+
+troom = room name of target
+*/
+
 module.exports = {
     name: 'claimer', 
     run: function(creep)
@@ -5,7 +13,7 @@ module.exports = {
         baseCreep.init(creep);
         
         //go back home // wait for target
-        if (!creep.memory.target)
+        if (!creep.memory.troom)
         {
             if (creep.room.name != creep.memory.home) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
@@ -17,9 +25,9 @@ module.exports = {
         }
         
         //move to target room
-        if (creep.room.name != creep.memory.target)
+        if (creep.room.name != creep.memory.troom)
         {
-            baseCreep.moveToRoom(creep, creep.memory.target);
+            baseCreep.moveToRoom(creep, creep.memory.troom);
             return;
         }
         
@@ -30,8 +38,9 @@ module.exports = {
             }
         } else {
             //go back and kill self
-            delete creep.memory.target;
+            delete creep.memory.troom;
             creep.memory.killSelf = true;
+            creep.memory.renewSelf = true;
         }
         
         

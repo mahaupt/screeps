@@ -39,7 +39,7 @@ module.exports = {
         if (scouts < 2) 
         {
             //spawn new scout
-            moduleSpawn.addSpawnList(Game.rooms[ops.source], "scout", {target: ops.target});
+            moduleSpawn.addSpawnList(Game.rooms[ops.source], "scout", {troom: ops.target});
         } 
         else 
         {

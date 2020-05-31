@@ -51,7 +51,7 @@ module.exports = {
         {
             this.spawn(spawn, "upgrader");
         } else 
-        if (builderCount < sourceCount)
+        if (builderCount < sourceCount + room.memory.stats.add_creeps)
         {
             this.spawn(spawn, "builder");
         } else  
