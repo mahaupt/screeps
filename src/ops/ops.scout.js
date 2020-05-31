@@ -44,9 +44,9 @@ module.exports = {
         else 
         {
             //add to task list
-            var index = Memory.intel.req.indexOf(target);
+            var index = Memory.intel.req.indexOf(ops.target);
             if (index < 0) {
-                Memory.intel.req.push(target);
+                Memory.intel.req.push(ops.target);
             }
         }
     },
