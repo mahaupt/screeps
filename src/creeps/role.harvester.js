@@ -21,6 +21,11 @@ module.exports = {
             creep.memory.harvesting = false;
         } else if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0) {
             creep.memory.harvesting = true;
+            
+            //prepare before embarking
+            if (creep.ticksToLive <= 800) {
+                creep.memory.renewSelf = true;
+            }
         }
         
         //go home and offload

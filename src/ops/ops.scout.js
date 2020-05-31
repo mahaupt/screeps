@@ -18,19 +18,18 @@ module.exports = {
         ops.mem.cooldown = Game.time + 500;
         
         
+        //check if scout is still on its way
+        var scout = _.find(Memory.creeps, (s) => s.role == "scout" && s.troom == ops.target);
+        if (scout) return;
+        
+        
         //get room path and look for hostiles
-        var path = Game.map.findRoute(ops.source, ops.target);
-        for (let i in path) {
-            if (Memory.intel && Memory.intel.list && Memory.intel.list[path[i].room]) {
-                if (Memory.intel.list[path[i].room].threat == "core" || 
-                Memory.intel.list[path[i].room].threat == "player")
-                {
-                    // enemy or core blocks path
-                    ops.finished = true;
-                    console.log("Scout ops " + ops.source + " to " + ops.target + " aborted. Enemy in path.");
-                    return;
-                }
-            }
+        var path = Game.map.findRoute(ops.source, ops.target, {routeCallback: baseCreep.roomCostCallback});
+        if (path == ERR_NO_PATH || path.length >= 20) 
+        {
+            ops.finished = true;
+            console.log("Scout ops " + ops.source + " to " + ops.target + " aborted. No suitable path found.");
+            return;
         }
         
         

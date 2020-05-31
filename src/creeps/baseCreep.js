@@ -352,13 +352,30 @@ module.exports = {
         return false;
     }, 
 	
+	
+	roomCostCallback: function(rname, fromRoomName)
+	{
+		if (Memory.intel && Memory.intel.list && Memory.intel.list[rname]) {
+			if (Memory.intel.list[rname].threat == "core" || 
+				Memory.intel.list[rname].threat == "player" || 
+				Memory.intel.list[rname].blocked)
+			{
+				//avoid room
+				return Infinity;
+			}
+		}
+		return 1;
+	}, 
+	
 	//source callback avoiding source keepers
-	avoidSourceCostCallback: function(rname, costs)
+	travelCostCallback: function(rname, costs)
 	{
 		var room = Game.rooms[rname];
 		
+		//room not found
 		if (!room) return;
 		
+		//no hostiles - return
 		if (room.find(FIND_HOSTILE_STRUCTURES).length <= 0) return;
 		
 		var sources = room.find(FIND_SOURCES);
@@ -381,18 +398,56 @@ module.exports = {
 	}, 
 	
 	//moves creep to room name, avoids source keeper
-	moveToRoom: function(creep, name, travelSafe=true) {
-        var pos = new RoomPosition(25, 25, name);
-		
-		if (travelSafe) {
-	        creep.moveTo(pos, {
-				reusePath: 10, 
-				costCallback: this.avoidSourceCostCallback, 
-				swampCost: 3, 
-				visualizePathStyle: {stroke: '#ffff00'}
+	moveToRoom: function(creep, name) {		
+		//follow room list
+		if (!creep.memory.roomPath || 
+			creep.memory.roomPathTarget != name)
+		{
+			var rlist = Game.map.findRoute(creep.room.name, name, {
+				routeCallback: this.roomCostCallback
 			});
-		} else {
-			creep.moveTo(pos, {visualizePathStyle: {stroke: '#ffff00'}});
+			
+			creep.memory.roomPath = rlist;
+			creep.memory.roomPathTarget = name;
+		}
+		
+		if (creep.memory.roomPath && creep.memory.roomPath[0])
+		{
+			if (creep.memory.roomPath[0].room == creep.room.name) {
+				creep.memory.roomPath.shift();
+			}
+		}
+		
+		var nextRoom = name;
+		if (creep.memory.roomPath && creep.memory.roomPath[0])
+		{
+			nextRoom = creep.memory.roomPath[0].room;
+		}
+		
+        var pos = new RoomPosition(25, 25, nextRoom);
+		
+		var ret = creep.moveTo(pos, {
+			reusePath: 50,
+			costCallback: this.travelCostCallback,
+			range: 5,
+			plainCost: 1,
+			swampCost: 3,
+			maxOps: 4000,
+			visualizePathStyle: {stroke: '#ffff00'}
+		});
+		
+		
+		if (ret == ERR_NO_PATH) {
+			/*creep.moveTo(creep.room.getPositionAt(25, 25), {range: 5});
+			
+			//mark room as blocked if walls exist
+			var r = creep.room.name;
+			var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_WALL});
+			
+			if (walls.length > 0 && Memory.intel.list[r]) {
+				Memory.intel.list[r].blocked = true;
+				delete creep.memory.roomPath;
+			}*/
 		}
     }, 
 	

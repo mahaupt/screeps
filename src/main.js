@@ -7,6 +7,7 @@ global.Terminal = require('module.terminal');
 global.Logistics = global.moduleLogistics;
 
 var roleMiner = require('creeps_role.miner');
+var roleHarvester = require('creeps_role.harvester');
 var roleUpgrader = require('creeps_role.upgrader');
 var roleBuilder = require('creeps_role.builder');
 var roleHauler = require('creeps_role.hauler');
@@ -94,6 +95,8 @@ module.exports.loop = function () {
                     roleBoostSelf.run(creep);
                 } else if(creep.memory.role == 'miner') {
                     roleMiner.run(creep);
+                } else if(creep.memory.role == 'harvester') {
+                    roleHarvester.run(creep);
                 } else if(creep.memory.role == 'upgrader') {
                     roleUpgrader.run(creep);
                 } else if(creep.memory.role == 'builder') {
