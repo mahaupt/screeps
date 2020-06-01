@@ -8,6 +8,7 @@ home = home room name
 harvesting = true/false
 troom = target room
 source = source id
+source_type = source type / deposit / mineral / source
 
 */
 module.exports = {
@@ -16,8 +17,7 @@ module.exports = {
     {
         baseCreep.init(creep);
         
-        if (!creep.memory.source || 
-            creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
+        if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
         } else if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0) {
             creep.memory.harvesting = true;
@@ -39,7 +39,11 @@ module.exports = {
             if (creep.room.name != creep.memory.home) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
-                var target = creep.room.terminal || creep.room.storage;
+                var target = creep.room.storage;
+                if (creep.store[RESOURCE_ENERGY] == 0) {
+                    target = creep.room.terminal || creep.room.storage;
+                }
+                
                 if (!target || target.store.getFreeCapacity() == 0) {
                     target = creep.room.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store.getFreeCapacity() > 0});
                 }
@@ -59,12 +63,19 @@ module.exports = {
             if (creep.room.name != creep.memory.troom) {
                 baseCreep.moveToRoom(creep, creep.memory.troom);
             } else {
+                
+                if (!creep.memory.source) {
+                    this.pickSource(creep);
+                }
+                
                 var source = Game.getObjectById(creep.memory.source);
                 if (!source) 
                 {
-                    //no source - no longer needed
+                    //no source avbl - no longer needed
                     delete creep.memory.source; 
+                    delete creep.memory.source_type;
                     creep.memory.killSelf = true;
+                    creep.memory.renewSelf = true;
                     return;
                 }
                 
@@ -109,5 +120,46 @@ module.exports = {
                 creep.memory.harvesting = false;
             }
         }
+    }, 
+    
+    
+    pickSource: function(creep)
+    {
+        var colleagues = _.filter(
+            Memory.creeps, 
+            (s) => s.role == 'harvester' && s.troom == creep.room.name
+        );
+        
+        var deposits = creep.room.find(FIND_DEPOSITS);
+        if (deposits.length > 0 && deposits[0].lastCooldown < 10) {
+            if (_.findIndex(colleagues, (s) => s.source == deposits[0].id) < 0) {
+                creep.memory.source = deposits[0].id;
+                creep.memory.source_type = 'deposit';
+                return;
+            }
+        }
+        
+        var minerals = creep.room.find(FIND_MINERALS);
+        if (minerals.length > 0 && minerals[0].mineralAmount > 2000) {
+            var extractor = minerals[0].pos.findInRange(FIND_STRUCTURES, 0, {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR });
+            
+            if (extractor.length > 0) {
+                if (_.findIndex(colleagues, (s) => s.source == minerals[0].id) < 0) {
+                    creep.memory.source = minerals[0].id;
+                    creep.memory.source_type = 'mineral';
+                    return;
+                }
+            }
+        }
+        
+        var sources = creep.room.find(FIND_SOURCES);
+        for (var s of sources) {
+            if (_.findIndex(colleagues, (s) => s.source == s.id) < 0) {
+                creep.memory.source = s.id;
+                creep.memory.source_type = 'source';
+                return;
+            }
+        }
+        
     }
 };

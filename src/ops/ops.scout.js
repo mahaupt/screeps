@@ -18,6 +18,10 @@ module.exports = {
         ops.mem.cooldown = Game.time + 500;
         
         
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
+        
+        
         //check if scout is still on its way
         var scout = _.find(Memory.creeps, (s) => s.role == "scout" && s.troom == ops.target);
         if (scout) return;

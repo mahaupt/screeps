@@ -14,6 +14,9 @@ module.exports = {
         if (ops.mem.cycle_timeout + this.cycle_timeout > Game.time) return;
         ops.mem.cycle_timeout = Game.time;
         
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
+        
         Ops.new("scout_vicinity", ops.source, "");
     }, 
     

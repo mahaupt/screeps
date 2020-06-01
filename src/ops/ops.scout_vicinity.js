@@ -16,6 +16,9 @@ module.exports = {
         if (ops.mem.scout_timeout + this.scout_timeout > Game.time) return;
         ops.mem.scout_timeout = Game.time;
         
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
+        
         this.sendScouts(ops);
     }, 
     

@@ -2,6 +2,9 @@ module.exports = {
     run: function(ops)
     {
         this.init(ops);
+        
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
     },
     
     
