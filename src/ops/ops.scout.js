@@ -7,7 +7,7 @@ module.exports = {
         var intel = Memory.intel.list[ops.target];
         if (Memory.intel.list[ops.target]) 
         {    
-            if (intel.time > Game.time -100) {
+            if (intel.time > Game.time - 200) {
                 ops.finished = true;
                 return;
             }

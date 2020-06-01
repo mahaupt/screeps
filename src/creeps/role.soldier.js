@@ -122,6 +122,11 @@ module.exports = {
             return;
         }
         
+        
+        //collect intel        
+        baseCreep.collectIntel(creep, creep.room);
+        
+        
         //in target room
         if (creep.room.name == creep.memory.troom) 
         {
