@@ -447,7 +447,7 @@ module.exports = {
 				{filter: (s) => s.structureType == STRUCTURE_WALL}
 			);
 			
-			if (walls.length > 0 && Memory.intel.list[r]) {
+			if (walls.length > 0 && Memory.intel.list[r] && !Memory.intel.list[r].blocked) {
 				Memory.intel.list[r].blocked = true;
 				Game.notify(creep.name + ": couldnt find way through room " + creep.room.name + " and marked as blocked");
 				delete creep.memory.roomPath;

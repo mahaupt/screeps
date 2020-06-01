@@ -23,6 +23,16 @@ module.exports = {
         if (scout) return;
         
         
+        //skip if room is my own
+        if (Game.rooms[ops.target] && 
+            Game.rooms[ops.target].controller && 
+            Game.rooms[ops.target].controller.my)
+        {
+            ops.finished = true;
+            return;
+        }
+        
+        
         //get room path and look for hostiles
         var path = Game.map.findRoute(ops.source, ops.target, {routeCallback: baseCreep.roomCostCallback});
         if (path == ERR_NO_PATH || path.length >= 20) 

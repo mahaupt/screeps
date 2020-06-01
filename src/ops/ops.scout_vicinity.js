@@ -56,18 +56,25 @@ module.exports = {
     {
         if (range <= 0) return [];
         var exits = Game.map.describeExits(roomname);
+        var rstatus = Game.map.getRoomStatus(roomname);
         var ret = [];
         
+        //add rooms (Only add rooms with same room status)
         for(let i of Object.keys(exits)) {
-            ret.push(exits[i]);    
+            if (Game.map.getRoomStatus(exits[i]).status == rstatus.status) {
+                ret.push(exits[i]); 
+            }   
         }
+        //add adjacent rooms of rooms (Only add rooms with same room status)
         for(let i of Object.keys(exits)) {
-            var rooms = this.getRoomsNearby(exits[i], range-1);
-            ret = [].concat(ret, rooms);
+            if (Game.map.getRoomStatus(exits[i]).status == rstatus.status) {
+                var rooms = this.getRoomsNearby(exits[i], range-1);
+                ret = [].concat(ret, rooms);
+            }
         }
         
         //remove doubles
-        _.uniq(ret);
+        ret = [...new Set(ret)];
         return ret;
     }
 };
