@@ -21,6 +21,8 @@ module.exports = {
             creep.memory.harvesting = false;
         } else if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0) {
             creep.memory.harvesting = true;
+            creep.memory.startTravel = Game.time;
+            delete creep.memory.travelTime;
             
             //prepare before embarking
             if (creep.ticksToLive <= 800) {
@@ -33,7 +35,7 @@ module.exports = {
             if (creep.room.name != creep.memory.home) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
-                var target = creep.room.storage;
+                var target = creep.room.terminal || creep.room.storage;
                 if (!target || target.store.getFreeCapacity() == 0) {
                     target = creep.room.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store.getFreeCapacity() > 0});
                 }
@@ -41,7 +43,7 @@ module.exports = {
                     var res_types = baseCreep.getStoredResourceTypes(creep.store);
                     var resource = res_types[0];
                     
-                    var ret = creep.transfer(target, resource);
+                    let ret = creep.transfer(target, resource);
                     if (ret == ERR_NOT_IN_RANGE) {
                         creep.moveTo(target, {range:1, visualizePathStyle: {stroke: '#00ff00'}});
                     }
@@ -63,10 +65,24 @@ module.exports = {
                     
                 }
                 
-                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                let ret = creep.harvest(source);
+                if (ret == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source, {range:1, visualizePathStyle: {stroke: '#ff0000'}});
+                } else if (ret == OK) {
+                    //calc travel time
+                    if (!creep.memory.travelTime) {
+                        creep.memory.travelTime = Game.time - creep.memory.startTravel;
+                        creep.memory.travelTime *= 1.25; //full cargo travel time
+                        creep.memory.travelTime += 50; //final reserve
+                        creep.memory.travelTime = Math.round(creep.memory.travelTime);
+                        creep.memory.travelTime = Math.max(creep.memory.travelTime, 200);
+                    }
                 }
+            }
             
+            //abort to have time to travel home
+            if (creep.ticksToLive <= creep.memory.travelTime) {
+                creep.memory.harvesting = false;
             }
         }
     }
