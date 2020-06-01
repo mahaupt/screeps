@@ -6,6 +6,7 @@ module.exports = {
 			filter: { structureType: STRUCTURE_TOWER }
 		});
 		
+		// TOWERS SHOOTING TARGET
 		for(var tower of towers)
 		{
 			//shoot hostiles
@@ -43,7 +44,7 @@ module.exports = {
 		}
 		
 		
-		//auto safemode
+		//AUTO SAFEMODE
 		var hostiles = room.find(FIND_HOSTILE_CREEPS);
 		if (hostiles.length > 0)
 		{
@@ -79,5 +80,20 @@ module.exports = {
 				}
 			}
 		} 
+		
+		
+		
+		// SPAWN ROOM LIFETIME OPS
+		if (Game.time % 100 == 0) {
+			var index = _.findIndex(
+				Memory.ops, (s) => 
+				{ return s.type == "room_lifetime" && s.source == room.name; }
+			);
+			if (index < 0) {
+				Ops.new("room_lifetime", room.name, "");
+			}
+		}
+		
+		
 	}
 };

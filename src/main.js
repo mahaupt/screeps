@@ -50,6 +50,7 @@ module.exports.loop = function () {
     
     
         //MODULES per ROOM
+        var i = 0;
         for (var r in Game.rooms) 
         {
             var room = Game.rooms[r];
@@ -61,9 +62,9 @@ module.exports.loop = function () {
             {
                 moduleStats.run(room);
                 
-                if (Game.time % 20 == 1)
+                if (Game.time % 100 == i++)
                     moduleAutobuilder.run(room);
-                if (room.terminal && Game.time % 20 == 4) {
+                if (room.terminal && Game.time % 20 == i++) {
                     Terminal.run(room);
                 }
                 
