@@ -62,9 +62,29 @@ module.exports = {
                     delete creep.memory.source; 
                     creep.memory.killSelf = true;
                     return;
-                    
                 }
                 
+                // ABORT CONDITIONS
+                if (source instanceof Deposit) {
+                    if (source.lastCooldown > 30) {
+                        creep.memory.killSelf = true; //kill on next renew
+                    }
+                } else 
+                if (source instanceof Mineral) {
+                    if (source.mineralAmount == 0) {
+                        creep.memory.killSelf = true;
+                        creep.memory.harvesting = false;
+                        return;
+                    }
+                } else 
+                if (source instanceof Source) {
+                    if (source.energy == 0) {
+                        creep.memory.harvesting = false;
+                        return;
+                    }
+                }
+                
+                // HARVEST
                 let ret = creep.harvest(source);
                 if (ret == ERR_NOT_IN_RANGE) {
                     creep.moveTo(source, {range:1, visualizePathStyle: {stroke: '#ff0000'}});
