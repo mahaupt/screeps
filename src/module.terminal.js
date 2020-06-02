@@ -16,7 +16,13 @@ module.exports = {
         //sell not needed resources
         for (var res of res_types) 
         {
-            if (room.terminal.store[res] < 50000 || res == RESOURCE_ENERGY) continue;
+            if (res != RESOURCE_METAL && 
+                res != RESOURCE_MIST &&
+                res != RESOURCE_BIOMASS && 
+                res != RESOURCE_SILICON && 
+                room.terminal.store[res] < 30000 || 
+                res == RESOURCE_ENERGY) continue;
+            
             if (this.sellResource(room, res, 3000) > 0) return;
         }
         

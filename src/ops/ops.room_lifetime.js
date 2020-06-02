@@ -10,7 +10,7 @@ module.exports = {
         
         //reserves room
         
-        // 10000 cycle timeout
+        // 30000 cycle timeout
         if (ops.mem.cycle_timeout + this.cycle_timeout > Game.time) return;
         ops.mem.cycle_timeout = Game.time;
         
@@ -18,27 +18,6 @@ module.exports = {
         if (Ops.checkSrcRoomAvbl(ops)) return;
         
         Ops.new("scout_vicinity", ops.source, "");
-    }, 
-    
-    
-    sendScouts: function(ops)
-    {
-        //scout timeout
-        if (ops.mem.scout_timeout + this.scout_timeout > Game.time) return;
-        ops.mem.scout_timeout = Game.time;
-        
-        var target = ops.mem.nearby[ops.mem.nearby_id];
-        
-        //skip own room scouting
-        var room = Game.rooms[target];
-        if (room && room.controller && room.controller.my) {
-            ops.mem.nearby_id++;
-            return;
-        }
-        
-        //start scout
-        Ops.new("scout", ops.source, target);
-        ops.mem.nearby_id++;
     }, 
     
     

@@ -383,14 +383,14 @@ module.exports = {
 		var avoids = [].concat(sources, minerals);
 		
 		_.forEach(avoids, function(avoid){
-			var xStart = avoid.pos.x - 5;
-			var xEnd = avoid.pos.x + 5;
-			var yStart = avoid.pos.y - 5;
-			var yEnd = avoid.pos.y + 5;
+			var xStart = avoid.pos.x - 4;
+			var xEnd = avoid.pos.x + 4;
+			var yStart = avoid.pos.y - 4;
+			var yEnd = avoid.pos.y + 4;
 
 			for(var x = xStart; x <= xEnd; x++) {
 				for(var y = yStart; y <= yEnd; y++) {
-					costs.set(x, y, 20);
+					costs.set(x, y, 10);
 				}
 			}
 		});
