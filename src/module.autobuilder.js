@@ -24,7 +24,7 @@ module.exports = {
 	    
         if (extensions_num < extensions_max && constr_sites_num < 2)
 	    {
-		    if (this.buildAroundSpawn(room, STRUCTURE_EXTENSION, true)) {
+		    if (this.buildAroundCenter(room, STRUCTURE_EXTENSION, true)) {
                 constr_sites_num++;
             }
 	    }
@@ -35,7 +35,7 @@ module.exports = {
         
         if (towers_num < towers_max && constr_sites_num < 2)
 	    {
-		    if (this.buildAroundSpawn(room, STRUCTURE_TOWER, true)) {
+		    if (this.buildAroundCenter(room, STRUCTURE_TOWER, true)) {
                 constr_sites_num++;
             }
 	    }
@@ -53,7 +53,7 @@ module.exports = {
                     constr_sites_num++;
                 }
             } else if (containers_num < containers_max-mineral_num) {
-			    if (this.buildAroundSpawn(room, STRUCTURE_CONTAINER, false)) {
+			    if (this.buildAroundCenter(room, STRUCTURE_CONTAINER, false)) {
                     constr_sites_num++;
                 }
 		    } else if (room.controller.level >= 6 && mineral_num >= 1) {
@@ -70,7 +70,7 @@ module.exports = {
         
         if (storage_num < storage_max && constr_sites_num < 2)
         {
-            if (this.buildAroundSpawn(room, STRUCTURE_STORAGE, true)) {
+            if (this.buildAroundCenter(room, STRUCTURE_STORAGE, true)) {
                 constr_sites_num++;
             }
         }
@@ -83,7 +83,7 @@ module.exports = {
         {
             //build base link
             if (links_num == 0) {
-                if (this.buildAroundSpawn(room, STRUCTURE_LINK, true)) {
+                if (this.buildAroundCenter(room, STRUCTURE_LINK, true)) {
                     constr_sites_num++;
                 }
             } else {
@@ -118,13 +118,19 @@ module.exports = {
         var terminal_max = CONTROLLER_STRUCTURES[STRUCTURE_TERMINAL][room.controller.level];
         if (terminal_num < terminal_max && constr_sites_num < 2) 
         {
-            if (this.buildAroundSpawn(room, STRUCTURE_TERMINAL, true)) {
+            if (this.buildAroundCenter(room, STRUCTURE_TERMINAL, true)) {
                 constr_sites_num++;
             }
         }
         
         //labs
-        
+        var lab_num = this.getTotalStructures(room, STRUCTURE_LAB);
+        var lab_max = CONTROLLER_STRUCTURES[STRUCTURE_LAB][room.controller.level];
+        if (lab_num < lab_max) {
+            if (this.buildAroundCenter(room, STRUCTURE_LAB, true)) {
+                constr_sites_num++;
+            }
+        }
         
 	    
 	    //build roads - nothing other to build
@@ -135,7 +141,7 @@ module.exports = {
         
         //building walls from lvl 4
         if (room.controller.level >= 4 && constr_sites_num == 0) {
-            //this.buildAroundSpawn(room, STRUCTURE_RAMPART, false);
+            //this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
         }
     },
     
@@ -153,12 +159,12 @@ module.exports = {
 	    {
 		    
 		    var cont = s.pos.findInRange(FIND_STRUCTURES, 2, {
-		        filter: (structure) => {
-		            return structure.structureType == type;
+		        filter: (s) => {
+		            return s.structureType == type;
 		        }});
 		    var cont_c = s.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 2, {
-		        filter: (structure) => {
-		            return structure.structureType == type;
+		        filter: (s) => {
+		            return s.structureType == type;
 		        }});
 		    
 		    //console.log("S x" + s.pos.x + " y" + s.pos.y + " - " + (cont.length+cont_c.length));
@@ -198,7 +204,7 @@ module.exports = {
     }, 
     
     
-    buildAroundSpawn: function(room, type, removeRoads=false) {
+    buildAroundCenter: function(room, type, removeRoads=false) {
 	    var spawns = room.find(FIND_MY_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_SPAWN;
@@ -208,7 +214,8 @@ module.exports = {
         //build around spawn 0
         if (spawns.length > 0)
         {
-	        var buildPos = this.getNextFreeBasePos(room, type, spawns[0].pos);
+            var centerPos = this.getBaseCenterPoint(spawns[0].pos);
+	        var buildPos = this.getNextFreeBasePos(room, type, centerPos);
 	        if (room.createConstructionSite(buildPos, type) == OK) {
                 if (removeRoads) {
                     this.removeRoads(room, buildPos);
@@ -268,82 +275,104 @@ module.exports = {
         return buildable;
     }, 
     
-    
     getNextFreeBasePos: function(room, type, centerPos)
     {
         var deltas = this.getPositionDeltas(type);
         for (var i=0; i < deltas.length; i++)
         {
-            var p1 = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y-deltas[i].y, room.name);
-            var p2 = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y+deltas[i].y, room.name);
-            var p3 = new RoomPosition(centerPos.x-deltas[i].x, centerPos.y+deltas[i].y, room.name);
-            var p4 = new RoomPosition(centerPos.x-deltas[i].x, centerPos.y-deltas[i].y, room.name);
+            var p = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y-deltas[i].y, room.name);
             
             var ignoreRoads = type != STRUCTURE_ROAD;
             
-            if (this.checkPositionFree(room, p1, ignoreRoads)) {
-                return p1;
-            }
-            if (this.checkPositionFree(room, p2, ignoreRoads)) {
-                return p2;
-            }
-            if (this.checkPositionFree(room, p3, ignoreRoads)) {
-                return p3;
-            }
-            if (this.checkPositionFree(room, p4, ignoreRoads)) {
-                return p4;
+            if (this.checkPositionFree(room, p, ignoreRoads)) {
+                return p;
             }
         }
+    },
+    
+    getBaseCenterPoint: function(pos)
+    {
+        return new RoomPosition(pos.x-1, pos.y-6, pos.roomName);
     }, 
     
-    //todo: add predefined layout
     getPositionDeltas: function(type)
     {
         var positions = {};
         
+        
         //extensions
         positions[STRUCTURE_EXTENSION] = [
-            {x: 1,y: 2}, {x: 1,y: 3},
-            {x: 2,y: 2}, {x: 2,y: 3},
+            {x:3, y:2}, {x:4, y:2}, {x:4, y:3}, {x:5, y:3}, {x:5, y:4}, {x:6, y:4}, {x:6, y:5}, 
+            {x:2, y:3}, {x:2, y:4}, {x:3, y:4}, {x:3, y:5}, {x:4, y:5}, {x:4, y:6}, {x:5, y:6}, 
             
-            {x: 1,y: 5}, {x: 1,y: 6},
-            {x: 2,y: 5}, {x: 2,y: 6},
+            {x:3, y:-2}, {x:4, y:-2}, {x:4, y:-3}, {x:5, y:-3}, {x:5, y:-4}, {x:6, y:-4}, {x:6, y:-5}, 
+            {x:2, y:-3}, {x:2, y:-4}, {x:3, y:-4}, {x:3, y:-5}, {x:4, y:-5}, {x:4, y:-6}, {x:5, y:-6}, 
             
-            {x: 4,y: 2}, {x: 4,y: 3},
-            {x: 5,y: 2}, {x: 5,y: 3},
+            {x:-3, y:2}, {x:-4, y:2}, {x:-4, y:3}, {x:-5, y:3}, {x:-5, y:4}, {x:-6, y:4}, {x:-6, y:5}, 
+            {x:-2, y:3}, {x:-2, y:4}, {x:-3, y:4}, {x:-3, y:5}, {x:-4, y:5}, {x:-4, y:6}, {x:-5, y:6},
             
-            {x: 4,y: 5}, {x: 4,y: 6},
-            {x: 5,y: 5}, {x: 5,y: 6},
+            {x:-1, y:3}, {x:1, y:3}, {x:-1, y:4}, {x:1, y:4}, {x:-1, y:5}, {x:1, y:5},  
+            {x:-1, y:-3}, {x:1, y:-3}, {x:-1, y:-4}, {x:1, y:-4}, {x:-1, y:-5}, {x:1, y:-5}, 
+            
+            {x:4, y:1}, {x:4, y:-1}, {x:5, y:1}, {x:5, y:-1}, 
+            {x:-4, y:1}, {x:-4, y:-1}, {x:-5, y:1}, {x:-5, y:-1}, 
         ];
         
         positions[STRUCTURE_CONTAINER] = [
-            {x:3, y:0}, {x:4, y:0}
+            {x:-6, y:-1}, {x:6, y:-1}
         ];
         
         positions[STRUCTURE_STORAGE] = [
-            {x:2, y:0}
+            {x:0, y:-1}
         ];
         
         positions[STRUCTURE_TERMINAL] = [
-            {x:-2, y:0}
+            {x:-1, y:-1}
         ];
         
         positions[STRUCTURE_TOWER] = [
-            {x:3, y:4}, {x:5, y:0}
+            {x:-1, y:0}, {x:1, y:0},
+            {x:-3, y:1}, {x:3, y:1}, 
+            {x:-3, y:-1}, {x:3, y:-1},
         ];
         
         positions[STRUCTURE_LINK] = [
             {x:0, y:1}
         ];
         
+        positions[STRUCTURE_LAB] = [
+            {x:-3, y:-2}, {x:-4, y:-2}, {x:-4, y:-3}, {x:-5, y:-3}, {x:-5, y:-4}, 
+            {x:-2, y:-3}, {x:-2, y:-4}, {x:-3, y:-4}, {x:-3, y:-5}, {x:-4, y:-5}
+        ];
+        
         positions[STRUCTURE_ROAD] = [
-            {x:-1, y:0}, {x:-1, y:-1}, 
-            {x:0, y:-1}
+            {x:0, y:0}, 
+            {x:-1, y:1}, {x:-2, y:2}, {x:-3, y:3}, {x:-4, y:4}, {x:-5, y:5}, {x:-6, y:6}, 
+            {x:1, y:-1}, {x:2, y:-2}, {x:3, y:-3}, {x:4, y:-4}, {x:5, y:-5}, {x:6, y:-6}, 
+            {x:2, y:2}, {x:3, y:3}, {x:4, y:4}, {x:5, y:5}, {x:6, y:6}, 
+            {x:-2, y:-2}, {x:-3, y:-3}, {x:-4, y:-4}, {x:-5, y:-5}, {x:-6, y:-6}, 
+            {x:0, y:2}, {x:0, y:3}, {x:0, y:4}, {x:0, y:5}, {x:0, y:6}, 
+            {x:0, y:-2}, {x:0, y:-3}, {x:0, y:-4}, {x:0, y:-5}, {x:0, y:-6}, 
+            {x:2, y:0}, {x:3, y:0}, {x:4, y:0}, {x:5, y:0}, {x:6, y:0}, 
+            {x:-2, y:0}, {x:-3, y:0}, {x:-4, y:0}, {x:-5, y:0}, {x:-6, y:0},
         ];
         
         positions[STRUCTURE_RAMPART] = [
-            {x:6, y:7}, {x:5, y:7}, {x:4, y:7}, {x:3, y:7}, {x:2, y:7}, {x:1, y:7}, {x:0, y:7}, 
-            {x:6, y:6}, {x:6, y:5}, {x:6, y:4}, {x:6, y:3}, {x:6, y:2}, {x:6, y:1}, {x:6, y:0}
+            {x: 0, y: 6}, 
+            {x: 1, y: 6}, {x: 2, y: 6}, {x: 3, y: 6}, {x: 4, y: 6}, {x: 5, y: 6}, {x: 6, y: 6}, 
+            {x: -1, y: 6}, {x: -2, y: 6}, {x: -3, y: 6}, {x: -4, y: 6}, {x: -5, y: 6}, {x: -6, y: 6}, 
+            
+            {x: 0, y: -6}, 
+            {x: 1, y: -6}, {x: 2, y: -6}, {x: 3, y: -6}, {x: 4, y: -6}, {x: 5, y: -6}, {x: 6, y: -6}, 
+            {x: -1, y: -6}, {x: -2, y: -6}, {x: -3, y: -6}, {x: -4, y: -6}, {x: -5, y: -6}, {x: -6, y: -6}, 
+            
+            {x: 6, y: 0},
+            {x: 6, y: 1}, {x: 6, y: 2}, {x: 6, y: 3}, {x: 6, y: 4}, {x: 6, y: 5}, 
+            {x: 6, y: -1}, {x: 6, y: -2}, {x: 6, y: -3}, {x: 6, y: -4}, {x: 6, y: -5}, 
+            
+            {x: -6, y: 0},
+            {x: -6, y: 1}, {x: -6, y: 2}, {x: -6, y: 3}, {x: -6, y: 4}, {x: -6, y: 5}, 
+            {x: -6, y: -1}, {x: -6, y: -2}, {x: -6, y: -3}, {x: -6, y: -4}, {x: -6, y: -5}, 
         ];
         
         
@@ -497,12 +526,13 @@ module.exports = {
         var targets = container.concat([room.controller]);
         if (spawn.length > 0 && targets.length > 0)
         {
+            var centerPos = this.getBaseCenterPoint(pasn[0].pos);
             var builtRoads = 0;
             
             //roads from spawn to Structures
             for (var t of targets)
             {
-                var path = spawn[0].pos.findPathTo(t.pos, {ignoreCreeps: true});
+                var path = centerPos.findPathTo(t.pos, {ignoreCreeps: true});
                 
                 //bugfix, dont build road on controller
                 //it strangely needs 25k to complete
@@ -523,7 +553,7 @@ module.exports = {
             
             //roads around spawn
             if (builtRoads == 0) {
-                    this.buildAroundSpawn(room, STRUCTURE_ROAD, false);
+                    this.buildAroundCenter(room, STRUCTURE_ROAD, false);
             }
         }
     }
