@@ -160,15 +160,22 @@ module.exports = {
 		} else 
 		if (role == 'pioneer')
 		{
-			nwork=3;
+			nwork=2;
 			ncarry=4;
-			nmove=7;
+			nmove=6;
 		} else 
 		if (role == 'claimer')
 		{
 			nwork=0;
 			ncarry=0;
 			nclaim=1;
+			nmove=1;
+		} else 
+		if (role == 'reserver')
+		{
+			nwork=0;
+			ncarry=0;
+			nclaim=Math.max(Math.round(bodySize/3), 1);
 			nmove=1;
 		} else 
 		if (role == 'soldier')
@@ -521,6 +528,16 @@ module.exports = {
         if (room.controller && room.controller.my) {
             return;
         }
+		
+		if (!Memory.intel) {
+			Memory.intel = {};
+		}
+		if (!Memory.intel.list) {
+			Memory.intel.list = [];
+		}if (!Memory.intel.req) {
+			Memory.intel.req = [];
+		}
+		
 		
 		//recent intel
 		if (Memory.intel.list[room] && 

@@ -32,6 +32,7 @@ module.exports =  {
         if (Game.time % 1000 == 9) {
             if (!room.memory.stats.energy_1k) {
                 room.memory.stats.energy_1k = energy;
+                room.memory.stats.add_creeps = 0;
             }
             
             room.memory.stats.energy_1k_dx = room.memory.stats.energy - room.memory.stats.energy_1k;
@@ -46,7 +47,6 @@ module.exports =  {
         if (Game.time % 10000 == 9) {
             if (!room.memory.stats.energy_10k) {
                 room.memory.stats.energy_10k = energy;
-                room.memory.stats.add_creeps = 0;
             }
             
             room.memory.stats.energy_10k_dx = room.memory.stats.energy - room.memory.stats.energy_10k;
