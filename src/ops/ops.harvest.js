@@ -59,22 +59,25 @@ module.exports = {
         var roomhvstr = _.filter(Memory.creeps, (s) => s.role == "harvester" && s.troom == ops.target);
         console.log(JSON.stringify(roomhvstr));
         
-        // PICK Deposits
-        if (intel.deposits && intel.deposits_cooldown < 10) {
-            let h = _.findIndex(roomhvstr, (s) => s.source_type == 'deposit' );
-            if (h < 0) {
-                //spawn harvester
-                moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
-                return;
+        // DEPOSITS AND MINERALS ONLY ON >LVL 6 SOURCE ROOMS
+        if (Game.rooms[ops.source].controller.level >= 6) {
+            // PICK Deposits
+            if (intel.deposits && intel.deposits_cooldown < 10) {
+                let h = _.findIndex(roomhvstr, (s) => s.source_type == 'deposit' );
+                if (h < 0) {
+                    //spawn harvester
+                    moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
+                    return;
+                }
             }
-        }
-        // PICK Minerals
-        if (intel.minerals && intel.minerals_extr && intel.minerals_amt > 2000) {
-            let h = _.findIndex(roomhvstr, (s) => s.source_type == 'mineral' );
-            if (h < 0) {
-                //spawn harvester
-                moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
-                return;
+            // PICK Minerals
+            if (intel.minerals && intel.minerals_extr && intel.minerals_amt > 2000) {
+                let h = _.findIndex(roomhvstr, (s) => s.source_type == 'mineral' );
+                if (h < 0) {
+                    //spawn harvester
+                    moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
+                    return;
+                }
             }
         }
         // Pick Source

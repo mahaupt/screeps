@@ -129,25 +129,28 @@ module.exports = {
             Memory.creeps, 
             (s) => s.role == 'harvester' && s.troom == creep.room.name
         );
+        var homeroom = Game.rooms[creep.memory.home];
         
-        var deposits = creep.room.find(FIND_DEPOSITS);
-        if (deposits.length > 0 && deposits[0].lastCooldown < 10) {
-            if (_.findIndex(colleagues, (s) => s.source == deposits[0].id) < 0) {
-                creep.memory.source = deposits[0].id;
-                creep.memory.source_type = 'deposit';
-                return;
-            }
-        }
-        
-        var minerals = creep.room.find(FIND_MINERALS);
-        if (minerals.length > 0 && minerals[0].mineralAmount > 2000) {
-            var extractor = minerals[0].pos.findInRange(FIND_STRUCTURES, 0, {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR });
-            
-            if (extractor.length > 0) {
-                if (_.findIndex(colleagues, (s) => s.source == minerals[0].id) < 0) {
-                    creep.memory.source = minerals[0].id;
-                    creep.memory.source_type = 'mineral';
+        if (homeroom.controller.level >= 6) {
+            var deposits = creep.room.find(FIND_DEPOSITS);
+            if (deposits.length > 0 && deposits[0].lastCooldown < 10) {
+                if (_.findIndex(colleagues, (s) => s.source == deposits[0].id) < 0) {
+                    creep.memory.source = deposits[0].id;
+                    creep.memory.source_type = 'deposit';
                     return;
+                }
+            }
+            
+            var minerals = creep.room.find(FIND_MINERALS);
+            if (minerals.length > 0 && minerals[0].mineralAmount > 2000) {
+                var extractor = minerals[0].pos.findInRange(FIND_STRUCTURES, 0, {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR });
+                
+                if (extractor.length > 0) {
+                    if (_.findIndex(colleagues, (s) => s.source == minerals[0].id) < 0) {
+                        creep.memory.source = minerals[0].id;
+                        creep.memory.source_type = 'mineral';
+                        return;
+                    }
                 }
             }
         }
