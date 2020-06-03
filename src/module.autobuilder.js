@@ -526,7 +526,7 @@ module.exports = {
         var targets = container.concat([room.controller]);
         if (spawn.length > 0 && targets.length > 0)
         {
-            var centerPos = this.getBaseCenterPoint(pasn[0].pos);
+            var centerPos = this.getBaseCenterPoint(spawn[0].pos);
             var builtRoads = 0;
             
             //roads from spawn to Structures
