@@ -176,10 +176,10 @@ module.exports = {
 			bodySize = Math.min(bodySize, 8);
 			nwork=0;
 			ncarry=0;
-			ntough=3*bodySize; //10
-			nmove=2*bodySize+1; //50
+			ntough=bodySize; //10
+			nmove=2*bodySize; //50
 			nattack=bodySize; //80
-			nheal=1; // 250
+			nheal=0; // 250
 		} else 
 		if (role == 'drainer')
 		{

@@ -292,7 +292,7 @@ module.exports = {
     
     getBaseCenterPoint: function(pos)
     {
-        return new RoomPosition(pos.x-1, pos.y-6, pos.roomName);
+        return new RoomPosition(pos.x-1, pos.y+6, pos.roomName);
     }, 
     
     getPositionDeltas: function(type)
