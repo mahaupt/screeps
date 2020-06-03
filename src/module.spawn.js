@@ -42,8 +42,8 @@ module.exports = {
             this.spawn(spawn, "miner");
         } else
         if (haulerCount < containerCount && 
-            haulerCount < sourceCount &&
-            haulerCount < sourceCount - linkCount+2) 
+            haulerCount < sourceCount+1 &&
+            haulerCount < sourceCount - linkCount+3) 
         {
             this.spawn(spawn, "hauler");
         } else 
