@@ -18,6 +18,15 @@ module.exports = {
     run: function(creep) 
     {    
         baseCreep.init(creep);
+        
+        
+        //go home if lost
+        if (creep.room.name != creep.memory.home) {
+            baseCreep.moveToRoom(creep, creep.memory.home);
+            return;
+        }
+        
+        
         var source = this.getSource(creep);
         var container = this.getContainer(creep, source);
         var link = this.getLink(creep, source);

@@ -13,13 +13,21 @@ module.exports = {
     name: 'builder', 
     run: function(creep) 
     {
+        baseCreep.init(creep);
+        
+        
+        //go home if lost
+        if (creep.room.name != creep.memory.home) {
+            baseCreep.moveToRoom(creep, creep.memory.home);
+            return;
+        }
+        
         //flee
         if (creep.room.memory.attacked_time + 30 > Game.time) {
-            var tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
-            if (tower) {
-                creep.moveTo(tower, {range: 2, visualizePathStyle: {stroke: '#00ff00'}});
-                return;
-            }
+            
+            //if creep is outside bunker - move inside bunker
+            var cpoint = moduleAutobuilder.getBaseCenterPoint(creep.room);
+                
         }
         
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
@@ -137,7 +145,9 @@ module.exports = {
         }
         
         //upgrade if no thing else to do
-        creep.memory.building = creep.room.controller.id;
+        if (creep.room.controller) {
+            creep.memory.building = creep.room.controller.id;
+        }
         
 
     }

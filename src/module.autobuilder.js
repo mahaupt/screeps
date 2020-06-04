@@ -5,6 +5,10 @@ module.exports = {
             this.pickFirstBasePos(room);
             return;
         }
+        //find base center
+        if (!room.memory.center) {
+            
+        }
         
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
@@ -205,24 +209,16 @@ module.exports = {
     
     
     buildAroundCenter: function(room, type, removeRoads=false) {
-	    var spawns = room.find(FIND_MY_STRUCTURES, {
-            filter: (structure) => {
-                return structure.structureType == STRUCTURE_SPAWN;
+	    
+        var centerPos = this.getBaseCenterPoint(room);
+        var buildPos = this.getNextFreeBasePos(room, type, centerPos);
+        if (room.createConstructionSite(buildPos, type) == OK) {
+            if (removeRoads) {
+                this.removeRoads(room, buildPos);
             }
-        });
-        
-        //build around spawn 0
-        if (spawns.length > 0)
-        {
-            var centerPos = this.getBaseCenterPoint(spawns[0].pos);
-	        var buildPos = this.getNextFreeBasePos(room, type, centerPos);
-	        if (room.createConstructionSite(buildPos, type) == OK) {
-                if (removeRoads) {
-                    this.removeRoads(room, buildPos);
-                }
-                return true;
-            }
+            return true;
         }
+
         return false;
     }, 
     
@@ -290,9 +286,23 @@ module.exports = {
         }
     },
     
-    getBaseCenterPoint: function(pos)
+    getBaseCenterPoint: function(room)
     {
-        return new RoomPosition(pos.x-1, pos.y+6, pos.roomName);
+        if (!room.memory.center) {
+            this.calcBaseCenterPoint(room);
+        }
+        return new RoomPosition(room.memory.center.x, room.memory.center.y, room.name);
+    }, 
+    
+    calcBaseCenterPoint: function(room)
+    {
+        var spawns = creep.room.find(
+            FIND_MY_STRUCTURES, 
+            {filter: (s) => s.structureType == STRUCTURE_SPAWN}
+        );
+        if (spanws.length > 0) {
+            room.memory.center = {x: spanws[0].pos.x-1, y: spanws[0].pos.y+6};
+        }
     }, 
     
     getPositionDeltas: function(type)
@@ -514,9 +524,6 @@ module.exports = {
     
     buildRoads: function(room)
     {
-        var spawn = room.find(FIND_STRUCTURES, {
-            filter: { structureType: STRUCTURE_SPAWN }
-        });
         var container = room.find(FIND_STRUCTURES, {
             filter: (s) => { 
                 return s.structureType == STRUCTURE_CONTAINER || 
@@ -524,9 +531,9 @@ module.exports = {
             }
         });
         var targets = container.concat([room.controller]);
-        if (spawn.length > 0 && targets.length > 0)
+        if (targets.length > 0)
         {
-            var centerPos = this.getBaseCenterPoint(spawn[0].pos);
+            var centerPos = this.getBaseCenterPoint(room);
             var builtRoads = 0;
             
             //roads from spawn to Structures
