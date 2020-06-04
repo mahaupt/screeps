@@ -24,7 +24,7 @@ module.exports = {
         
         //skip spawning harvesters on low energy levels
         var elevel = Memory.rooms[ops.source].stats.energy / Memory.rooms[ops.source].stats.capacity;
-        if (elevel < 0.1) return;
+        if (elevel < 0.05) return;
         
         
         // GET INTEL

@@ -12,48 +12,8 @@ module.exports = {
 		});
 		
 		
-		//shoot hostiles
-		var shooters = _.filter(room.memory.hostiles, (h) => h.shoot == true);
-		if (shooters.length > 0) {
-			var hostile = Game.getObjectById(shooters[0].creep);
-	        if (hostile) {
-				for(let tower of towers)
-				{
-	            	tower.attack(hostile);
-				}
-				return;
-	        }
-		}
-		
-		//heal creeps
-		var injured = room.find(FIND_MY_CREEPS, {filter: (s) => (s.hits < s.hitsMax) });
-		if (injured.length > 0) {
-			for(let tower of towers)
-			{
-				tower.heal(injured[0]);
-			}
-			return;
-		}
-		
-		
-		
-			
-		//repair structures except walls below 10k hps
-		var structures = room.find(FIND_STRUCTURES, {
-            filter: (s) => s.hits < s.hitsMax && (
-			s.structureType != STRUCTURE_WALL && 
-			s.structureType != STRUCTURE_RAMPART || 
-			s.hits < 10000)
-        });
-        if(structures.length > 0) {
-			for(let tower of towers)
-			{
-				if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
-					tower.repair(structures[0]);
-				}					
-			}
-			return;
-        }
+		//towers shooting
+		this.towers(room, towers);
 
 		
 		
@@ -122,6 +82,54 @@ module.exports = {
 		
 		
 	},
+	
+	
+	towers: function(room, towers)
+	{
+		//shoot hostiles
+		var towers_busy = false;
+		var shooters = _.filter(room.memory.hostiles, (h) => h.shoot == true);
+		if (shooters.length > 0 && !towers_busy) {
+			var hostile = Game.getObjectById(shooters[0].creep);
+	        if (hostile) {
+				for(let tower of towers)
+				{
+	            	tower.attack(hostile);
+				}
+				towers_busy = true;
+	        }
+		}
+		
+		//heal creeps
+		var injured = room.find(FIND_MY_CREEPS, {filter: (s) => (s.hits < s.hitsMax) });
+		if (injured.length > 0 && !towers_busy) {
+			for(let tower of towers)
+			{
+				tower.heal(injured[0]);
+			}
+			towers_busy = true;
+		}
+		
+		
+		
+			
+		//repair structures except walls below 10k hps
+		var structures = room.find(FIND_STRUCTURES, {
+            filter: (s) => s.hits < s.hitsMax && (
+			s.structureType != STRUCTURE_WALL && 
+			s.structureType != STRUCTURE_RAMPART || 
+			s.hits < 10000)
+        });
+        if(structures.length > 0 && !towers_busy) {
+			for(let tower of towers)
+			{
+				if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
+					tower.repair(structures[0]);
+				}					
+			}
+			towers_busy = true;
+        }
+	}, 
 	
 	
 	buildHostileList: function(room)
