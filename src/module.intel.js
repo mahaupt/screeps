@@ -50,7 +50,7 @@ module.exports = {
         var minerals = room.find(FIND_MINERALS);
         var deposits = room.find(FIND_DEPOSITS);
         var source_keeper = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_KEEPER_LAIR});
-        var invaterCores = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_INVADER_CORE});
+        var invaderCores = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_INVADER_CORE});
         
         
         var intel = {};
@@ -75,7 +75,7 @@ module.exports = {
             intel.deposits_cooldown = deposits[0].lastCooldown;
         }
         intel.threat = "none";
-        if (invaterCores.length > 0) {
+        if (invaderCores.length > 0) {
             intel.threat = "core";
         } else if (source_keeper.length > 0) {
             intel.threat = "keeper";
@@ -110,6 +110,15 @@ module.exports = {
         if (index >= 0) {
             Memory.intel.req.splice(index, 1);
         }
+        
+        //potential new room?
+        if (intel.ctrl && 
+            (intel.threat == "none" || 
+            (intel.threat == "player" && !intel.has_spawn)) &&
+            intel.sources >= 2) 
+        {
+            this.addPotClaim(room.name);
+        }
     }, 
     
     setDiplomatics: function(playername, status)
@@ -130,6 +139,18 @@ module.exports = {
         } else {
             Memory.intel.diplo.push({player: playername, status: this.NEUTRAL});
             return this.NEUTRAL;
+        }
+    },
+    
+    addPotClaim: function(roomname)
+    {
+        if (!Memory.intel.claimable) {
+            Memory.intel.claimable = [];
+        }
+        
+        var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
+        if (index < 0) {
+            Memory.intel.claimable.push({room: roomname, parsed: false});
         }
     }
     

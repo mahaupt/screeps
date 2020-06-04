@@ -64,7 +64,7 @@ module.exports = {
 			
 			//autospawn a soldier
 			var soldier = _.find(Memory.creeps, (s) => s.role == "soldier" && s.troom == room.name);
-			if (!soldier) {
+			if (!soldier && false) {
 				var index = _.findIndex(room.memory.spawnList, (s) => s.role == "soldier");
 				if (index < 0) {
 					moduleSpawn.addSpawnList(room, "soldier", {troom: room.name, grp: "defend", embark: true, killSelf: true});

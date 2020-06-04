@@ -4,8 +4,8 @@ module.exports = {
         this.init(ops);
         
         //check if scout has completed
-        var intel = Memory.intel.list[ops.target];
-        if (Memory.intel.list[ops.target]) 
+        var intel = Intel.getIntel(ops.target);
+        if (intel) 
         {    
             if (intel.time > Game.time - 200) {
                 ops.finished = true;
@@ -68,17 +68,6 @@ module.exports = {
     {
         if (ops.mem.init) return;
         ops.mem.init = true;
-        
-        //Memory Setup
-        if (!Memory.intel) {
-            Memory.intel = {};
-        }
-        if (!Memory.intel.list) {
-            Memory.intel.list = {};
-        }
-        if (!Memory.intel.req) {
-            Memory.intel.req = [];
-        }
         ops.mem.cooldown = 0;
         
     }, 

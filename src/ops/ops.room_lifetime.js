@@ -19,12 +19,29 @@ module.exports = {
         
         Ops.new("scout_vicinity", ops.source, "");
         
-        
+        //AUTO CLAIM NEW ROOMS
         var myrooms = _.filter(Game.rooms, (s) => s.controller && s.controller.my);
         if (myrooms.length < Game.gcl) 
         {
             //todo: pick best room
             
+        }
+        
+        //AUTO HARVEST OPS
+        for (var intel of Memory.intel.list) {
+            if (intel.threat != "none") continue;
+            
+            var dist = Game.map.getRoomLinearDistance(ops.source, intel.name, true);
+            if (dist <= 1) 
+            {
+                //source and mineral ops
+                //check if no harvest ops exist
+                var i = _.findIndex(Memory.ops, (o) => { return o.target == intel.name; });
+                if (i < 0) {
+                    Ops.new("harvest", ops.source, intel.name);
+                    return;
+                }
+            }
         }
     }, 
     
