@@ -70,9 +70,12 @@ module.exports = {
 				var nconstr = hostiles[i].pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 4).length;
 				var nstruct = hostiles[i].pos.findInRange(FIND_STRUCTURES, 4).length;
 				
+				var cstrength = baseCreep.getCreepBodyStrength(hostiles[i]);
+				
 				//activate safe mode if more then 3 hostiles or no towers
 				if (ncreeps+nconstr+nstruct > 0 && 
-					(hostiles.length > 3 || towers.length == 0))
+					(hostiles.length > 3 || towers.length == 0) || 
+					cstrength > 50)
 				{
 					//try activate safe mode
 					//console.log("danger!");
