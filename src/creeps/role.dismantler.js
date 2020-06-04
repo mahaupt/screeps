@@ -34,7 +34,7 @@ module.exports = {
         
         
         //intel
-        baseCreep.collectIntel(creep, creep.room);
+        Intel.collectIntel(creep, creep.room);
         
         
         //has target - go scout

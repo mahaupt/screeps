@@ -124,7 +124,7 @@ module.exports = {
         
         
         //collect intel        
-        baseCreep.collectIntel(creep, creep.room);
+        Intel.collectIntel(creep, creep.room);
         
         
         //in target room

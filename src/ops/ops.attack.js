@@ -5,6 +5,18 @@ module.exports = {
         
         // SOURCE ROOM NOT AVBL - ABORT
         if (Ops.checkSrcRoomAvbl(ops)) return;
+        
+        
+        //SCOUT
+        
+        
+        //DRAIN
+        
+        
+        //ATTACK
+        
+        
+        //DESTROY
     },
     
     

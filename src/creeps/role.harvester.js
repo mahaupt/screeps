@@ -31,7 +31,7 @@ module.exports = {
         }
         
         //collect intel        
-        baseCreep.collectIntel(creep, creep.room);
+        Intel.collectIntel(creep, creep.room);
 
         
         //go home and offload

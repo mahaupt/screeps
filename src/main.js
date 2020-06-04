@@ -5,6 +5,7 @@ global.Ops = require('ops_ops');
 global.Labs = require('labs_labs');
 global.Terminal = require('module.terminal');
 global.Logistics = global.moduleLogistics;
+global.Intel = require('module.intel');
 
 var roleMiner = require('creeps_role.miner');
 var roleHarvester = require('creeps_role.harvester');

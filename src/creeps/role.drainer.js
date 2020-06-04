@@ -50,6 +50,10 @@ module.exports = {
         }
         
         
+        //intel
+        Intel.collectIntel(creep, creep.room);
+        
+        
         //move to target room
         if (creep.room.name == creep.memory.troom) {
             delete creep.memory.one_more_step;
