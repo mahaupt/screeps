@@ -149,7 +149,7 @@ module.exports = {
 		{
 			bodySize = Math.min(bodySize, 8);
 			nwork=0;
-			ncarry = Math.min(2*bodySize, 25);
+			ncarry = Math.min(2*bodySize+1, 25);
 			nmove = Math.min(2*bodySize-1, 25);
 		} else 
 		if (role=='scout')

@@ -18,6 +18,14 @@ module.exports = {
         if (Ops.checkSrcRoomAvbl(ops)) return;
         
         Ops.new("scout_vicinity", ops.source, "");
+        
+        
+        var myrooms = _.filter(Game.rooms, (s) => s.controller && s.controller.my);
+        if (myrooms.length < Game.gcl) 
+        {
+            //todo: pick best room
+            
+        }
     }, 
     
     

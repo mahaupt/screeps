@@ -1,47 +1,60 @@
 module.exports = {
 	run: function(room)
 	{
+		//defense list
+		this.memCleanup(room);
+		this.buildHostileList(room);
+		
+		
 		
 		var towers = room.find(FIND_MY_STRUCTURES, {
 			filter: { structureType: STRUCTURE_TOWER }
 		});
 		
-		// TOWERS SHOOTING TARGET
-		for(var tower of towers)
-		{
-			//shoot hostiles
-			var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-	        if(closestHostile) {
-	            tower.attack(closestHostile);
-				continue;
+		
+		//shoot hostiles
+		var shooters = _.filter(room.memory.hostiles, (h) => h.shoot == true);
+		if (shooters.length > 0) {
+			var hostile = Game.getObjectById(shooters[0].creep);
+	        if (hostile) {
+				for(let tower of towers)
+				{
+	            	tower.attack(hostile);
+				}
+				return;
 	        }
-			
-			//heal creeps
-			var injured = tower.pos.findClosestByRange(FIND_MY_CREEPS, {filter: (s) => (s.hits < s.hitsMax) });
-			if (injured) {
-				tower.heal(injured);
-				continue;
-			}
-			
-			//repair stuff if no hostiles and enough energy
-			if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
-				
-				//repair structures except walls below 10k hps
-				var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-		            filter: (structure) => structure.hits < structure.hitsMax && (
-					structure.structureType != STRUCTURE_WALL && 
-					structure.structureType != STRUCTURE_RAMPART || 
-					structure.hits < 10000)
-		        });
-		        if(closestDamagedStructure) {
-		            tower.repair(closestDamagedStructure);
-					continue;
-		        }
-				
-				//maybe repair walls
-				
-			}
 		}
+		
+		//heal creeps
+		var injured = room.find(FIND_MY_CREEPS, {filter: (s) => (s.hits < s.hitsMax) });
+		if (injured.length > 0) {
+			for(let tower of towers)
+			{
+				tower.heal(injured[0]);
+			}
+			return;
+		}
+		
+		
+		
+			
+		//repair structures except walls below 10k hps
+		var structures = room.find(FIND_STRUCTURES, {
+            filter: (s) => s.hits < s.hitsMax && (
+			s.structureType != STRUCTURE_WALL && 
+			s.structureType != STRUCTURE_RAMPART || 
+			s.hits < 10000)
+        });
+        if(structures.length > 0) {
+			for(let tower of towers)
+			{
+				if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
+					tower.repair(structures[0]);
+				}					
+			}
+			return;
+        }
+
 		
 		
 		//AUTO SAFEMODE
@@ -105,5 +118,111 @@ module.exports = {
 		}
 		
 		
+	},
+	
+	
+	buildHostileList: function(room)
+	{
+		if (!room.memory.hostiles) {
+			room.memory.hostiles = [];
+		}
+		
+		var hostiles = room.find(FIND_HOSTILE_CREEPS);
+		
+		//maybe filter out friendlies
+		
+		for (var h of hostiles) 
+		{
+			var bparts = _.countBy(h.body, 'type');
+			
+			//AI Hostiles
+			if (h.owner.username == "Invader") {
+				this.addToHostileList(room, 5, h.id, "Invader");
+				this.enableShoot(room, h.id);
+			}
+			
+			//non-offensive-creeps
+			if (!bparts[WORK] && !bparts[ATTACK] && !bparts[RANGED_ATTACK] && !bparts[CLAIM]) {
+				if (bparts[HEAL] && bparts[HEAL] > 0) {
+					//healer? drainer?
+					this.addToHostileList(room, 6, h.id, "healer");
+					let nearcreeps = h.pos.findInRange(FIND_MY_CREEPS, 4);
+					let nearstructs = h.pos.findInRange(FIND_STRUCTURES, 4);
+					if (nearcreeps.length > 0 || nearstructs.length > 0) {
+						this.enableShoot(room, h.id);
+					}
+					
+					continue;
+				} else 
+				if (bparts[CARRY] && bparts[CARRY] > 0) {
+					//scooper? - shoot when close
+					this.addToHostileList(room, 4, h.id, "scooper");
+					let nearcreeps = h.pos.findInRange(FIND_MY_CREEPS, 2);
+					let nearstructs = h.pos.findInRange(FIND_STRUCTURES, 2);
+					if (nearcreeps.length > 0 || nearstructs.length > 0) {
+						this.enableShoot(room, h.id);
+					}
+					
+					continue;
+				}
+				//scout
+			}
+			else {
+				//dangerous creep
+				this.addToHostileList(room, 5, h.id, "attacker");
+				let nearcreeps = h.pos.findInRange(FIND_MY_CREEPS, 3);
+				let nearstructs = h.pos.findInRange(FIND_STRUCTURES, 3);
+				if (nearcreeps.length > 0 || nearstructs.length > 0) {
+					this.enableShoot(room, h.id);
+				}
+				
+				continue;
+			}
+		}
+		
+	},
+	
+	addToHostileList: function(room, prio, creepid, role, shoot=false)
+	{
+		var index = _.findIndex(room.memory.hostiles, (c) => c.creep == creepid);
+		if (index < 0) {
+			room.memory.hostiles.push({prio: prio, creep: creepid, role: role, shoot: shoot});
+		}
+	}, 
+	
+	enableShoot: function(room, creepid)
+	{
+		var index = _.findIndex(room.memory.hostiles, (c) => c.creep == creepid);
+		if (index >= 0) {
+			room.memory.hostiles[index].shoot = true;
+		}
+	}, 
+	
+	
+	memCleanup: function(room)
+	{
+		for (var i in room.memory.hostiles)
+		{
+			var c = Game.getObjectById(room.memory.hostiles[i].creep);
+			if (!c || c.room != room.name) {
+				room.memory.hostiles.splice(i, 1);
+				return;
+			}
+		}
+	}, 
+	
+	
+	getSummedDistanceFromTowers: function(pos, room)
+	{
+		var towers = room.find(FIND_MY_STRUCTURES, {
+			filter: { structureType: STRUCTURE_TOWER }
+		});
+		
+		var ret = 0;
+		for (var t of towers) {
+			ret += t.pos.getRangeTo(t.pos);
+		}
+		
+		return ret;
 	}
 };

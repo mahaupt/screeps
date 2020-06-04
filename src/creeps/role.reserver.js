@@ -47,7 +47,7 @@ module.exports = {
         if (res != ERR_NOT_IN_RANGE) {
             creep.signController(
                 creep.room.controller, 
-                "Expansion"
+                "Expansion Room"
             );
         }
         
