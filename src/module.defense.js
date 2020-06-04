@@ -18,7 +18,11 @@ module.exports = {
 		
 		
 		//AUTO SAFEMODE
-		var hostiles = room.find(FIND_HOSTILE_CREEPS);
+		var hostiles = room.find(
+			FIND_HOSTILE_CREEPS, 
+			{filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND}
+		);
+		
 		if (hostiles.length > 0)
 		{
 			room.memory.attacked_time = Game.time;
@@ -26,6 +30,7 @@ module.exports = {
 			//check if hostiles are near creeps or structures
 			for (var i=0; i < hostiles.length; i++)
 			{
+				
 				var ncreeps = hostiles[i].pos.findInRange(FIND_MY_CREEPS, 4).length;
 				var nconstr = hostiles[i].pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 4).length;
 				var nstruct = hostiles[i].pos.findInRange(FIND_STRUCTURES, 4).length;
@@ -145,6 +150,11 @@ module.exports = {
 		for (var h of hostiles) 
 		{
 			var bparts = _.countBy(h.body, 'type');
+			
+			//friendlies
+			if (Intel.getDiplomatics(h.owner.username) == Intel.FRIEND) {
+				continue;
+			}
 			
 			//AI Hostiles
 			if (h.owner.username == "Invader") {

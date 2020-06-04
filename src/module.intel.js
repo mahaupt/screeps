@@ -89,7 +89,7 @@ module.exports = {
             
             if (room.controller.owner) {
                 intel.threat = "player";
-                
+                intel.owner = room.controller.owner.username;
                 intel.has_spawn = false;
                 var spawns = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN});
                 if (spawns.length > 0) {

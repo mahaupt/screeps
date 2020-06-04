@@ -198,13 +198,17 @@ module.exports = {
         var structures = null;
         
         if (range <= 0) {
-            hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS);
+            hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
             structure = findAtPos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
-                filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+                filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
+                    s.structureType == STRUCTURE_SPAWN) && 
+                    Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
         } else {
-            hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range);
+            hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
             structure = findAtPos.findInRange(FIND_HOSTILE_STRUCTURES, range, {
-                filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+                filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
+                    s.structureType == STRUCTURE_SPAWN) && 
+                    Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
                 
             if (hostiles.length > 0) {
                 hostiles = hostiles[0];
