@@ -45,7 +45,7 @@ module.exports = {
                 }
                 
                 if (!target || target.store.getFreeCapacity() == 0) {
-                    target = creep.room.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store.getFreeCapacity() > 0});
+                    target = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store.getFreeCapacity() > 0});
                 }
                 if (target) {
                     var res_types = baseCreep.getStoredResourceTypes(creep.store);
