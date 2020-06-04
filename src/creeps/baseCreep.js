@@ -180,13 +180,21 @@ module.exports = {
 		} else 
 		if (role == 'soldier')
 		{
-			bodySize = Math.min(bodySize, 8);
-			nwork=0;
-			ncarry=0;
-			ntough=bodySize; //10
-			nmove=2*bodySize; //50
-			nattack=bodySize; //80
-			nheal=0; // 250
+			if (bodySize > 2) {
+				bodySize = Math.min(bodySize, 8);
+				nwork=0;
+				ncarry=0;
+				ntough=bodySize; //10
+				nmove=2*bodySize+1; //50
+				nrattack=bodySize; //80
+				nheal=1; // 250
+			} else {
+				nwork=0;
+				ncarry=0;
+				ntough=bodySize;
+				nmove=2*bodySize;
+				nrattack=bodySize;
+			}
 		} else 
 		if (role == 'drainer')
 		{
@@ -196,6 +204,14 @@ module.exports = {
 			ntough=bodySize*2;//29; //10
 			nmove=bodySize;//17; //50
 			nheal=Math.round(bodySize/2);//4; // 250
+		} else
+		if (role == 'dismantler')
+		{
+			bodySize = Math.min(bodySize, 16);
+			nwork=bodySize;
+			ncarry=0;
+			nmove=Math.ceil(1.5*bodySize);//17; //50
+			nheal=Math.round(0.5*bodySize);//4; // 250
 		} else 
 		if (role == 'harvester')
 		{
@@ -350,7 +366,7 @@ module.exports = {
         var cap = creep.room.memory.stats.capacity;
         var ratio = energy / cap;
         
-        if (cap > 800 && ratio <= 0.1)
+        if (cap > 800 && ratio <= 0.05)
         {
             creep.say("😴");
 			creep.moveTo(creep.room.controller);
@@ -477,6 +493,13 @@ module.exports = {
 	
 	prepareCreep: function(creep)
     {
+		//creep is not home - reset prepare
+		if (creep.room.name != creep.memory.home) {
+			creep.memory.embark = true;
+			return false;
+		}
+		
+		
         //renew creeps
         var spawns = creep.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN});
 
@@ -533,7 +556,7 @@ module.exports = {
 			Memory.intel = {};
 		}
 		if (!Memory.intel.list) {
-			Memory.intel.list = [];
+			Memory.intel.list = {};
 		}if (!Memory.intel.req) {
 			Memory.intel.req = [];
 		}

@@ -180,10 +180,12 @@ module.exports = {
     {
         creep.say("⚔️");
         
-        var ret = creep.attack(target);
+        /*var ret = creep.attack(target);
         if (ret == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
-        }
+        }*/
+        creep.rangedMassAttack();
+        creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
     }, 
     
     pickTarget: function(creep, findAtPos = null, range = -1)

@@ -80,6 +80,8 @@ module.exports = {
                 }
             }
         }
+        
+        
         // Pick Source
         if (intel.sources > 0 && path.length <= 1) {
             let h = _.findIndex(roomhvstr, (s) => s.source_type == 'source' );

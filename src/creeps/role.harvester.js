@@ -156,9 +156,9 @@ module.exports = {
         }
         
         var sources = creep.room.find(FIND_SOURCES);
-        for (var s of sources) {
-            if (_.findIndex(colleagues, (s) => s.source == s.id) < 0) {
-                creep.memory.source = s.id;
+        for (var src of sources) {
+            if (_.findIndex(colleagues, (s) => s.source == src.id) < 0) {
+                creep.memory.source = src.id;
                 creep.memory.source_type = 'source';
                 return;
             }

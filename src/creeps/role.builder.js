@@ -88,6 +88,7 @@ module.exports = {
     
     
     pickBuildTarget: function(creep) {
+        delete creep.memory.dismantle;
         
         //repairs needed
         var repairs = creep.pos.findClosestByPath(FIND_STRUCTURES, {
@@ -103,6 +104,15 @@ module.exports = {
             creep.memory.building = repairs.id;
             return;
         }
+        
+        
+        //dismantle
+        /*var dismantles = creep.pos.findClosestByPath(FIND_FLAGS, 
+            {filter: (s) => s.name.search("dismantle") == 0});
+        if (dismantles) {
+            creep.memory.dismantle = true;
+            //let structure = dismantles.pos.findInRange()
+        }*/
         
         
         //construction sites

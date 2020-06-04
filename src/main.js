@@ -17,6 +17,7 @@ var roleClaimer = require('creeps_role.claimer');
 var roleReserver = require('creeps_role.reserver');
 var roleSoldier = require('creeps_role.soldier');
 var roleDrainer = require('creeps_role.drainer');
+var roleDismantler = require('creeps_role.dismantler');
 var roleRenewSelf = require('creeps_role.renewSelf');
 var roleBoostSelf = require('creeps_role.boostSelf');
 
@@ -111,12 +112,14 @@ module.exports.loop = function () {
                     rolePioneer.run(creep);
                 } else if (creep.memory.role == 'claimer') {
                    roleClaimer.run(creep);
-               } else if (creep.memory.role == 'reserver') {
+                } else if (creep.memory.role == 'reserver') {
                    roleReserver.run(creep);
                 } else if (creep.memory.role == 'soldier') {
                    roleSoldier.run(creep);
-               } else if (creep.memory.role == 'drainer') {
+                } else if (creep.memory.role == 'drainer') {
                    roleDrainer.run(creep);
+                } else if (creep.memory.role == 'dismantler') {
+                   roleDismantler.run(creep);
                 }
             /*}
             catch(err)

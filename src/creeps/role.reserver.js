@@ -36,8 +36,22 @@ module.exports = {
         }
         
         
+        var res = -1;
+        
+        if (creep.room.controller.owner) {
+            res = creep.attackController(creep.room.controller);
+        } else {
+            res = creep.reserveController(creep.room.controller);
+        }
+        
+        if (res != ERR_NOT_IN_RANGE) {
+            creep.signController(
+                creep.room.controller, 
+                "Expansion"
+            );
+        }
+        
         //in target room
-        var res = creep.reserveController(creep.room.controller);
         if (res != OK) {
             creep.moveTo(creep.room.controller);
         }
