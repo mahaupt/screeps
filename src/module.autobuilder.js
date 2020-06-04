@@ -296,12 +296,12 @@ module.exports = {
     
     calcBaseCenterPoint: function(room)
     {
-        var spawns = creep.room.find(
+        var spawns = room.find(
             FIND_MY_STRUCTURES, 
             {filter: (s) => s.structureType == STRUCTURE_SPAWN}
         );
-        if (spanws.length > 0) {
-            room.memory.center = {x: spanws[0].pos.x-1, y: spanws[0].pos.y+6};
+        if (spawns.length > 0) {
+            room.memory.center = {x: spawns[0].pos.x-1, y: spawns[0].pos.y+6};
         }
     }, 
     
