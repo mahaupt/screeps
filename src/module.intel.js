@@ -152,6 +152,35 @@ module.exports = {
         if (index < 0) {
             Memory.intel.claimable.push({room: roomname, parsed: false});
         }
+    }, 
+    
+    isPotClaimCalculating: function(roomname)
+    {
+        if (!Memory.intel.claimable) {
+            Memory.intel.claimable = [];
+        }
+        var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
+        if (index >= 0) {
+            return !Memory.intel.claimable[index].parsed;
+        }
+        return false;
+    }, 
+    
+    
+    getPotClaimCenterPos: function(roomname)
+    {
+        if (!Memory.intel) return undefined;
+        if (!Memory.intel.claimable) return undefined;
+        
+        var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
+        if (index > 0) {
+            if (Memory.intel.claimable[index].parsed) {
+                var center = Memory.intel.claimable[index].center;
+                return new RoomPosition(center.x, center.y, roomname);
+            }
+        }
+        
+        return undefined;
     }
     
 };

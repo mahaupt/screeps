@@ -50,7 +50,11 @@ module.exports =  {
             if (room.memory.stats.energy_1k_dx > 1000 && elevel >= 0.15 || 
                 elevel >= 0.95) {
                 room.memory.stats.add_creeps += 1;
-                console.log(room.name + ": incr number of creeps");
+                if (room.memory.stats.add_creeps > 6) {
+                    room.memory.stats.add_creeps = 6;
+                } else {
+                    console.log(room.name + ": incr number of creeps");
+                }
             }
             
             //remove builders

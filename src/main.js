@@ -27,6 +27,7 @@ var moduleStats = require('module.stats');
 
 var moduleDefense = require('module.defense');
 var moduleEvents = require('module.events');
+var moduleBasePosCalc = require('module.baseposcalc');
 
 /*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -134,5 +135,11 @@ module.exports.loop = function () {
     	        creep.memory.renewSelf = true;
             }
         }
+        
+        
+        //use rest of cpu
+        moduleBasePosCalc.run();
+        
+        
     //});
 };

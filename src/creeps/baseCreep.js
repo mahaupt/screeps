@@ -379,10 +379,12 @@ module.exports = {
 	
 	roomCostCallback: function(rname, fromRoomName)
 	{
-		if (Memory.intel && Memory.intel.list && Memory.intel.list[rname]) {
-			if (Memory.intel.list[rname].threat == "core" || 
-				Memory.intel.list[rname].threat == "player" || 
-				Memory.intel.list[rname].blocked)
+		var intel = Intel.getIntel(rname);
+		if (intel) {
+			
+			if (intel.threat == "core" && intel.time+90000>Game.time || 
+				intel.threat == "player" || 
+				intel.blocked)
 			{
 				//avoid room
 				return Infinity;
