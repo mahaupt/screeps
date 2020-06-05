@@ -1,6 +1,6 @@
 /*
 Memory Layout
-role = 'tank'
+role = 'drainer'
 home = home room name
 
 
@@ -13,7 +13,7 @@ one_more_step = true/false
 */
 
 module.exports = {
-    name: "tank", 
+    name: "drainer", 
     boost_res: ['GO', 'LO', 'ZO'],
     run: function(creep) {
         baseCreep.init(creep);
@@ -36,16 +36,22 @@ module.exports = {
                 creep.moveTo(creep.room.controller);
             }
             delete creep.memory.embark;
+            delete creep.memory.noRenew;
             return;
         }
         
         //if target room - prepare for embarkation
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
+                creep.memory.noRenew = true;
                 baseCreep.boostCreep(creep, this.boost_res);
             }
             return;
         }
+        
+        
+        //intel
+        Intel.collectIntel(creep, creep.room);
         
         
         //move to target room
@@ -62,16 +68,25 @@ module.exports = {
                     var dir = creep.pos.getDirectionTo(25, 25);
                     creep.move(dir);
                     
-                    var exit = creep.pos.findInRange(FIND_EXIT, 0);
+                    let exit = creep.pos.findInRange(FIND_EXIT, 0);
                     if (exit.length == 0) {
                         creep.memory.tx = creep.pos.x;
                         creep.memory.ty = creep.pos.y;
                     }
                 }
                 
+                //no enemies left - go home
+                var enemies = creep.room.find(
+                    FIND_HOSTILE_STRUCTURES, 
+                    {filter: (s) => s.structureType == STRUCTURE_TOWER && s.store.getUsedCapacity(RESOURCE_ENERGY) > 0}
+                );
+                if (enemies.length <= 0) {
+                    delete creep.memory.target;
+                }
+                
             } else {
                 //retreat
-                var exit = Game.map.findExit(creep.room.name, creep.memory.room_before_troom);
+                let exit = Game.map.findExit(creep.room.name, creep.memory.room_before_troom);
                 if (exit >= 0) {
                     var closest_exit = creep.pos.findClosestByPath(exit);
                     creep.moveTo(closest_exit);

@@ -1,16 +1,10 @@
-/*
-Memory Layout
-role = 'claimer'
-home = home room name
-
-troom = room name of target
-*/
-
 module.exports = {
-    name: 'claimer', 
     run: function(creep)
     {
         baseCreep.init(creep);
+        
+        //cannot be renewed
+        creep.memory.noRenew = true;
         
         //go back home // wait for target
         if (!creep.memory.troom)
@@ -34,18 +28,32 @@ module.exports = {
             return;
         }
         
-        //capture controller
-        if (!creep.room.controller.my) {
-            if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
-            }
-        } else {
-            //go back and kill self
+        
+        //delete target - invalid
+        if (!creep.room.controller || creep.room.controller.my) {
             delete creep.memory.troom;
-            creep.memory.killSelf = true;
-            creep.memory.renewSelf = true;
+            return;
         }
         
         
-    },
+        var res = -1;
+        
+        if (creep.room.controller.owner) {
+            res = creep.attackController(creep.room.controller);
+        } else {
+            res = creep.reserveController(creep.room.controller);
+        }
+        
+        if (res != ERR_NOT_IN_RANGE) {
+            creep.signController(
+                creep.room.controller, 
+                "Expansion Room"
+            );
+        }
+        
+        //in target room
+        if (res != OK) {
+            creep.moveTo(creep.room.controller);
+        }
+    }
 };

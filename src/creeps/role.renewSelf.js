@@ -43,36 +43,37 @@ module.exports = {
 					}
 				}
 			}
+			
 			//carry energy to base
 	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 	                creep.moveTo(targets[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+					return;
 	            }
 	        } 
-			else 
-			{
-		        //renew self vs recycle self
-		        if (creep.memory.killSelf)
+			
+	        //renew self vs recycle self
+	        if (creep.memory.killSelf)
+	        {
+		        if (spawns[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 		        {
-			        if (spawns[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
-			        {
-				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
-			        }
-			        creep.say("☠");
-			        return;
-		        } else {
-					var ret = spawns[0].renewCreep(creep);
-			        if (ret == ERR_NOT_IN_RANGE)
-			        {
-				        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
-			        } else if (ret == ERR_FULL)
-					{
-						//renew successful
-						creep.memory.renewSelf = false;
-					}
-					creep.say("❤");
+			        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 		        }
-		    }
+		        creep.say("☠");
+		        return;
+	        } else {
+				var ret = spawns[0].renewCreep(creep);
+		        if (ret == ERR_NOT_IN_RANGE || ret == ERR_BUSY)
+		        {
+			        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+		        } else if (ret == ERR_FULL)
+				{
+					//renew successful
+					creep.memory.renewSelf = false;
+				}
+				creep.say("❤");
+	        }
+		   
         }
         
         

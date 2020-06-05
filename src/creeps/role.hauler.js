@@ -1,9 +1,10 @@
+
 /*
 Memory Layout
 .role = "hauler"
 .harvesting = true/false
 .renewSelf = true/false
-.container = container.id // link.id
+.task = HAULING TASK
 .target = target.id
 */
 

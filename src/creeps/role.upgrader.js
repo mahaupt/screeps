@@ -1,8 +1,26 @@
+/*
+Memory Layout
+role = 'upgrader'
+home = home room name
+
+harvesting = true/false
+source = source id / container id
+*/
+
 module.exports = {
     name: 'claimer', 
     run: function(creep) {
+        baseCreep.init(creep);
+        
+        
+        //go home if lost
+        if (creep.room.name != creep.memory.home) {
+            baseCreep.moveToRoom(creep, creep.memory.home);
+            return;
+        }
+        
         //flee
-        if (creep.room.memory.attacked) {
+        if (creep.room.memory.attacked_time + 30 > Game.time) {
             var tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
             if (tower) {
                 creep.moveTo(tower, {range: 2, visualizePathStyle: {stroke: '#00ff00'}});

@@ -32,7 +32,7 @@ module.exports = {
     genLootTasks: function(room)
     {
         //todo: if room is attacked, skip looting
-        if (room.memory.attacked) return;
+        if (room.memory.attacked_time + 30 > Game.time) return;
         
         //get loot sources
         var res = room.find(FIND_DROPPED_RESOURCES);

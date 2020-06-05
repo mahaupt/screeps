@@ -149,7 +149,7 @@ module.exports = {
 		{
 			bodySize = Math.min(bodySize, 8);
 			nwork=0;
-			ncarry = Math.min(2*bodySize, 25);
+			ncarry = Math.min(2*bodySize+1, 25);
 			nmove = Math.min(2*bodySize-1, 25);
 		} else 
 		if (role=='scout')
@@ -160,9 +160,9 @@ module.exports = {
 		} else 
 		if (role == 'pioneer')
 		{
-			nwork=3;
+			nwork=2;
 			ncarry=4;
-			nmove=7;
+			nmove=6;
 		} else 
 		if (role == 'claimer')
 		{
@@ -171,25 +171,62 @@ module.exports = {
 			nclaim=1;
 			nmove=1;
 		} else 
+		if (role == 'reserver')
+		{
+			nwork=0;
+			ncarry=0;
+			nclaim=Math.max(Math.round(bodySize/3), 1);
+			nmove=1;
+		} else 
 		if (role == 'soldier')
 		{
-			bodySize = Math.min(bodySize, 16);
-			bodySize = 1;
-			nwork=0;
-			ncarry=0;
-			ntough=1*bodySize; //10
-			nmove=1*bodySize+1; //50
-			nrattack=bodySize; //150
-			nheal=1; // 250
+			if (bodySize > 2) {
+				bodySize = Math.min(bodySize, 8);
+				nwork=0;
+				ncarry=0;
+				ntough=bodySize; //10
+				nmove=2*bodySize+1; //50
+				nrattack=bodySize; //80
+				nheal=1; // 250
+			} else {
+				nwork=0;
+				ncarry=0;
+				ntough=bodySize;
+				nmove=2*bodySize;
+				nrattack=bodySize;
+			}
 		} else 
-		if (role == 'tank')
+		if (role == 'drainer')
 		{
 			bodySize = Math.min(bodySize, 16);
 			nwork=0;
 			ncarry=0;
-			ntough=1;//29; //10
-			nmove=1;//17; //50
-			nheal=1;//4; // 250
+			ntough=bodySize*2;//29; //10
+			nmove=bodySize;//17; //50
+			nheal=Math.round(bodySize/2);//4; // 250
+		} else
+		if (role == 'dismantler')
+		{
+			bodySize = Math.min(bodySize, 16);
+			nwork=bodySize;
+			ncarry=0;
+			nmove=Math.ceil(1.5*bodySize);//17; //50
+			nheal=Math.round(0.5*bodySize);//4; // 250
+		} else 
+		if (role == 'harvester')
+		{
+			bodySize = Math.min(bodySize, 16);
+			nwork=Math.ceil(0.5*bodySize);
+			ncarry=bodySize;
+			nmove=Math.ceil(1.5*bodySize);
+		}
+		if (role == 'healer')
+		{
+			bodySize = Math.min(bodySize, 25);
+			nwork = 0;
+			ncarry = 0;
+			nmove= bodySize; //50
+			nheal = bodySize; //250
 		}
 		//upgrader && builder == standard
 		
@@ -283,18 +320,13 @@ module.exports = {
 	}, 
 	
 	getSpawnLink: function(room) {
-        var spawn = room.find(FIND_STRUCTURES, {
+        var cpoint = moduleAutobuilder.getBaseCenterPoint(room);
+        var spawnlink = cpoint.findInRange(FIND_STRUCTURES, 2, {
 	        filter: (structure) => {
-	            return (structure.structureType == STRUCTURE_SPAWN);
+	            return (structure.structureType == STRUCTURE_LINK);
 	        }});
-        if (spawn.length > 0) {
-            var spawnlink = spawn[0].pos.findInRange(FIND_STRUCTURES, 2, {
-    	        filter: (structure) => {
-    	            return (structure.structureType == STRUCTURE_LINK);
-    	        }});
-            if (spawnlink.length > 0) {
-                return spawnlink[0];
-            }
+        if (spawnlink.length > 0) {
+            return spawnlink[0];
         }
         
         return false;
@@ -325,11 +357,17 @@ module.exports = {
     }, 
 	
 	skipDueEnergyLevels: function(creep) {
-        var energy = creep.room.memory.total_energy;
-        var cap = creep.room.memory.total_capacity;
+		//no skipping if room is attacked
+		if (creep.room.memory.attacked_time + 30 > Game.time) {
+			return false;
+		}
+		
+		
+        var energy = creep.room.memory.stats.energy;
+        var cap = creep.room.memory.stats.capacity;
         var ratio = energy / cap;
         
-        if (cap > 800 && ratio <= 0.1)
+        if (cap > 800 && ratio <= 0.05)
         {
             creep.say("😴");
 			creep.moveTo(creep.room.controller);
@@ -338,26 +376,45 @@ module.exports = {
         return false;
     }, 
 	
+	
+	roomCostCallback: function(rname, fromRoomName)
+	{
+		if (Memory.intel && Memory.intel.list && Memory.intel.list[rname]) {
+			if (Memory.intel.list[rname].threat == "core" || 
+				Memory.intel.list[rname].threat == "player" || 
+				Memory.intel.list[rname].blocked)
+			{
+				//avoid room
+				return Infinity;
+			}
+		}
+		return 1;
+	}, 
+	
 	//source callback avoiding source keepers
-	avoidSourceCostCallback: function(rname, costs)
+	travelCostCallback: function(rname, costs)
 	{
 		var room = Game.rooms[rname];
 		
+		//room not found
 		if (!room) return;
+		
+		//no hostiles - return
+		if (room.find(FIND_HOSTILE_STRUCTURES).length <= 0) return;
 		
 		var sources = room.find(FIND_SOURCES);
 		var minerals = room.find(FIND_MINERALS);
 		var avoids = [].concat(sources, minerals);
 		
 		_.forEach(avoids, function(avoid){
-			var xStart = avoid.pos.x - 5;
-			var xEnd = avoid.pos.x + 5;
-			var yStart = avoid.pos.y - 5;
-			var yEnd = avoid.pos.y + 5;
+			var xStart = avoid.pos.x - 4;
+			var xEnd = avoid.pos.x + 4;
+			var yStart = avoid.pos.y - 4;
+			var yEnd = avoid.pos.y + 4;
 
 			for(var x = xStart; x <= xEnd; x++) {
 				for(var y = yStart; y <= yEnd; y++) {
-					costs.set(x, y, 20);
+					costs.set(x, y, 10);
 				}
 			}
 		});
@@ -365,18 +422,60 @@ module.exports = {
 	}, 
 	
 	//moves creep to room name, avoids source keeper
-	moveToRoom: function(creep, name, travelSafe=true) {
-        var pos = new RoomPosition(25, 25, name);
-		
-		if (travelSafe) {
-	        creep.moveTo(pos, {
-				reusePath: 10, 
-				costCallback: this.avoidSourceCostCallback, 
-				swampCost: 3, 
-				visualizePathStyle: {stroke: '#ffff00'}
+	moveToRoom: function(creep, name) {		
+		//follow room list
+		if (!creep.memory.roomPath || 
+			creep.memory.roomPathTarget != name)
+		{
+			var rlist = Game.map.findRoute(creep.room.name, name, {
+				routeCallback: this.roomCostCallback
 			});
-		} else {
-			creep.moveTo(pos, {visualizePathStyle: {stroke: '#ffff00'}});
+			
+			creep.memory.roomPath = rlist;
+			creep.memory.roomPathTarget = name;
+		}
+		
+		if (creep.memory.roomPath && creep.memory.roomPath[0])
+		{
+			if (creep.memory.roomPath[0].room == creep.room.name) {
+				creep.memory.roomPath.shift();
+			}
+		}
+		
+		var nextRoom = name;
+		if (creep.memory.roomPath && creep.memory.roomPath[0])
+		{
+			nextRoom = creep.memory.roomPath[0].room;
+		}
+		
+        var pos = new RoomPosition(25, 25, nextRoom);
+		
+		var ret = creep.moveTo(pos, {
+			reusePath: 50,
+			costCallback: this.travelCostCallback,
+			range: 5,
+			plainCost: 1,
+			swampCost: 3,
+			maxOps: 4000,
+			visualizePathStyle: {stroke: '#ffff00'}
+		});
+		
+		
+		if (ret == ERR_NO_PATH) {
+			creep.moveTo(creep.room.getPositionAt(25, 25), {range: 5});
+			
+			//mark room as blocked if walls exist
+			var r = creep.room.name;
+			var walls = creep.room.find(
+				FIND_STRUCTURES, 
+				{filter: (s) => s.structureType == STRUCTURE_WALL}
+			);
+			
+			if (walls.length > 0 && Memory.intel.list[r] && !Memory.intel.list[r].blocked) {
+				Memory.intel.list[r].blocked = true;
+				Game.notify(creep.name + ": couldnt find way through room " + creep.room.name + " and marked as blocked");
+				delete creep.memory.roomPath;
+			}
 		}
     }, 
 	
@@ -395,6 +494,13 @@ module.exports = {
 	
 	prepareCreep: function(creep)
     {
+		//creep is not home - reset prepare
+		if (creep.room.name != creep.memory.home) {
+			creep.memory.embark = true;
+			return false;
+		}
+		
+		
         //renew creeps
         var spawns = creep.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN});
 
@@ -438,6 +544,11 @@ module.exports = {
 	flee: function(creep)
 	{
 		//drop energy and flee to next tower
+		
+	}, 
+	
+	calcTankDps: function(creep)
+	{
 		
 	}
 };

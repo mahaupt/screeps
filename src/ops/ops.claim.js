@@ -14,6 +14,11 @@ module.exports = {
         ops.mem.timeout = Game.time + 50;
         ops.mem.skip_timeout = false;
         
+        
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
+        
+        
         //states
         if (ops.mem.state == this.PREPARE) 
         {
@@ -33,12 +38,12 @@ module.exports = {
                 
                 //spawn of claimer successful
                 if (spawns.length > 0 && 
-                    moduleSpawn.spawn(spawns[0], "claimer", {target: ops.target}))
+                    moduleSpawn.spawn(spawns[0], "claimer", {troom: ops.target}))
                 {
                     //set target of pioneers
                     for (var i = 0; i < pioneers.length; i++)
                     {
-                        pioneers[i].memory.target = ops.target;
+                        pioneers[i].memory.troom = ops.target;
                     }
                     
                     //next state
@@ -135,8 +140,8 @@ module.exports = {
                 ops.mem.reinforcement = true;
                 ops.mem.state_started = Game.time; // restart state
                 
-                this.spawnPioneerGroup(ops, {target: ops.target});
-                console.log(ops.source + ": Claim Ops: Spawning Reinforcement")
+                this.spawnPioneerGroup(ops, this.pioneerGroupSize, {troom: ops.target});
+                console.log(ops.source + ": Claim Ops: Spawning Reinforcement");
                 return;
             }
             
@@ -164,19 +169,19 @@ module.exports = {
         ops.mem.max_creep_life = 1000;
         
         
-        this.spawnPioneerGroup(ops);
+        this.spawnPioneerGroup(ops, this.pioneerGroupSize);
         
         //add timeout
         ops.mem.timeout = Game.time + 50*this.pioneerGroupSize;
     }, 
     
     
-    spawnPioneerGroup: function(ops, mem = {})
+    spawnPioneerGroup: function(ops, size, mem={})
     {
         var room = Game.rooms[ops.source];
         
         if (room) {
-            for (var i=0; i < this.pioneerGroupSize; i++) {
+            for (var i=0; i < size; i++) {
                 moduleSpawn.addSpawnList(room, "pioneer", mem);
             }
         }

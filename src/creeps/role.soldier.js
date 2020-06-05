@@ -27,7 +27,7 @@ module.exports = {
         
         var leader = this.getLeader(creep);
         
-        this.attackDetection(creep);
+        this.attackDetection(creep, leader);
         this.healSelf(creep);
         
         if (creep.memory.grp_lead == 'self')
@@ -67,11 +67,13 @@ module.exports = {
         if (creep.memory.troom && !creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
                 //prepared - search for boost
+                creep.memory.noRenew = true;
                 baseCreep.boostCreep(creep, this.boost_res);
             }
             return;
         } else if (!creep.memory.troom) {
             delete creep.memory.embark;
+            delete creep.memory.noRenew;
         }
         
         //follow leader
@@ -104,6 +106,7 @@ module.exports = {
                 creep.moveTo(creep.room.controller);
                 this.pickTarget(creep);
             }
+            delete creep.memory.noRenew;
             delete creep.memory.embark;
             return;
         }
@@ -113,10 +116,16 @@ module.exports = {
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
                 //prepared - search for boost
+                creep.memory.noRenew = true;
                 baseCreep.boostCreep(creep, this.boost_res);
             }
             return;
         }
+        
+        
+        //collect intel        
+        Intel.collectIntel(creep, creep.room);
+        
         
         //in target room
         if (creep.room.name == creep.memory.troom) 
@@ -147,7 +156,7 @@ module.exports = {
         {   //move to target room
             
             //handle counter attack on the way
-            if (creep.memory.attacked) {
+            if (creep.memory.attacked_time + 10 > Game.time) {
                 if (!creep.memory.target && !creep.memory.passive) 
                 {   //pick closest target
                     this.pickTarget(creep);
@@ -171,13 +180,12 @@ module.exports = {
     {
         creep.say("⚔️");
         
-        var range = creep.pos.getRangeTo(target);
-        if (range > 1) {
+        /*var ret = creep.attack(target);
+        if (ret == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
-        }
-        if (range <= 3) {
-            creep.rangedMassAttack();
-        }
+        }*/
+        creep.rangedMassAttack();
+        creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
     }, 
     
     pickTarget: function(creep, findAtPos = null, range = -1)
@@ -190,13 +198,17 @@ module.exports = {
         var structures = null;
         
         if (range <= 0) {
-            hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS);
+            hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
             structure = findAtPos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
-                filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+                filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
+                    s.structureType == STRUCTURE_SPAWN) && 
+                    Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
         } else {
-            hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range);
+            hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
             structure = findAtPos.findInRange(FIND_HOSTILE_STRUCTURES, range, {
-                filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+                filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
+                    s.structureType == STRUCTURE_SPAWN) && 
+                    Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
                 
             if (hostiles.length > 0) {
                 hostiles = hostiles[0];
@@ -233,33 +245,18 @@ module.exports = {
     }, 
     
     
-    attackDetection: function(creep)
+    attackDetection: function(creep, leader)
     {
-        if (!creep.memory.last_hitpoints) {
-            creep.memory.last_hitpoints = creep.hits;
-            return;
-        }
+        // attacked timer is now autoset
         
-        if (creep.memory.last_hitpoints < creep.hits) {
-            creep.memory.attacked = true;
-            creep.memory.attacked_time = Game.time;
-            
-            //tell leader
-            if (creep.memory.grp_lead != 'self') {
-                var lead = Game.getObjectById(creep.memory.grp_lead);
-                if (lead) {
-                    lead.memory.attacked = true;
-                    lead.memory.attacked_time = Game.time;
-                }
+        
+        //tell leader
+        if (creep.memory.attacked_time && leader) {
+            if (creep.memory.attacked_time > leader.memory.attacked_time) {
+                leader.memory.attacked_time = creep.memory.attacked_time;
             }
         }
-        else if (creep.memory.attacked_time + 10 < Game.time)
-        {
-            delete creep.memory.attacked;
-            delete creep.memory.attacked_time;
-        }
         
-        creep.memory.last_hitpoints = creep.hits;
     }, 
     
     
@@ -269,7 +266,10 @@ module.exports = {
             leader.memory.grp_follow = [];
         }
         
-        leader.memory.grp_follow.push(follower.id);
+        var index = _.findIndex(leader.memory.grp_follow, (s) => s == follower.id);
+        if (index < 0) {
+            leader.memory.grp_follow.push(follower.id);
+        }
     }, 
     
     checkFollower: function(creep)
@@ -298,6 +298,7 @@ module.exports = {
         //leader = other creep
         var ldr = Game.getObjectById(creep.memory.grp_lead);
         if (ldr) {
+            this.addFollower(ldr, creep);
             return ldr;
         }
         
@@ -309,7 +310,6 @@ module.exports = {
         
         if (leader) {
             creep.memory.grp_lead = leader.id;
-            this.addFollower(leader, creep);
             return leader;
         } else {
             //set leader as self

@@ -9,6 +9,9 @@ const opsClaim = require('ops_ops.claim');
 const opsDefend = require('ops_ops.defend');
 const opsDrain = require('ops_ops.drain');
 const opsScout = require('ops_ops.scout');
+const opsHarvest = require('ops_ops.harvest');
+const opsScoutVicinity  = require('ops_ops.scout_vicinity');
+const opsRoomLifetime = require('ops_ops.room_lifetime');
 
 module.exports = {
     run: function() {
@@ -31,6 +34,12 @@ module.exports = {
                 opsDrain.run(Memory.ops[i]);
             } else if (Memory.ops[i].type == 'scout') {
                 opsScout.run(Memory.ops[i]);
+            } else if (Memory.ops[i].type == 'harvest') {
+                opsHarvest.run(Memory.ops[i]);
+            } else if (Memory.ops[i].type == 'scout_vicinity') {
+                opsScoutVicinity.run(Memory.ops[i]);
+            } else if (Memory.ops[i].type == 'room_lifetime') {
+                opsRoomLifetime.run(Memory.ops[i]);
             }
         }
     }, 
@@ -39,5 +48,17 @@ module.exports = {
     new: function(type, source, target, mem={}) 
     {
         Memory.ops.push({type: type, source: source, target: target, finished: false, mem: mem});
+    },
+    
+    
+    checkSrcRoomAvbl: function(ops)
+    {
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (!Game.rooms[ops.source]) {
+            console.log("Ops." + ops.type + ": Source room lost. Aborting");
+            ops.finished = true;
+            return true;
+        }
+        return false;
     }
 };
