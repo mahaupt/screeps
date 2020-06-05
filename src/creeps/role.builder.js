@@ -107,7 +107,7 @@ module.exports = {
                 return (
                     structure.structureType != STRUCTURE_WALL && 
                     structure.structureType != STRUCTURE_RAMPART && 
-                    structure.hits < structure.hitsMax);
+                    structure.hits < structure.hitsMax*0.8);
             }
         });
         if (repairs)
