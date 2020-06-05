@@ -82,7 +82,7 @@ module.exports = {
             {
                 points -= 9999;
             } else {
-                points -= Math.pow(path.length, 2)*0.5;
+                points -= path.length*5;
             }
         }
         
@@ -105,7 +105,7 @@ module.exports = {
             }
             if (places[i].terrain == 'wall')
             {
-                points -= 25;
+                points -= 50;
             }
         }
         
@@ -123,10 +123,10 @@ module.exports = {
             
             if (!path.length)
             {
-                points += 50*5;
+                points += 50*2;
             } else {
                 //the longer the better
-                points += path.length*5;
+                points += path.length*2;
             }
         }
         
