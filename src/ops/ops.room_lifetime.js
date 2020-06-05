@@ -28,7 +28,8 @@ module.exports = {
         }
         
         //AUTO HARVEST OPS
-        for (var intel of Memory.intel.list) {
+        for (var i in Memory.intel.list) {
+            var intel = Memory.intel.list[i];
             if (intel.threat != "none") continue;
             
             var dist = Game.map.getRoomLinearDistance(ops.source, intel.name, true);
@@ -36,8 +37,8 @@ module.exports = {
             {
                 //source and mineral ops
                 //check if no harvest ops exist
-                var i = _.findIndex(Memory.ops, (o) => { return o.target == intel.name; });
-                if (i < 0) {
+                var j = _.findIndex(Memory.ops, (o) => { return o.target == intel.name; });
+                if (j < 0) {
                     Ops.new("harvest", ops.source, intel.name);
                     return;
                 }
