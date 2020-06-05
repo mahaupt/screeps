@@ -40,11 +40,11 @@ module.exports = {
 				//activate safe mode if more then 3 hostiles or no towers
 				if (ncreeps+nconstr+nstruct > 0 && 
 					(hostiles.length > 3 || towers.length == 0) || 
-					cstrength > 50)
+					cstrength > 100)
 				{
 					//try activate safe mode
 					//console.log("danger!");
-					if (!room.controller.safeMode) {
+					if (!room.controller.safeMode && false) {
 						if (room.controller.activateSafeMode() == OK)
 						{
 							let msg = room.name + ": Hostiles detected! Safe mode activated!";
@@ -92,27 +92,26 @@ module.exports = {
 	towers: function(room, towers)
 	{
 		//shoot hostiles
-		var towers_busy = false;
 		var shooters = _.filter(room.memory.hostiles, (h) => h.shoot == true);
-		if (shooters.length > 0 && !towers_busy) {
+		if (shooters.length > 0) {
 			var hostile = Game.getObjectById(shooters[0].creep);
 	        if (hostile) {
 				for(let tower of towers)
 				{
 	            	tower.attack(hostile);
 				}
-				towers_busy = true;
+				return;
 	        }
 		}
 		
 		//heal creeps
 		var injured = room.find(FIND_MY_CREEPS, {filter: (s) => (s.hits < s.hitsMax) });
-		if (injured.length > 0 && !towers_busy) {
+		if (injured.length > 0) {
 			for(let tower of towers)
 			{
 				tower.heal(injured[0]);
 			}
-			towers_busy = true;
+			return;
 		}
 		
 		
@@ -125,14 +124,14 @@ module.exports = {
 			s.structureType != STRUCTURE_RAMPART || 
 			s.hits < 10000)
         });
-        if(structures.length > 0 && !towers_busy) {
+        if(structures.length > 0) {
 			for(let tower of towers)
 			{
 				if (tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)/2) {
 					tower.repair(structures[0]);
 				}					
 			}
-			towers_busy = true;
+			return;
         }
 	}, 
 	

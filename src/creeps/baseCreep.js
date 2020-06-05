@@ -320,18 +320,13 @@ module.exports = {
 	}, 
 	
 	getSpawnLink: function(room) {
-        var spawn = room.find(FIND_STRUCTURES, {
+        var cpoint = moduleAutobuilder.getBaseCenterPoint(room);
+        var spawnlink = cpoint.findInRange(FIND_STRUCTURES, 2, {
 	        filter: (structure) => {
-	            return (structure.structureType == STRUCTURE_SPAWN);
+	            return (structure.structureType == STRUCTURE_LINK);
 	        }});
-        if (spawn.length > 0) {
-            var spawnlink = spawn[0].pos.findInRange(FIND_STRUCTURES, 2, {
-    	        filter: (structure) => {
-    	            return (structure.structureType == STRUCTURE_LINK);
-    	        }});
-            if (spawnlink.length > 0) {
-                return spawnlink[0];
-            }
+        if (spawnlink.length > 0) {
+            return spawnlink[0];
         }
         
         return false;
@@ -362,6 +357,12 @@ module.exports = {
     }, 
 	
 	skipDueEnergyLevels: function(creep) {
+		//no skipping if room is attacked
+		if (creep.room.memory.attacked_time + 30 > Game.time) {
+			return false;
+		}
+		
+		
         var energy = creep.room.memory.stats.energy;
         var cap = creep.room.memory.stats.capacity;
         var ratio = energy / cap;
@@ -546,5 +547,8 @@ module.exports = {
 		
 	}, 
 	
-	
+	calcTankDps: function(creep)
+	{
+		
+	}
 };

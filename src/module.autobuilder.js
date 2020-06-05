@@ -1,26 +1,23 @@
 module.exports = {
-    run: function(room) {
-        //Base building calculation
-        if (Memory.pBLocation) {
-            this.pickFirstBasePos(room);
-            return;
-        }
-        //find base center
-        if (!room.memory.center) {
-            
-        }
-        
+    run: function(room) {        
 	    var constr_sites_num = room.find(FIND_MY_CONSTRUCTION_SITES).length;
 	    
 	    //SPAWN
 	    var spawn_num = this.getTotalStructures(room, STRUCTURE_SPAWN);
+        var spawn_built = this.getTotalStructures(room, STRUCTURE_SPAWN, true);
 	    var spawn_max = 1;
-        if (spawn_num == 0) {
-            //this.pickFirstBasePos(room);
+        if (spawn_num < spawn_max) {
+            var cpoint = this.getBaseCenterPoint(room);
+            if (cpoint) 
+            {
+                //center point avbl for build
+                this.buildAroundCenter(room, STRUCTURE_SPAWN, true);
+            }
             return;
-        } else if (spawn_num < spawn_max) {
-            //todo: additional spawns
         }
+        
+        //no spawn - abort autobuild
+        if (spawn_built == 0) return;
 	    
 	    //EXTENSIONS
 	    var extensions_num = this.getTotalStructures(room, STRUCTURE_EXTENSION);
@@ -145,7 +142,8 @@ module.exports = {
         
         //building walls from lvl 4
         if (room.controller.level >= 4 && constr_sites_num == 0) {
-            //this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
+            this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
+            this.buildAroundCenter(room, STRUCTURE_WALL, true);
         }
     },
     
@@ -155,7 +153,7 @@ module.exports = {
         
         //first - pick valid build positions
 	    var sources = room.find(FIND_SOURCES);
-        if (room.controller.level >= 6) {
+        if (room.controller.level >= 6 && type != STRUCTURE_LINK) {
             sources = sources.concat(room.find(FIND_MINERALS));
         }
         
@@ -212,6 +210,8 @@ module.exports = {
 	    
         var centerPos = this.getBaseCenterPoint(room);
         var buildPos = this.getNextFreeBasePos(room, type, centerPos);
+        if (!centerPos || !buildPos) return false;
+        
         if (room.createConstructionSite(buildPos, type) == OK) {
             if (removeRoads) {
                 this.removeRoads(room, buildPos);
@@ -223,15 +223,19 @@ module.exports = {
     }, 
     
     
-    getTotalStructures: function(room, type) {
+    getTotalStructures: function(room, type, ignore_csites=false) {
 	    var structures = room.find(FIND_STRUCTURES, {
 			    filter: { structureType: type }
 			});
-		var constr = room.find(FIND_MY_CONSTRUCTION_SITES, {
-			    filter: { structureType: type }
-			});
-			
-		return structures.length + constr.length;
+		
+        if (ignore_csites) {
+            return structures.length;
+        } else {
+            var constr = room.find(FIND_MY_CONSTRUCTION_SITES, {
+    			    filter: { structureType: type }
+    			});
+            return structures.length + constr.length;
+        }
     }, 
     
     
@@ -249,7 +253,6 @@ module.exports = {
                     target[i].terrain != 'swamp')
                 {
                     return false;
-                    break;
                 }
             }
             
@@ -259,7 +262,6 @@ module.exports = {
                 if (!(target[i].structure instanceof StructureRoad) || !ignoreRoads)
                 {
                     return false;
-                    break;
                 }
             }
         }
@@ -277,38 +279,59 @@ module.exports = {
         for (var i=0; i < deltas.length; i++)
         {
             var p = new RoomPosition(centerPos.x+deltas[i].x, centerPos.y-deltas[i].y, room.name);
-            
+
             var ignoreRoads = type != STRUCTURE_ROAD;
             
             if (this.checkPositionFree(room, p, ignoreRoads)) {
                 return p;
             }
         }
+        return undefined;
     },
     
     getBaseCenterPoint: function(room)
     {
         if (!room.memory.center) {
-            this.calcBaseCenterPoint(room);
+            if (!this.calcBaseCenterPoint(room)) {
+                return undefined;
+            }
         }
         return new RoomPosition(room.memory.center.x, room.memory.center.y, room.name);
     }, 
     
     calcBaseCenterPoint: function(room)
     {
+        //calc from first spawn
         var spawns = room.find(
             FIND_MY_STRUCTURES, 
             {filter: (s) => s.structureType == STRUCTURE_SPAWN}
         );
         if (spawns.length > 0) {
             room.memory.center = {x: spawns[0].pos.x-1, y: spawns[0].pos.y+6};
+            return true;
         }
+        
+        //find Base flag
+        var bflags = room.find(FIND_FLAGS, {filter: (s) => s.name.search("Base")==0});
+        if (bflags.length > 0) {
+            room.memory.center = {x: bflags[0].pos.x, y: bflags[0].pos.y};
+            bflags[0].remove();
+            return true;
+        }
+        
+        //todo take calculated base pos
+        
+        return false;
     }, 
     
     getPositionDeltas: function(type)
     {
         var positions = {};
         
+        
+        positions[STRUCTURE_SPAWN] = [
+            {x:1, y:6}, {x:1, y:-6},
+        ];
         
         //extensions
         positions[STRUCTURE_EXTENSION] = [
@@ -368,21 +391,35 @@ module.exports = {
         ];
         
         positions[STRUCTURE_RAMPART] = [
-            {x: 0, y: 6}, 
-            {x: 1, y: 6}, {x: 2, y: 6}, {x: 3, y: 6}, {x: 4, y: 6}, {x: 5, y: 6}, {x: 6, y: 6}, 
-            {x: -1, y: 6}, {x: -2, y: 6}, {x: -3, y: 6}, {x: -4, y: 6}, {x: -5, y: 6}, {x: -6, y: 6}, 
+            {x: 0, y: 9},
+            {x: 2, y: 9}, {x: 4, y: 9}, {x: 6, y: 9}, {x: 8, y: 9}, 
+            {x: -2, y: 9}, {x: -4, y: 9}, {x: -6, y: 9}, {x: -8, y: 9}, 
             
-            {x: 0, y: -6}, 
-            {x: 1, y: -6}, {x: 2, y: -6}, {x: 3, y: -6}, {x: 4, y: -6}, {x: 5, y: -6}, {x: 6, y: -6}, 
-            {x: -1, y: -6}, {x: -2, y: -6}, {x: -3, y: -6}, {x: -4, y: -6}, {x: -5, y: -6}, {x: -6, y: -6}, 
+            {x: 0, y: -9}, 
+            {x: 2, y: -9}, {x: 4, y: -9}, {x: 6, y: -9}, {x: 8, y: -9}, 
+            {x: -2, y: -9}, {x: -4, y: -9}, {x: -6, y: -9}, {x: -8, y: -9}, 
             
-            {x: 6, y: 0},
-            {x: 6, y: 1}, {x: 6, y: 2}, {x: 6, y: 3}, {x: 6, y: 4}, {x: 6, y: 5}, 
-            {x: 6, y: -1}, {x: 6, y: -2}, {x: 6, y: -3}, {x: 6, y: -4}, {x: 6, y: -5}, 
+            {x: 9, y: 0},
+            {x: 9, y: 2}, {x: 9, y: 4}, {x: 9, y: 6}, {x: 9, y: 8}, 
+            {x: 9, y: -2}, {x: 9, y: -4}, {x: 9, y: -6}, {x: 9, y: -8}, 
             
-            {x: -6, y: 0},
-            {x: -6, y: 1}, {x: -6, y: 2}, {x: -6, y: 3}, {x: -6, y: 4}, {x: -6, y: 5}, 
-            {x: -6, y: -1}, {x: -6, y: -2}, {x: -6, y: -3}, {x: -6, y: -4}, {x: -6, y: -5}, 
+            {x: -9, y: 0},
+            {x: -9, y: 2}, {x: -9, y: 4}, {x: -9, y: 6}, {x: -9, y: 8}, 
+            {x: -9, y: -2}, {x: -9, y: -4}, {x: -9, y: -6}, {x: -9, y: -8}, 
+        ];
+        
+        positions[STRUCTURE_WALL] = [
+            {x: 1, y: 9}, {x: 3, y: 9}, {x: 5, y: 9}, {x: 7, y: 9}, {x: 9, y: 9},
+            {x: -1, y: 9}, {x: -3, y: 9}, {x: -5, y: 9}, {x: -7, y: 9}, {x: -9, y: 9}, 
+            
+            {x: 1, y: -9}, {x: 3, y: -9}, {x: 5, y: -9}, {x: 7, y: -9}, {x: 9, y: -9},
+            {x: -1, y: -9}, {x: -3, y: -9}, {x: -5, y: -9}, {x: -7, y: -9}, {x: -9, y: -9}, 
+            
+            {x: 9, y: 1}, {x: 9, y: 3}, {x: 9, y: 5}, {x: 9, y: 7}, {x: 9, y: 9}, 
+            {x: 9, y: -1}, {x: 9, y: -3}, {x: 9, y: -5}, {x: 9, y: -7}, {x: 9, y: -9}, 
+            
+            {x: -9, y: 1}, {x: -9, y: 3}, {x: -9, y: 5}, {x: -9, y: 7}, {x: -9, y: 9}, 
+            {x: -9, y: -1}, {x: -9, y: -3}, {x: -9, y: -5}, {x: -9, y: -7}, {x: -9, y: -9}, 
         ];
         
         
