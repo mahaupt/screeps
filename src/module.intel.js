@@ -150,20 +150,30 @@ module.exports = {
         
         var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
         if (index < 0) {
-            Memory.intel.claimable.push({room: roomname, parsed: false});
+            var terrain = this.buildPotClaimTerrain(roomname);
+            Memory.intel.claimable.push({room: roomname, parsed: false, terrain: terrain.serialize()});
         }
     }, 
     
-    isPotClaimCalculating: function(roomname)
+    //build cost matrix based on terrain
+    buildPotClaimTerrain: function(roomname)
     {
-        if (!Memory.intel.claimable) {
-            Memory.intel.claimable = [];
+        var costs = new PathFinder.CostMatrix();
+        const terrain = Game.map.getRoomTerrain(roomname);
+        
+        for (var x = 1; x <= 48; x++) {
+            for (var y = 1; y <= 48; y++) {
+                switch(terrain.get(x,y)) {
+                    case TERRAIN_MASK_WALL:
+                        costs.set(x, y, 255);
+                        break;
+                    case TERRAIN_MASK_SWAMP:
+                        costs.set(x, y, 5);
+                        break;
+                }
+            }
         }
-        var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
-        if (index >= 0) {
-            return !Memory.intel.claimable[index].parsed;
-        }
-        return false;
+        return costs;
     }, 
     
     
@@ -181,6 +191,6 @@ module.exports = {
         }
         
         return undefined;
-    }
+    }, 
     
 };

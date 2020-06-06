@@ -46,7 +46,8 @@ module.exports = {
         ops.mem.init = true;
         ops.mem.scout_timeout = 0;
         
-        var range = 3;
+        var room = Game.rooms[ops.source];
+        var range = room.controller.level;
         if (ops.mem.range) {
             range = ops.mem.range;
         }

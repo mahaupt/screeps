@@ -37,18 +37,8 @@ module.exports =  {
             //move to room
             baseCreep.moveToRoom(creep, creep.memory.troom);
         } else {
-            
-            //wait for intel calculations
-            if (Intel.isPotClaimCalculating(creep.room.name)) {
-                if (creep.room.controller) {
-                    creep.moveTo(creep.room.controller);
-                    return;
-                }
-            }            
-            
-            //otherwise go home
+            //target finished
             delete creep.memory.troom;
-            
         }
         
         //scout

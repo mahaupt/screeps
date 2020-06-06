@@ -16,14 +16,14 @@ module.exports = {
             //getting claimable object
             var cabl = Memory.intel.claimable[i];
             
-            //room is visible
+            //room is mine
             var room = Game.rooms[cabl.room];
-            if (!room) continue;
-            if (room.controller && room.controller.my) {
+            if (room && room.controller && room.controller.my) {
                 //own room - delete from lis
                 Memory.intel.claimable.splice(i, 1);
                 return;
             }
+            
             //room is already parsed
             if (cabl.parsed) continue;
             
@@ -33,18 +33,23 @@ module.exports = {
             var j = 0;
             var k = 0;
             
+            //get terrain cost matrix
+            var costs = PathFinder.CostMatrix.deserialize(cabl.terrain);
+            
             //calc
             var startc = 1+this.base_size;
             var endc = 48-this.base_size;
             
-            
+            //start variable
+            //var dx = endc - startc + 1;
+            //var jumpx = Math.floor(progress / dx);
             
             for (var x = startc; x <= endc; x++) {
                 for (var y = startc; y <= endc; y++) {
                     if (j < progress) { j++; continue; }
                     
                     //calc and save position
-                    let points = this.valueBasePos(room, room.getPositionAt(x, y));
+                    let points = this.valueBasePos(new RoomPosition(x, y, cabl.room), costs);
                     if (cabl.points === undefined || points > cabl.points) {
                         cabl.points = points;
                         cabl.center = {x: x, y: y};
@@ -58,77 +63,38 @@ module.exports = {
                     //no remaining cpu - abort
                     cpu_avbl = Game.cpu.limit - Game.cpu.getUsed() - 1;
                     if (cpu_avbl < 0) return;
-                    if (k >= 20) return;
+                    if (k >= 50) return;
                 }
             } //for
             
-            //finished
+            //finished - cleanup
             cabl.parsed = true;
+            delete cabl.terrain;
         }
     },
     
     
-    valueBasePos: function(room, pos)
+    valueBasePos: function(pos, costs)
     {
         var points = 0;
         var baseSize = 7;
         
         //distance to sources
-        var sources = room.find(FIND_SOURCES);
-        for (var i=0; i < sources.length; i++) {
-            var path = pos.findPathTo(sources[i]);
-            
-            if (!path.length)
-            {
-                points -= 9999;
-            } else {
-                points -= path.length*5;
-            }
-        }
+        //nope
         
         //free positions to build
-        var places = room.lookAtArea(
-            pos.y-baseSize, 
-            pos.x-baseSize, 
-            pos.y+baseSize, 
-            pos.x+baseSize, 
-            true);
-        for(var i=0; i < places.length; i++)
-        {
-            if (places[i].terrain == 'plain')
-            {
-                points += 1;
-            }
-            if (places[i].terrain == 'swamp')
-            {
-                points -= 1;
-            }
-            if (places[i].terrain == 'wall')
-            {
-                points -= 50;
+        for (var x = pos.x-baseSize; x <= pos.x+baseSize; x++) {
+            for (var y = pos.y-baseSize; y <= pos.y+baseSize; y++) {
+                points -= costs.get(x, y);
             }
         }
         
-        //distance to exit
-        var exits = [];
-        exits.push(pos.findClosestByPath(FIND_EXIT_TOP));
-        exits.push(pos.findClosestByPath(FIND_EXIT_RIGHT));
-        exits.push(pos.findClosestByPath(FIND_EXIT_BOTTOM));
-        exits.push(pos.findClosestByPath(FIND_EXIT_LEFT));
         
-        for (var i=0; i < exits.length; i++)
-        {
-            if (!exits[i]) continue;
-            var path = pos.findPathTo(exits[i]);
-            
-            if (!path.length)
-            {
-                points += 50*2;
-            } else {
-                //the longer the better
-                points += path.length*2;
-            }
-        }
+        //distance to center
+        var centerPoint = new RoomPosition(25, 25, pos.roomName);
+        var dist = centerPoint.getRangeTo(pos);
+        points -= dist*5;
+        
         
         return points;
     },
