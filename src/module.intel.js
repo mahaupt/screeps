@@ -182,8 +182,8 @@ module.exports = {
         if (!Memory.intel) return undefined;
         if (!Memory.intel.claimable) return undefined;
         
-        var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
-        if (index > 0) {
+        var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname && s.parsed==true);
+        if (index >= 0) {
             if (Memory.intel.claimable[index].parsed) {
                 var center = Memory.intel.claimable[index].center;
                 return new RoomPosition(center.x, center.y, roomname);

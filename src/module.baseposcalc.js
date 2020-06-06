@@ -19,9 +19,12 @@ module.exports = {
             //room is mine
             var room = Game.rooms[cabl.room];
             if (room && room.controller && room.controller.my) {
-                //own room - delete from lis
-                Memory.intel.claimable.splice(i, 1);
-                return;
+                //own room - delete from list
+                if (room.memory.center) {
+                    //just check if center is already set before deleting
+                    Memory.intel.claimable.splice(i, 1);
+                    return;
+                }
             }
             
             //room is already parsed
