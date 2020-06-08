@@ -142,8 +142,8 @@ module.exports = {
         
         //building walls from lvl 4
         if (room.controller.level >= 4 && constr_sites_num == 0) {
-            this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
-            this.buildAroundCenter(room, STRUCTURE_WALL, true);
+            //this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
+            //this.buildAroundCenter(room, STRUCTURE_WALL, true);
         }
     },
     

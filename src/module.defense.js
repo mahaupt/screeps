@@ -86,6 +86,20 @@ module.exports = {
 		}
 		
 		
+		//calc wall hp
+		if (room.controller.level == 4) {
+			room.memory.walls = 50000;
+		} else if (room.controller.level == 5) {
+			room.memory.walls = 100000;
+		} else if (room.controller.level == 6) {
+			room.memory.walls = 500000;
+		} else if (room.controller.level == 7) {
+			room.memory.walls = 1000000;
+		} else if (room.controller.level == 8) {
+			room.memory.walls = 10000000;
+		}
+		
+		
 	},
 	
 	
