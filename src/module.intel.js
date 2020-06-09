@@ -95,6 +95,12 @@ module.exports = {
                 if (spawns.length > 0) {
                     intel.has_spawn = true;
                 }
+                
+                intel.has_towers = false;
+                var towers = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
+                if (towers.length > 0) {
+                    intel.has_towers = true;
+                }
             }
         }
         

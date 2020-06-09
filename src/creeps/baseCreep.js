@@ -175,7 +175,7 @@ module.exports = {
 		{
 			nwork=0;
 			ncarry=0;
-			nclaim=Math.max(Math.round(bodySize/3), 1);
+			nclaim=Math.max(Math.round(bodySize/2), 1);
 			nmove=1;
 		} else 
 		if (role == 'soldier')
@@ -202,8 +202,8 @@ module.exports = {
 			nwork=0;
 			ncarry=0;
 			ntough=bodySize*2;//29; //10
-			nmove=bodySize;//17; //50
-			nheal=Math.round(bodySize/2);//4; // 250
+			nmove=Math.round(bodySize*2.5);//17; //50
+			nheal=Math.round(bodySize*0.5);//4; // 250
 		} else
 		if (role == 'dismantler')
 		{
@@ -379,11 +379,18 @@ module.exports = {
 	
 	roomCostCallback: function(rname, fromRoomName)
 	{
+		//room status not equal - blocked
+		var fstatus = Game.map.getRoomStatus(fromRoomName);
+		var tstatus = Game.map.getRoomStatus(rname);
+		if (fstatus != tstatus) {
+			return Infinity;
+		}
+		
 		var intel = Intel.getIntel(rname);
 		if (intel) {
 			
 			if (intel.threat == "core" && intel.time+90000>Game.time || 
-				intel.threat == "player" || 
+				intel.threat == "player" && (intel.has_towers || intel.creeps > 0) || 
 				intel.blocked)
 			{
 				//avoid room
