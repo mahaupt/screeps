@@ -14,14 +14,12 @@ trange = range of targets at pos
 target - object id of attack target
 passive = false
 
-attacked = false;
 attacked_time = 0;
-last_hitpoints = hits;
 */
 
 module.exports = {
     name: 'soldier', 
-    boost_res: ['GO', 'KO', 'ZO'], 
+    boost_res: ['GO', 'KO'], 
     run: function(creep) {
         baseCreep.init(creep);
         

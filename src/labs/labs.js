@@ -39,7 +39,7 @@ module.exports = {
                 Labs.Production.startProduction(room, "GO", 3000);
                 return;
             }
-            /*if (!this.resourceAvailable(room, "UH", 1500)) {
+            if (!this.resourceAvailable(room, "UH", 1500)) {
                 Labs.Production.startProduction(room, "UH", 3000);
                 return;
             }
@@ -54,7 +54,7 @@ module.exports = {
             if (!this.resourceAvailable(room, "ZO", 1500)) {
                 Labs.Production.startProduction(room, "ZO", 3000);
                 return;
-            }*/
+            }
         }
     },
     

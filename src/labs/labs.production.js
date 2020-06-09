@@ -62,6 +62,7 @@ module.exports = {
             console.log(room.name + ": Buying " + res);
             return;
         }
+        //consider bying instead
         
         //start production
         var base = this.getBaseMinerals(res);
