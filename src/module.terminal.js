@@ -41,6 +41,10 @@ module.exports = {
                 }
             }
         }
+        
+        //sometimes transport tasks
+        Logistics.genTerminalFilling(room);
+        this.discountOrders(room);
     }, 
     
     addBuyList: function(room, res, amount, max_price=0.15)
@@ -110,5 +114,18 @@ module.exports = {
     
     getAvgPrice: function(room, res, type) {
         
-    }
+    },
+    
+    discountOrders: function(room) 
+    {
+        //apply discount to orders
+        if (!room.memory.buy_list) {
+            room.memory.buy_list = [];
+        }
+        
+        for (var i in room.memory.buy_list) {
+            var buy = room.memory.buy_list[i];
+            buy.max_price += 0.01;
+        }
+    },
 };

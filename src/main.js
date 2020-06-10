@@ -20,6 +20,7 @@ var roleReserver = require('creeps_role.reserver');
 var roleSoldier = require('creeps_role.soldier');
 var roleDrainer = require('creeps_role.drainer');
 var roleDismantler = require('creeps_role.dismantler');
+var roleHealer = require('creeps_role.healer');
 var roleRenewSelf = require('creeps_role.renewSelf');
 var roleBoostSelf = require('creeps_role.boostSelf');
 
@@ -123,6 +124,8 @@ module.exports.loop = function () {
                    roleDrainer.run(creep);
                 } else if (creep.memory.role == 'dismantler') {
                    roleDismantler.run(creep);
+               } else if (creep.memory.role == 'healer') {
+                   roleHealer.run(creep);
                 }
             /*}
             catch(err)

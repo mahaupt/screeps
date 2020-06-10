@@ -14,12 +14,14 @@ module.exports = {
         baseCreep.init(creep);
         
         if (!creep.memory.target) {
+            this.healSelf(creep);
             if (creep.memory.home != creep.room.name) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
                 creep.say("😴");
                 creep.moveTo(creep.room.controller);
             }
+            return;
         }
         
         var target = Game.getObjectById(creep.memory.target);
@@ -31,18 +33,25 @@ module.exports = {
             }
         }
         
-        creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: "#55ff55"}});
+        creep.moveTo(target, {visualizePathStyle: {stroke: "#55ff55"}});
         this.healTarget(creep, target);
     }, 
     
     
-    healTarget: function(creep, target) {
+    healSelf: function(creep) {
         //heal self
         if (creep.hits < creep.hitsMax) 
         {
             creep.heal(creep);
-            return;
+            return true;
         }
+        return false
+    }, 
+    
+    
+    healTarget: function(creep, target) {
+        
+        if (this.healSelf(creep)) return;
         
         //heal target
         if (target.hits < target.hitsMax) {
@@ -64,7 +73,7 @@ module.exports = {
     
     
     pickTarget: function(creep) {
-        var t = creep.room.findClosestByPath(
+        var t = creep.pos.findClosestByPath(
             FIND_MY_CREEPS, 
             {filter: (c) => c.memory.role == 'soldier' || c.memory.role == 'dismantler'}
         );

@@ -133,7 +133,7 @@ module.exports = {
 		
 		if (role=='miner')
 		{
-			bodySize = Math.min(bodySize, 5);
+			bodySize = Math.min(bodySize, 6);
 			nwork = Math.floor(1.5*bodySize);
 			ncarry = Math.max(Math.floor(0.5*bodySize), 1);
 			nmove = Math.max(Math.floor(0.5*bodySize), 1);
