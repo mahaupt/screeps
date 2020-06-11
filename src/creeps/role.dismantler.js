@@ -1,5 +1,6 @@
 module.exports = {
     name: "dismantler",
+    boost: ['dismantle'],
     
     run: function(creep)
     {
@@ -27,7 +28,7 @@ module.exports = {
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
                 creep.memory.noRenew = true;
-                //baseCreep.boostCreep(creep, this.boost_res);
+                baseCreep.boostCreep(creep, this.boost);
             }
             return;
         }

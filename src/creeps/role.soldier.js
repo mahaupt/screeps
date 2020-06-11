@@ -19,7 +19,7 @@ attacked_time = 0;
 
 module.exports = {
     name: 'soldier', 
-    boost_res: ['GO', 'KO'], 
+    boost: ['damage', 'rangedAttack'], 
     run: function(creep) {
         baseCreep.init(creep);
         
@@ -66,7 +66,7 @@ module.exports = {
             if (baseCreep.prepareCreep(creep)) {
                 //prepared - search for boost
                 creep.memory.noRenew = true;
-                baseCreep.boostCreep(creep, this.boost_res);
+                baseCreep.boostCreep(creep, this.boost);
             }
             return;
         } else if (!creep.memory.troom) {

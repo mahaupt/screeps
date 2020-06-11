@@ -7,7 +7,7 @@ target = creep.id
 
 module.exports = {
     name: "healer",
-    boost_res: ['LO'], 
+    boost: ['heal'], 
     
     run: function(creep)
     {

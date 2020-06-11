@@ -526,21 +526,41 @@ module.exports = {
 		return false;
     }, 
 	
+	
+	findBoostRes: function(boost) {
+		var boost_res = [];
+		
+		for (var w in BOOSTS) {
+			for (var res in BOOSTS[w]) {
+				if (BOOSTS[w][res][boost]) {
+					boost_res.push(res);
+				}
+			}
+		}
+		
+		return boost_res.reverse();
+	}, 
+	
 	//find labs to boost creep
-	boostCreep: function(creep, res_array)
+	boostCreep: function(creep, boosts)
 	{
 		var found_labs = false;
 		
-		for(var res of res_array) 
+		for(var boost of boosts) 
 		{
-			var amt = Labs.Boost.calcDemand(creep, res);
-			var lab = Labs.Boost.findBoostLab(creep.room, res, amt);
-			if (lab) {
-				found_labs = true;
-				if (!creep.memory.boostLabs) {
-					creep.memory.boostLabs = [];
+			var res_array = this.findBoostRes(boost);
+			for (var res of res_array) 
+			{
+				var amt = Labs.Boost.calcDemand(creep, res);
+				var lab = Labs.Boost.findBoostLab(creep.room, res, amt);
+				if (lab) {
+					found_labs = true;
+					if (!creep.memory.boostLabs) {
+						creep.memory.boostLabs = [];
+					}
+					creep.memory.boostLabs.push(lab.id);
+					break;
 				}
-				creep.memory.boostLabs.push(lab.id);
 			}
 		}
 		

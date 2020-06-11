@@ -43,7 +43,7 @@ module.exports = {
         } else
         if (haulerCount < containerCount && 
             haulerCount < sourceCount+1 &&
-            haulerCount < sourceCount - linkCount+3) 
+            haulerCount < sourceCount - linkCount+2) 
         {
             this.spawn(spawn, "hauler");
         } else 
@@ -75,7 +75,20 @@ module.exports = {
     {
         let data = { memory: {...{role: role}, ...memory}};
         
-        let bodySize = baseCreep.getSuitableBodySize(role, spawn.room.energyAvailable);
+        var roomCreeps = spawn.room.find(FIND_MY_CREEPS);
+        var counts = _.countBy(roomCreeps, 'memory.role');
+        var minerCount = counts.miner || 0;
+        var haulerCount = counts.hauler || 0;
+        
+        //try to spawn creeps with full body parts
+        //unless colony has to recover (miner or hauler missing, or energy level low)
+        var avbl_energy = spawn.room.energyAvailable;
+        var energy_ratio = spawn.room.memory.stats.energy / spawn.room.memory.stats.capacity;
+        if (minerCount > 0 && haulerCount > 0 && energy_ratio >= 0.05) {
+            avbl_energy = spawn.room.energyCapacityAvailable;
+        }
+        
+        let bodySize = baseCreep.getSuitableBodySize(role, avbl_energy);
         let body = baseCreep.buildBody(spawn.room, role, bodySize);
         let name = baseCreep.getName(spawn.room, role);
         var ret = spawn.spawnCreep(body, name, data);
