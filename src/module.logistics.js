@@ -19,7 +19,7 @@ module.exports = {
     genLootTasks: function(room)
     {
         //todo: if room is attacked, skip looting
-        if (room.memory.attacked_time + 100 > Game.time) return;
+        if (room.memory.attacked_time + 30 > Game.time) return;
         
         //get loot sources
         var res = room.find(FIND_DROPPED_RESOURCES);
@@ -59,7 +59,7 @@ module.exports = {
                 filter: (s) => 
                 { 
                     return s.structureType == STRUCTURE_TOWER && 
-                        s.store.getFreeCapacity(RESOURCE_ENERGY) > 10;
+                        s.store.getFreeCapacity(RESOURCE_ENERGY) > 50;
                 }
             }
         );
@@ -116,6 +116,32 @@ module.exports = {
             this.removeTaskGroup(room, "s");
         }
     },
+    
+    genTerminalFilling: function(room) {
+        var structures = room.find(
+            FIND_STRUCTURES, 
+            {filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE}
+        );
+        
+        for (var i in structures) {
+            var s = structures[i];
+            
+            //mining container - skip
+            var sources = s.pos.findInRange(FIND_SOURCES, 2);
+            var minerals = s.pos.findInRange(FIND_MINERALS, 2);
+            if (s.structureType == STRUCTURE_CONTAINER && (sources.length > 0 || minerals.length > 0)) {
+                continue;
+            }
+            
+            //get resources
+            var res = baseCreep.getStoredResourceTypes(s.store);
+            for (var j in res) {
+                if (res[j] == RESOURCE_ENERGY) continue;
+                var amt = s.store[res[j]];
+                this.addTransportTask(room, s.id, room.terminal.id, amt, res[j]);
+            }
+        }
+    }, 
     
     //insert or update task
     //if ignoreSource=true, only compares task type

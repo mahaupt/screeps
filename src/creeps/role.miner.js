@@ -18,6 +18,15 @@ module.exports = {
     run: function(creep) 
     {    
         baseCreep.init(creep);
+        
+        
+        //go home if lost
+        if (creep.room.name != creep.memory.home) {
+            baseCreep.moveToRoom(creep, creep.memory.home);
+            return;
+        }
+        
+        
         var source = this.getSource(creep);
         var container = this.getContainer(creep, source);
         var link = this.getLink(creep, source);
@@ -381,6 +390,7 @@ module.exports = {
     addContainerTransportTask: function(container)
     {
         var res_types = baseCreep.getStoredResourceTypes(container.store);
+        res_types = _.sortBy(res_types, (r) => -container.store.getUsedCapacity(r));
         if (res_types.length > 0 && 
             container.store.getUsedCapacity(res_types[0]) >= 200) 
         {

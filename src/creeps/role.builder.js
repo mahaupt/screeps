@@ -13,13 +13,18 @@ module.exports = {
     name: 'builder', 
     run: function(creep) 
     {
-        //flee
+        baseCreep.init(creep);
+        
+        
+        //go home if lost
+        if (creep.room.name != creep.memory.home) {
+            baseCreep.moveToRoom(creep, creep.memory.home);
+            return;
+        }
+        
+        //war mode
         if (creep.room.memory.attacked_time + 30 > Game.time) {
-            var tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
-            if (tower) {
-                creep.moveTo(tower, {range: 2, visualizePathStyle: {stroke: '#00ff00'}});
-                return;
-            }
+            this.cancelUnimportantTargets(creep);
         }
         
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
@@ -49,7 +54,13 @@ module.exports = {
             
             if (!creep.memory.building)
             {
-                this.pickBuildTarget(creep);
+                //war mode
+                if (creep.room.memory.attacked_time + 30 > Game.time) {
+                    this.pickBuildTargetInWar(creep);
+                } else {
+                    this.pickBuildTarget(creep);
+                }
+                
             }
             
             
@@ -88,6 +99,7 @@ module.exports = {
     
     
     pickBuildTarget: function(creep) {
+        delete creep.memory.dismantle;
         
         //repairs needed
         var repairs = creep.pos.findClosestByPath(FIND_STRUCTURES, {
@@ -95,7 +107,7 @@ module.exports = {
                 return (
                     structure.structureType != STRUCTURE_WALL && 
                     structure.structureType != STRUCTURE_RAMPART && 
-                    structure.hits < structure.hitsMax);
+                    structure.hits < structure.hitsMax*0.8);
             }
         });
         if (repairs)
@@ -103,6 +115,15 @@ module.exports = {
             creep.memory.building = repairs.id;
             return;
         }
+        
+        
+        //dismantle
+        /*var dismantles = creep.pos.findClosestByPath(FIND_FLAGS, 
+            {filter: (s) => s.name.search("dismantle") == 0});
+        if (dismantles) {
+            creep.memory.dismantle = true;
+            //let structure = dismantles.pos.findInRange()
+        }*/
         
         
         //construction sites
@@ -113,12 +134,13 @@ module.exports = {
         }
         
         
-        //fortify walls to 50k
+        //fortify walls
+        var wallhp = creep.room.memory.walls;
         var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 
             return (s.structureType == STRUCTURE_WALL || 
             s.structureType == STRUCTURE_RAMPART) && 
             s.hits < s.hitsMax &&
-            s.hits < 50000; 
+            s.hits < wallhp; 
         }});
         if (walls.length > 0) {
             walls = _.sortBy(walls, (s) => s.hits);
@@ -127,9 +149,63 @@ module.exports = {
         }
         
         //upgrade if no thing else to do
-        creep.memory.building = creep.room.controller.id;
+        if (creep.room.controller) {
+            creep.memory.building = creep.room.controller.id;
+        }
         
 
+    }, 
+    
+    
+    cancelUnimportantTargets: function(creep)
+    {
+        //if creep is outside bunker - move inside bunker
+        var cpoint = moduleAutobuilder.getBaseCenterPoint(creep.room);
+        var building = Game.getObjectById(creep.memory.building);
+        var source = Game.getObjectById(creep.memory.source);
+        
+        //build target
+        if (building) 
+        {
+            let dist = cpoint.getRangeTo(building.pos);
+            if (dist > 9) {
+                delete creep.memory.building;
+            }
+        }
+        
+        //source outside base
+        if (source) 
+        {
+            let dist = cpoint.getRangeTo(source.pos);
+            if (dist > 6) {
+                delete creep.memory.source;
+            }
+        }
+        
+        //creep outside base
+        let dist = cpoint.getRangeTo(creep.pos);
+        if (dist > 6) {
+            let dir = creep.moveTo(cpoint);
+        }
+    }, 
+    
+    
+    pickBuildTargetInWar: function(creep)
+    {
+        var cpoint = moduleAutobuilder.getBaseCenterPoint(creep.room);
+        
+        //pick wall and tower repairs
+        var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 
+            return (s.structureType == STRUCTURE_WALL || 
+            s.structureType == STRUCTURE_RAMPART) && 
+            s.hits < s.hitsMax && 
+            s.pos.getRangeTo(cpoint) <= 9
+        }});
+        if (walls.length > 0) {
+            walls = _.sortBy(walls, (s) => s.hits);
+            creep.memory.building = walls[0].id;
+            return;
+        }
     }
     
 };

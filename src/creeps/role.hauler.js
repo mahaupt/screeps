@@ -129,9 +129,8 @@ module.exports = {
 			var stored_resources = baseCreep.getStoredResourceTypes(creep.store);
 			var multi_dropoff = false;
 			if (target.structureType == STRUCTURE_TERMINAL || 
-				!creep.room.terminal && 
-				(target.structureType == STRUCTURE_CONTAINER || 
-				target.structureType == STRUCTURE_STORAGE)) 
+				target.structureType == STRUCTURE_CONTAINER || 
+				target.structureType == STRUCTURE_STORAGE) 
 			{
 				//multidropoff to terminal or / if there is no terminal / to storage
 				multi_dropoff = stored_resources.length > 1;
@@ -140,11 +139,13 @@ module.exports = {
 			
 			//go to target and transfer
 			var ret = creep.transfer(target, resource);
+			//console.log(creep.name + ":" + ret);
+			
 			if(ret == ERR_NOT_IN_RANGE) {
 				creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
 			}
 			//target full - search new target
-			if (target.store.getFreeCapacity(resource) == 0) {
+			if (target.store.getFreeCapacity(resource) == 0 || ret == ERR_INVALID_TARGET) {
 				delete creep.memory.target;
 			}
 			//transfer complete - search new target

@@ -10,6 +10,15 @@ source = source id / container id
 module.exports = {
     name: 'claimer', 
     run: function(creep) {
+        baseCreep.init(creep);
+        
+        
+        //go home if lost
+        if (creep.room.name != creep.memory.home) {
+            baseCreep.moveToRoom(creep, creep.memory.home);
+            return;
+        }
+        
         //flee
         if (creep.room.memory.attacked_time + 30 > Game.time) {
             var tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});

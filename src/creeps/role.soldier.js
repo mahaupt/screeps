@@ -14,14 +14,12 @@ trange = range of targets at pos
 target - object id of attack target
 passive = false
 
-attacked = false;
 attacked_time = 0;
-last_hitpoints = hits;
 */
 
 module.exports = {
     name: 'soldier', 
-    boost_res: ['GO', 'KO', 'ZO'], 
+    boost: ['damage', 'rangedAttack'], 
     run: function(creep) {
         baseCreep.init(creep);
         
@@ -68,7 +66,7 @@ module.exports = {
             if (baseCreep.prepareCreep(creep)) {
                 //prepared - search for boost
                 creep.memory.noRenew = true;
-                baseCreep.boostCreep(creep, this.boost_res);
+                baseCreep.boostCreep(creep, this.boost);
             }
             return;
         } else if (!creep.memory.troom) {
@@ -121,6 +119,11 @@ module.exports = {
             }
             return;
         }
+        
+        
+        //collect intel        
+        Intel.collectIntel(creep, creep.room);
+        
         
         //in target room
         if (creep.room.name == creep.memory.troom) 
@@ -175,10 +178,12 @@ module.exports = {
     {
         creep.say("⚔️");
         
-        var ret = creep.attack(target);
+        /*var ret = creep.attack(target);
         if (ret == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
-        }
+        }*/
+        creep.rangedMassAttack();
+        creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
     }, 
     
     pickTarget: function(creep, findAtPos = null, range = -1)
@@ -191,13 +196,17 @@ module.exports = {
         var structures = null;
         
         if (range <= 0) {
-            hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS);
+            hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
             structure = findAtPos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
-                filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+                filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
+                    s.structureType == STRUCTURE_SPAWN) && 
+                    Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
         } else {
-            hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range);
+            hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
             structure = findAtPos.findInRange(FIND_HOSTILE_STRUCTURES, range, {
-                filter: (s)=>s.structureType == STRUCTURE_TOWER || s.structureType == STRUCTURE_SPAWN});
+                filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
+                    s.structureType == STRUCTURE_SPAWN) && 
+                    Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
                 
             if (hostiles.length > 0) {
                 hostiles = hostiles[0];

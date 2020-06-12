@@ -4,10 +4,10 @@ module.exports = {
         this.init(ops);
         
         //check if scout has completed
-        var intel = Memory.intel.list[ops.target];
-        if (Memory.intel.list[ops.target]) 
+        var intel = Intel.getIntel(ops.target);
+        if (intel) 
         {    
-            if (intel.time > Game.time -100) {
+            if (intel.time > Game.time - 200) {
                 ops.finished = true;
                 return;
             }
@@ -18,19 +18,32 @@ module.exports = {
         ops.mem.cooldown = Game.time + 500;
         
         
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
+        
+        
+        //check if scout is still on its way
+        var scout = _.find(Memory.creeps, (s) => s.role == "scout" && s.troom == ops.target);
+        if (scout) return;
+        
+        
+        //skip if room is my own
+        if (Game.rooms[ops.target] && 
+            Game.rooms[ops.target].controller && 
+            Game.rooms[ops.target].controller.my)
+        {
+            ops.finished = true;
+            return;
+        }
+        
+        
         //get room path and look for hostiles
-        var path = Game.map.findRoute(ops.source, ops.target);
-        for (let i in path) {
-            if (Memory.intel && Memory.intel.list && Memory.intel.list[path[i].room]) {
-                if (Memory.intel.list[path[i].room].threat == "core" || 
-                Memory.intel.list[path[i].room].threat == "player")
-                {
-                    // enemy or core blocks path
-                    ops.finished = true;
-                    console.log("Scout ops " + ops.source + " to " + ops.target + " aborted. Enemy in path.");
-                    return;
-                }
-            }
+        var path = Game.map.findRoute(ops.source, ops.target, {routeCallback: baseCreep.roomCostCallback});
+        if (path == ERR_NO_PATH || path.length >= 20) 
+        {
+            ops.finished = true;
+            console.log("Scout ops " + ops.source + " to " + ops.target + " aborted. No suitable path found.");
+            return;
         }
         
         
@@ -55,17 +68,6 @@ module.exports = {
     {
         if (ops.mem.init) return;
         ops.mem.init = true;
-        
-        //Memory Setup
-        if (!Memory.intel) {
-            Memory.intel = {};
-        }
-        if (!Memory.intel.list) {
-            Memory.intel.list = {};
-        }
-        if (!Memory.intel.req) {
-            Memory.intel.req = [];
-        }
         ops.mem.cooldown = 0;
         
     }, 

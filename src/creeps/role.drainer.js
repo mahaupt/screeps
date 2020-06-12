@@ -14,7 +14,7 @@ one_more_step = true/false
 
 module.exports = {
     name: "drainer", 
-    boost_res: ['GO', 'LO', 'ZO'],
+    boost: ['damage', 'heal', 'fatigue'],
     run: function(creep) {
         baseCreep.init(creep);
         
@@ -44,10 +44,14 @@ module.exports = {
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
                 creep.memory.noRenew = true;
-                baseCreep.boostCreep(creep, this.boost_res);
+                baseCreep.boostCreep(creep, this.boost);
             }
             return;
         }
+        
+        
+        //intel
+        Intel.collectIntel(creep, creep.room);
         
         
         //move to target room

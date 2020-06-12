@@ -14,6 +14,11 @@ module.exports = {
         ops.mem.timeout = Game.time + 50;
         ops.mem.skip_timeout = false;
         
+        
+        // SOURCE ROOM NOT AVBL - ABORT
+        if (Ops.checkSrcRoomAvbl(ops)) return;
+        
+        
         //states
         if (ops.mem.state == this.PREPARE) 
         {

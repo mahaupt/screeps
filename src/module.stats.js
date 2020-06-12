@@ -28,10 +28,13 @@ module.exports =  {
         room.memory.stats.energy = energy;
         room.memory.stats.capacity = capacity;
         
+        var elevel = energy/capacity;
+        
         //stats and time dependent collecting
         if (Game.time % 1000 == 9) {
             if (!room.memory.stats.energy_1k) {
                 room.memory.stats.energy_1k = energy;
+                room.memory.stats.add_creeps = 0;
             }
             
             room.memory.stats.energy_1k_dx = room.memory.stats.energy - room.memory.stats.energy_1k;
@@ -42,11 +45,39 @@ module.exports =  {
                 room.memory.stats.energy_1k_dx30*29 + 
                 room.memory.stats.energy_1k_dx;
             room.memory.stats.energy_1k_dx30 = Math.round(room.memory.stats.energy_1k_dx30/30);
+            
+            //add builders
+            if (room.memory.stats.energy_1k_dx > 1000 && elevel >= 0.15 || 
+                elevel >= 0.95) {
+                room.memory.stats.add_creeps += 1;
+                if (room.memory.stats.add_creeps > 6) {
+                    room.memory.stats.add_creeps = 6;
+                } else {
+                    console.log(room.name + ": incr number of creeps");
+                }
+            }
+            
+            //remove builders
+            if (room.memory.stats.energy_1k_dx < 0 && elevel <= 0.15 ||
+                elevel <= 0.05)
+            {
+                room.memory.stats.add_creeps -= 1;
+                if (room.memory.stats.add_creeps < 0) {
+                    room.memory.stats.add_creeps = 0;
+                } else {
+                    //remove one builder
+                    console.log(room.name + ": decr number of creeps");
+                    var creeps = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "builder" && !s.memory.killSelf });
+                    if (creeps.length > 0) {
+                        creeps[0].memory.killSelf = true;
+                        creeps[0].memory.renewSelf = true;
+                    }
+                }
+            } 
         }
         if (Game.time % 10000 == 9) {
             if (!room.memory.stats.energy_10k) {
                 room.memory.stats.energy_10k = energy;
-                room.memory.stats.add_creeps = 0;
             }
             
             room.memory.stats.energy_10k_dx = room.memory.stats.energy - room.memory.stats.energy_10k;
@@ -57,18 +88,6 @@ module.exports =  {
                 room.memory.stats.energy_10k_dx30*29 + 
                 room.memory.stats.energy_10k_dx;
             room.memory.stats.energy_10k_dx30 = Math.round(room.memory.stats.energy_10k_dx30/30);
-            
-            //additional creep advisory
-            if (room.memory.stats.energy_10k_dx > 10000 && 
-                room.memory.stats.energy_10k_dx30 > 10000) 
-            {
-                room.memory.stats.add_creeps += 1;
-            }
-            if (room.memory.stats.energy_10k_dx < 0 && 
-                room.memory.stats.add_creeps > 0) 
-            {
-                room.memory.stats.add_creeps -= 1;
-            }
         }
     }, 
     
