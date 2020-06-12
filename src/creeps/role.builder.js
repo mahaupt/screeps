@@ -134,12 +134,13 @@ module.exports = {
         }
         
         
-        //fortify walls to 50k
+        //fortify walls
+        var wallhp = creep.room.memory.walls;
         var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 
             return (s.structureType == STRUCTURE_WALL || 
             s.structureType == STRUCTURE_RAMPART) && 
             s.hits < s.hitsMax &&
-            s.hits < 50000; 
+            s.hits < wallhp; 
         }});
         if (walls.length > 0) {
             walls = _.sortBy(walls, (s) => s.hits);

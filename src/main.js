@@ -1,4 +1,5 @@
 global.baseCreep = require('creeps_baseCreep');
+global.baseGroup = require('creeps_baseGroup');
 global.moduleLogistics = require('module.logistics');
 global.moduleSpawn = require('module.spawn');
 global.Ops = require('ops_ops');
@@ -20,6 +21,7 @@ var roleReserver = require('creeps_role.reserver');
 var roleSoldier = require('creeps_role.soldier');
 var roleDrainer = require('creeps_role.drainer');
 var roleDismantler = require('creeps_role.dismantler');
+var roleHealer = require('creeps_role.healer');
 var roleRenewSelf = require('creeps_role.renewSelf');
 var roleBoostSelf = require('creeps_role.boostSelf');
 
@@ -27,6 +29,7 @@ var moduleStats = require('module.stats');
 
 var moduleDefense = require('module.defense');
 var moduleEvents = require('module.events');
+var moduleBasePosCalc = require('module.baseposcalc');
 
 /*const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -122,6 +125,8 @@ module.exports.loop = function () {
                    roleDrainer.run(creep);
                 } else if (creep.memory.role == 'dismantler') {
                    roleDismantler.run(creep);
+               } else if (creep.memory.role == 'healer') {
+                   roleHealer.run(creep);
                 }
             /*}
             catch(err)
@@ -134,5 +139,11 @@ module.exports.loop = function () {
     	        creep.memory.renewSelf = true;
             }
         }
+        
+        
+        //use rest of cpu
+        moduleBasePosCalc.run();
+        
+        
     //});
 };

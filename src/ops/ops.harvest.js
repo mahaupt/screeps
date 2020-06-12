@@ -57,7 +57,6 @@ module.exports = {
         
         // EXISTING HARVESTER
         var roomhvstr = _.filter(Memory.creeps, (s) => s.role == "harvester" && s.troom == ops.target);
-        console.log(JSON.stringify(roomhvstr));
         
         // DEPOSITS AND MINERALS ONLY ON >LVL 6 SOURCE ROOMS
         if (Game.rooms[ops.source].controller.level >= 6) {

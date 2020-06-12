@@ -23,7 +23,7 @@ module.exports = {
                 room.terminal.store[res] < 30000 || 
                 res == RESOURCE_ENERGY) continue;
             
-            if (this.sellResource(room, res, 3000) > 0) return;
+            if (this.sellResource(room, res, 1000) > 0) return;
         }
         
         //buy resources
@@ -41,6 +41,10 @@ module.exports = {
                 }
             }
         }
+        
+        //sometimes transport tasks
+        Logistics.genTerminalFilling(room);
+        this.discountOrders(room);
     }, 
     
     addBuyList: function(room, res, amount, max_price=0.15)
@@ -105,5 +109,23 @@ module.exports = {
         }
         
         return 0;
-    }
+    }, 
+    
+    
+    getAvgPrice: function(room, res, type) {
+        
+    },
+    
+    discountOrders: function(room) 
+    {
+        //apply discount to orders
+        if (!room.memory.buy_list) {
+            room.memory.buy_list = [];
+        }
+        
+        for (var i in room.memory.buy_list) {
+            var buy = room.memory.buy_list[i];
+            buy.max_price += 0.01;
+        }
+    },
 };

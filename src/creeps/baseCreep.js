@@ -133,7 +133,7 @@ module.exports = {
 		
 		if (role=='miner')
 		{
-			bodySize = Math.min(bodySize, 5);
+			bodySize = Math.min(bodySize, 6);
 			nwork = Math.floor(1.5*bodySize);
 			ncarry = Math.max(Math.floor(0.5*bodySize), 1);
 			nmove = Math.max(Math.floor(0.5*bodySize), 1);
@@ -175,7 +175,7 @@ module.exports = {
 		{
 			nwork=0;
 			ncarry=0;
-			nclaim=Math.max(Math.round(bodySize/3), 1);
+			nclaim=Math.max(Math.round(bodySize/2), 1);
 			nmove=1;
 		} else 
 		if (role == 'soldier')
@@ -202,8 +202,8 @@ module.exports = {
 			nwork=0;
 			ncarry=0;
 			ntough=bodySize*2;//29; //10
-			nmove=bodySize;//17; //50
-			nheal=Math.round(bodySize/2);//4; // 250
+			nmove=Math.round(bodySize*2.5);//17; //50
+			nheal=Math.round(bodySize*0.5);//4; // 250
 		} else
 		if (role == 'dismantler')
 		{
@@ -379,10 +379,19 @@ module.exports = {
 	
 	roomCostCallback: function(rname, fromRoomName)
 	{
-		if (Memory.intel && Memory.intel.list && Memory.intel.list[rname]) {
-			if (Memory.intel.list[rname].threat == "core" || 
-				Memory.intel.list[rname].threat == "player" || 
-				Memory.intel.list[rname].blocked)
+		//room status not equal - blocked
+		var fstatus = Game.map.getRoomStatus(fromRoomName);
+		var tstatus = Game.map.getRoomStatus(rname);
+		if (fstatus != tstatus) {
+			return Infinity;
+		}
+		
+		var intel = Intel.getIntel(rname);
+		if (intel) {
+			
+			if (intel.threat == "core" && intel.time+90000>Game.time || 
+				intel.threat == "player" && (intel.has_towers || intel.creeps > 0) || 
+				intel.blocked)
 			{
 				//avoid room
 				return Infinity;
@@ -517,21 +526,41 @@ module.exports = {
 		return false;
     }, 
 	
+	
+	findBoostRes: function(boost) {
+		var boost_res = [];
+		
+		for (var w in BOOSTS) {
+			for (var res in BOOSTS[w]) {
+				if (BOOSTS[w][res][boost]) {
+					boost_res.push(res);
+				}
+			}
+		}
+		
+		return boost_res.reverse();
+	}, 
+	
 	//find labs to boost creep
-	boostCreep: function(creep, res_array)
+	boostCreep: function(creep, boosts)
 	{
 		var found_labs = false;
 		
-		for(var res of res_array) 
+		for(var boost of boosts) 
 		{
-			var amt = Labs.Boost.calcDemand(creep, res);
-			var lab = Labs.Boost.findBoostLab(creep.room, res, amt);
-			if (lab) {
-				found_labs = true;
-				if (!creep.memory.boostLabs) {
-					creep.memory.boostLabs = [];
+			var res_array = this.findBoostRes(boost);
+			for (var res of res_array) 
+			{
+				var amt = Labs.Boost.calcDemand(creep, res);
+				var lab = Labs.Boost.findBoostLab(creep.room, res, amt);
+				if (lab) {
+					found_labs = true;
+					if (!creep.memory.boostLabs) {
+						creep.memory.boostLabs = [];
+					}
+					creep.memory.boostLabs.push(lab.id);
+					break;
 				}
-				creep.memory.boostLabs.push(lab.id);
 			}
 		}
 		

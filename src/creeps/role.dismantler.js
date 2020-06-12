@@ -1,5 +1,6 @@
 module.exports = {
     name: "dismantler",
+    boost: ['dismantle'],
     
     run: function(creep)
     {
@@ -27,7 +28,7 @@ module.exports = {
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
                 creep.memory.noRenew = true;
-                //baseCreep.boostCreep(creep, this.boost_res);
+                baseCreep.boostCreep(creep, this.boost);
             }
             return;
         }
@@ -50,9 +51,11 @@ module.exports = {
             if (target) {
                 creep.say("⚔️");
                 if (creep.dismantle(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
+                    creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
                 }
             } else {
+                creep.memory.killSelf = true;
+                creep.memory.renewSelf = true;
                 delete creep.memory.troom;
             }
         }

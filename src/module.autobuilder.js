@@ -142,8 +142,8 @@ module.exports = {
         
         //building walls from lvl 4
         if (room.controller.level >= 4 && constr_sites_num == 0) {
-            this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
-            this.buildAroundCenter(room, STRUCTURE_WALL, true);
+            //this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
+            //this.buildAroundCenter(room, STRUCTURE_WALL, true);
         }
     },
     
@@ -319,7 +319,12 @@ module.exports = {
             return true;
         }
         
-        //todo take calculated base pos
+        //take calculated base pos
+        var cbpos = Intel.getPotClaimCenterPos(room.name);
+        if (cbpos) {
+            room.memory.center = {x: cbpos.x, y: cbpos.y};
+            return true;
+        }
         
         return false;
     }, 
@@ -424,126 +429,6 @@ module.exports = {
         
         
         return positions[type];
-    },
-    
-    
-    pickFirstBasePos: function(room)
-    {
-        if (Memory.pBLocation) {
-            //calculation already running in different room
-            if (room.name != Memory.pBRoom) return;
-        } else {
-            Memory.pBLocation = true;
-            Memory.pBRoom = room.name;
-            Memory.pBPoints = -99999;
-            Memory.pBPosX = 0;
-            Memory.pBPosY = 0;
-            Memory.pBCalcs = 0;
-        }
-        
-        for (var i=0; i < 10; i++)
-        {
-            var x = Math.floor(Math.random()*48)+1;
-            var y = Math.floor(Math.random()*48)+1;
-            var pos = new RoomPosition(x, y, room.name);
-            var points = this.valueBasePos(room, pos);
-            Memory.pBCalcs++;
-            
-            if (Memory.pBPoints < points)
-            {
-                Memory.pBPoints = points;
-                Memory.pBPosX = x;
-                Memory.pBPosY = y;
-            }
-        }
-        
-        //calculated enough
-        if (Memory.pBCalcs >= 1000 || Memory.pBPoints >= -120)
-        {
-            var x = Memory.pBPosX;
-            var y = Memory.pBPosY;
-            var pts = Memory.pBPoints;
-            var calcs = Memory.pBCalcs;
-            console.log("Picked Spawn Location for Room " + room.name);
-            console.log("Building Spawn at " + x + " / " + y);
-            console.log("Needed " + calcs + " calcs and got " + pts + " points");
-            
-            room.createConstructionSite(x, y, STRUCTURE_SPAWN, "cbacon");
-            
-            //cleanup
-            delete Memory.pBLocation;
-            delete Memory.pBRoom;
-            delete Memory.pBPoints;
-            delete Memory.pBPosX;
-            delete Memory.pBPosY;
-            delete Memory.pBCalcs;
-        }
-    }, 
-    
-    
-    valueBasePos: function(room, pos)
-    {
-        var points = 0;
-        var baseSize = 7;
-        
-        //distance to sources
-        var sources = room.find(FIND_SOURCES);
-        for (var i=0; i < sources.length; i++) {
-            var path = pos.findPathTo(sources[i]);
-            
-            if (!path.length)
-            {
-                points -= 9999;
-            } else {
-                points -= Math.pow(path.length, 2)*0.5;
-            }
-        }
-        
-        //free positions to build
-        var places = room.lookAtArea(
-            pos.y-baseSize, 
-            pos.x-baseSize, 
-            pos.y+baseSize, 
-            pos.x+baseSize, 
-            true);
-        for(var i=0; i < places.length; i++)
-        {
-            if (places[i].terrain == 'plain')
-            {
-                points += 1;
-            }
-            if (places[i].terrain == 'swamp')
-            {
-                points -= 1;
-            }
-            if (places[i].terrain == 'wall')
-            {
-                points -= 15;
-            }
-        }
-        
-        //distance to exit
-        var exits = [];
-        exits.push(pos.findClosestByPath(FIND_EXIT_TOP));
-        exits.push(pos.findClosestByPath(FIND_EXIT_RIGHT));
-        exits.push(pos.findClosestByPath(FIND_EXIT_BOTTOM));
-        exits.push(pos.findClosestByPath(FIND_EXIT_LEFT));
-        
-        for (var i=0; i < exits.length; i++)
-        {
-            if (!exits[i]) continue;
-            var path = pos.findPathTo(exits[i]);
-            
-            if (!path.length)
-            {
-                points += 50*5;
-            } else {
-                //the longer the better
-                points += path.length*5;
-            }
-        }
-        
-        return points;
     },
     
     removeRoads: function(room, pos)

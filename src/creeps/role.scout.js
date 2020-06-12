@@ -36,7 +36,8 @@ module.exports =  {
             
             //move to room
             baseCreep.moveToRoom(creep, creep.memory.troom);
-        } else {            
+        } else {
+            //target finished
             delete creep.memory.troom;
         }
         

@@ -4,6 +4,7 @@ module.exports = {
     REACTION: "reaction",
     BOOST: "boost",
     EMPTYING: "emptying",
+    RESET: "reset", 
     
     tx_timeout: 100,
     boost_timeout: 500,
@@ -62,7 +63,15 @@ module.exports = {
         }
         if (mem.state == this.REACTION)
         {
-            if (!mem.is_producing) return;
+            if (!mem.is_producing) 
+            {   //non producing labs - just check if res is sufficient
+                let amount = lab.store[mem.mineralType] || 0;
+                if (amount < mem.amount) {
+                    this.state = this.FILLING;
+                    Game.notify(lab.room.name + ": Bug: Lab has not enough res: " + Game.time);
+                }
+                return;
+            }
             if (lab.cooldown != 0) return;
             var lab_a = Game.getObjectById(mem.lab_a);
             var lab_b = Game.getObjectById(mem.lab_b);
@@ -140,7 +149,7 @@ module.exports = {
             if (amount == 0) 
             {
                 //finished - reset
-                mem.state = this.IDLE;
+                mem.state = this.RESET;
                 mem.init = false;
                 mem.resource_request = 0;
             }
@@ -154,7 +163,6 @@ module.exports = {
         if (mem.init === true) return;
         mem.init = true;
         mem.state = this.IDLE;
-        mem.ready = true;
         mem.energy_request = 0;
         mem.resource_request = 0;
         
@@ -176,7 +184,6 @@ module.exports = {
         lab_a = null, lab_b = null, boost_creep = false)
     {
         mem.state = this.FILLING;
-        mem.ready = false;
         mem.mineralType = resource;
         mem.amount = amount;
         mem.lab_a = lab_a;
