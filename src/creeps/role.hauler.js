@@ -146,7 +146,8 @@ module.exports = {
 			
 			//go to target and transfer
 			var ret = creep.transfer(target, resource);
-			console.log(creep.name + ":" + ret);
+			//console.log(creep.name + ":" + ret);
+			
 			if(ret == ERR_NOT_IN_RANGE) {
 				creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
 			}
