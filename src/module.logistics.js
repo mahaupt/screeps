@@ -1,5 +1,8 @@
 module.exports = {
     run: function(room) {
+        if (room.memory.ltasks instanceof Array) {
+            delete room.memory.ltasks;
+        }
         if (!room.memory.ltasks) {
             room.memory.ltasks = {};
         }
@@ -30,25 +33,35 @@ module.exports = {
         
         for (var i=0; i < targets.length; i++)
         {
-            var amount = targets[i].amount || targets[i].store.getUsedCapacity();
+            var resources = [];
+            if (targets[i] instanceof Resource) {
+                resources = [ targets[i].resourceType ];
+            } else {
+                resources = baseCreep.getStoredResourceTypes(targets[i].store);
+            }
             
-            if (amount > 10)
+            for (var res_type of resources) 
             {
-                var task = {};
-                task.id = "";
-                task.prio = 6;
-                task.type = "loot";
-                task.src = targets[i].id;
-                task.vol = amount;
-                task.acc = 0;
-                task.utx = 0;
-                task.rec = null;
-                task.res = null;
-                
-                this.insertOrUpdate(room, task);
+                var amount = targets[i].amount || targets[i].store[res_type];
+                if (amount > 10)
+                {
+                    var task = {};
+                    task.id = "";
+                    task.prio = 6;
+                    task.type = "loot";
+                    task.src = targets[i].id;
+                    task.vol = amount;
+                    task.acc = 0;
+                    task.utx = 0;
+                    task.rec = null;
+                    task.res = res_type;
+                    
+                    this.insertOrUpdate(room, task);
+                }
             }
         }
     }, 
+    
     
     //carries energy from Containers and Storages to Spawn
     genSpawnDistributionTask: function(room)
@@ -152,8 +165,8 @@ module.exports = {
             (s) => { 
                 return (s.src == task.src || ignoreSource) && 
                     s.type == task.type && 
-                    (!task.rec || s.rec == task.rec) &&
-                    (!task.res || s.res == task.res); 
+                    s.res == task.res && 
+                    (!task.rec || s.rec == task.rec); 
         });
         
         if (id && !force_new)
