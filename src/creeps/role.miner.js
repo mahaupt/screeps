@@ -396,7 +396,7 @@ module.exports = {
         {
             moduleLogistics.addTransportTask(
                 container.room, 
-                container, 
+                container.id, 
                 null, 
                 container.store.getUsedCapacity(res_types[0]), 
                 res_types[0], 

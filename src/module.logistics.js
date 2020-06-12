@@ -10,6 +10,7 @@ module.exports = {
         
         //ltasks = {prio, type:, src:, vol:, acc:, utx:, rec:, res:}
         //prio, type, source, total volume, accepted volume, under transport volume, [receiver], [resource type]
+        this.updateTaskList(room);
     }, 
     
     updateTaskList: function(room)
@@ -121,6 +122,7 @@ module.exports = {
             task.src = source.id;
             task.vol = energyForTransport;
             task.acc = 0;
+            task.utx = 0;
             task.rec = null;
             task.res = RESOURCE_ENERGY;
             
@@ -160,7 +162,7 @@ module.exports = {
     //if ignoreSource=true, only compares task type
     insertOrUpdate: function(room, task, ignoreSource=false, force_new=false)
     {
-        var id = _.find(
+        var id = _.findKey(
             room.memory.ltasks, 
             (s) => { 
                 return (s.src == task.src || ignoreSource) && 
@@ -173,9 +175,11 @@ module.exports = {
         {
             //update
             var accepted = room.memory.ltasks[id].acc;
+            var utx = room.memory.ltasks[id].utx;
             room.memory.ltasks[id] = task;
             room.memory.ltasks[id].id = id;
             room.memory.ltasks[id].acc = accepted;
+            room.memory.ltasks[id].utx = utx;
         } else {
             //find unique id
             do {
@@ -205,6 +209,7 @@ module.exports = {
             src: source,
             vol: amount,
             acc: 0,
+            utx: 0,
             rec: receiver,
             res: resource
         };
@@ -221,21 +226,14 @@ module.exports = {
     },
     
     
-    sortTaskList: function(room)
-    {
-        room.memory.ltasks = _.sortBy(room.memory.ltasks, (s) => -(s.prio*1000000+s.vol-s.acc));
-    },
-    
-    
     getNewTasks: function(room, capacity)
     {
         if (room.memory.ltasks_upd) {
             this.updateTaskList(room);
             room.memory.ltasks_upd = false;
         }
-        this.sortTaskList(room);
         
-        var id = _.find(room.memory.ltasks, (s) => { return s.vol > s.acc;});
+        var id = _.findKey(room.memory.ltasks, (s) => { return s.vol-s.acc-s.utx > 0;});
         
         if (id) {
             room.memory.ltasks[id].acc += capacity;
