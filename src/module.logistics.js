@@ -159,10 +159,10 @@ module.exports = {
         if (id && !force_new)
         {
             //update
-            var accepted = room.memory.ltasks[index].acc;
-            room.memory.ltasks[index] = task;
-            room.memory.ltasks[index].id = id;
-            room.memory.ltasks[index].acc = accepted;
+            var accepted = room.memory.ltasks[id].acc;
+            room.memory.ltasks[id] = task;
+            room.memory.ltasks[id].id = id;
+            room.memory.ltasks[id].acc = accepted;
         } else {
             //find unique id
             do {
@@ -229,7 +229,7 @@ module.exports = {
             return [ id ];
         }
         
-        return null;
+        return [];
     }, 
     
     getTask: function(room, taskid)
