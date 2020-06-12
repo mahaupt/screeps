@@ -63,7 +63,15 @@ module.exports = {
         }
         if (mem.state == this.REACTION)
         {
-            if (!mem.is_producing) return;
+            if (!mem.is_producing) 
+            {   //non producing labs - just check if res is sufficient
+                let amount = lab.store[mem.mineralType] || 0;
+                if (amount < mem.amount) {
+                    this.state = this.FILLING;
+                    Game.notify(lab.room.name + ": Bug: Lab has not enough res: " + Game.time);
+                }
+                return;
+            }
             if (lab.cooldown != 0) return;
             var lab_a = Game.getObjectById(mem.lab_a);
             var lab_b = Game.getObjectById(mem.lab_b);

@@ -1,4 +1,5 @@
 global.baseCreep = require('creeps_baseCreep');
+global.baseGroup = require('creeps_baseGroup');
 global.moduleLogistics = require('module.logistics');
 global.moduleSpawn = require('module.spawn');
 global.Ops = require('ops_ops');
