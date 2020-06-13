@@ -22,9 +22,11 @@ module.exports = {
 		{
 			if (creep.store.getUsedCapacity() > 0) {
 				this.confusionDropoff(creep);
+				return;
 			}
 			if (creep.ticksToLive < 200) {
 				creep.memory.renewSelf = true;
+				return;
 			}
             creep.memory.pickup = true;
 			
@@ -36,25 +38,25 @@ module.exports = {
         
 		if (creep.memory.tasks.length > 0) 
 		{
-			var taskid = creep.memory.tasks[creep.memory.task_ptr];
-			var task = Logistics.getTask(creep.room, taskid);
+			var taskmem = creep.memory.tasks[creep.memory.task_ptr];
+			var task = Logistics.getTask(creep.room, taskmem.id);
 			
 			if (!task) {
-				this.removeTask(creep, taskid);
 				creep.memory.task_ptr = 0;
-				console.log(creep.name + ": error, invalid task: " + taskid);
+				console.log(creep.room.name + " " + creep.name + ": error, invalid task: " + taskmem.id);
 				console.log(JSON.stringify(creep.memory.tasks));
+				this.removeTask(creep, taskmem.id);
 				return;
 			}
 			
 			//has task - do things
 	        if (creep.memory.pickup)
 	        {
-		        this.pickup(creep, task);
+		        this.pickup(creep, task, taskmem);
 	        } 
 	        else 
 	        {
-				this.dropoff(creep, task);
+				this.dropoff(creep, task, taskmem);
 		    }
 		} 
 		else 
@@ -64,11 +66,13 @@ module.exports = {
 		}
 	}, 
 	
-	pickup: function(creep, task) 
+	pickup: function(creep, task, taskmem) 
 	{
 		//source is available check
 		var s = Game.getObjectById(task.src);
 		if (!s) { 
+			console.log(creep.room.name + " " + creep.name + ": source invalid, delete task");
+			console.log(JSON.stringify(task));
 			Logistics.deleteTask(creep.room, task.id);
 			this.removeTask(creep, task.id);
 			return; 
@@ -84,7 +88,7 @@ module.exports = {
 		var resource = task.res || RESOURCE_ENERGY;
 		var amount_avbl = s.amount || s.store[resource];
 		var storage_avbl = creep.store.getFreeCapacity();
-		var amount = Math.min(amount_avbl, storage_avbl, task.vol);
+		var amount = Math.min(amount_avbl, storage_avbl, taskmem.vol);
 		
 		var ret = null;
 		if (s instanceof Resource){
@@ -92,24 +96,42 @@ module.exports = {
 		} else {
 			ret = creep.withdraw(s, resource, amount);
 		}
-		//creep.say(ret);
+		creep.say(ret);
 		if (ret  == ERR_NOT_IN_RANGE) {
 			creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
 		}
 		
 		
 		//successful
-		if (ret == OK || ret == ERR_NOT_ENOUGH_RESOURCES) {
-			Logistics.markPickup(creep.room, task.id, amount);
+		if (ret == OK) {
+			taskmem.utx += amount;
+			Logistics.markPickup(creep.room, task.id, taskmem.vol, amount);
 			this.nextTask(creep, task);
+
+			//creep will be full - switch to dropoff
+			if (amount >= storage_avbl) 
+			{
+				creep.memory.pickup = false;
+				this.cancelAllOpenTasks(creep);
+				console.log(creep.room.name + " " + creep.name + ": Creep full, pickup false");
+			}
 		}
-		if (ret == ERR_FULL) {
-			creep.memory.pickup = false;
+		
+		//Err - task invalid, not enough resources for transport
+		//edit task
+		if (ret == ERR_NOT_ENOUGH_RESOURCES) {
+			if (amount_avbl == 0) {
+				var new_vol = task.vol - taskmem.vol;
+				Logistics.setVolume(creep.room, task.id, new_vol);
+				Logistics.markAbort(creep.room, task.id, taskmem.vol);
+				taskmem.vol = 0;
+				this.removeTask(creep, task.id);
+			}
 		}
 	}, 
 	
 	
-	dropoff: function(creep, task) 
+	dropoff: function(creep, task, taskmem) 
 	{
 		//pick energy receiver
 		if (!creep.memory.target) {
@@ -130,7 +152,7 @@ module.exports = {
 			var resource = task.res || RESOURCE_ENERGY;
 			var amount_avbl = creep.store[resource];
 			var storage_avbl = target.store.getFreeCapacity(resource);
-			var amount = Math.min(amount_avbl, storage_avbl, task.vol);
+			var amount = Math.min(amount_avbl, storage_avbl, taskmem.utx);
 			
 			//go to target and transfer
 			var ret = creep.transfer(target, resource, amount);
@@ -146,7 +168,7 @@ module.exports = {
 			}
 			
 			//transfer complete - search new target
-			if (ret == OK || ret == ERR_NOT_ENOUGH_RESOURCES) 
+			if (ret == OK) 
 			{
 				Logistics.markDropoff(creep.room, task.id, amount);
 				delete creep.memory.target;
@@ -159,6 +181,7 @@ module.exports = {
 				if (storage_avbl >= amount_avbl) {
 					creep.memory.pickup = true;
 					creep.memory.tasks = [];
+					console.log(creep.room.name + " " + creep.name + ": Creep empty, looking for new tasks");
 				}
 			}
 		}
@@ -189,6 +212,7 @@ module.exports = {
 		if (taskrec) {
 			if (taskrec.store.getFreeCapacity(task.res) > 0) {
 				creep.memory.target = taskrec.id;
+				return;
 			}
 		}
 		
@@ -264,7 +288,7 @@ module.exports = {
 	
 	removeTask: function(creep, taskid)
 	{
-		var index = _.findIndex(creep.memory.tasks, (s) => s == taskid);
+		var index = _.findIndex(creep.memory.tasks, (s) => s.id == taskid);
 		if (index >= 0) {
 			creep.memory.tasks.splice(index, 1);
 		}
@@ -278,6 +302,27 @@ module.exports = {
 			creep.memory.task_ptr = 0;
 		}
 	},
+	
+	cancelAllOpenTasks: function(creep)
+	{
+		for (var i in creep.memory.tasks) {
+			var taskmem = creep.memory.tasks[i];
+			
+			//all tasks not started
+			if (taskmem.vol > 0 && taskmem.utx == 0)
+			{
+				Logistics.markCancel(creep.room, taskmem.id, taskmem.vol);
+				taskmem.vol = 0;
+			}
+		}
+		
+		this.removeEmptyTasks(creep);
+	}, 
+	
+	removeEmptyTasks: function(creep)
+	{
+		_.remove(creep.memory.tasks, (s) => s.vol == 0 && s.utx == 0);
+	}, 
 	
 	
 	confusionDropoff: function(creep)

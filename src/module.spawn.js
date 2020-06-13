@@ -43,7 +43,8 @@ module.exports = {
         } else
         if (haulerCount < containerCount && 
             haulerCount < sourceCount+1 &&
-            haulerCount < sourceCount - linkCount+2) 
+            haulerCount < sourceCount - linkCount+2 || 
+            haulerCount < 1) 
         {
             this.spawn(spawn, "hauler");
         } else 

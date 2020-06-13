@@ -394,7 +394,7 @@ module.exports = {
         if (res_types.length > 0 && 
             container.store.getUsedCapacity(res_types[0]) >= 200) 
         {
-            moduleLogistics.addTransportTask(
+            Logistics.addTransportTask(
                 container.room, 
                 container.id, 
                 null, 

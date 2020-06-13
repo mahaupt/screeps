@@ -10,7 +10,21 @@ module.exports = {
         
         //ltasks = {prio, type:, src:, vol:, acc:, utx:, rec:, res:}
         //prio, type, source, total volume, accepted volume, under transport volume, [receiver], [resource type]
-        this.updateTaskList(room);
+        
+        room.visual.text("Transport Tasks", 1, 1, {align: 'left'});
+        var i = 0;
+        for (var id in room.memory.ltasks) {
+            var task = room.memory.ltasks[id];
+            i++;
+            
+            room.visual.text(task.id, 1, 1+i, {align: 'left'});
+            room.visual.text(task.type, 5, 1+i, {align: 'left'});
+            room.visual.text(task.vol, 7, 1+i, {align: 'left'});
+            room.visual.text(task.acc, 9, 1+i, {align: 'left'});
+            room.visual.text(task.utx, 11, 1+i, {align: 'left'});
+            
+            
+        }
     }, 
     
     updateTaskList: function(room)
@@ -176,10 +190,22 @@ module.exports = {
             //update
             var accepted = room.memory.ltasks[id].acc;
             var utx = room.memory.ltasks[id].utx;
+            
             room.memory.ltasks[id] = task;
             room.memory.ltasks[id].id = id;
             room.memory.ltasks[id].acc = accepted;
             room.memory.ltasks[id].utx = utx;
+            
+            //outgoing tasks
+            if (task.type == "l" || task.type == "loot" || task.type == "mc") {
+                room.memory.ltasks[id].vol += utx;
+            } else {
+                room.memory.ltasks[id].vol -= utx;
+                if (room.memory.ltasks[id].vol < 0) {
+                    room.memory.ltasks[id].vol = 0;
+                }
+            }
+            
         } else {
             //find unique id
             do {
@@ -222,7 +248,10 @@ module.exports = {
     
     removeTaskGroup: function(room, taskgroup)
     {
-        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { return s.type != taskgroup; });
+        var tasks = _.filter(room.memory.ltasks, (s) => { return s.type == taskgroup; });
+        for (var t of tasks) {
+            delete room.memory.ltasks[t.id];
+        }
     },
     
     
@@ -233,11 +262,23 @@ module.exports = {
             room.memory.ltasks_upd = false;
         }
         
-        var id = _.findKey(room.memory.ltasks, (s) => { return s.vol-s.acc-s.utx > 0;});
+        var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*1000);
         
-        if (id) {
-            room.memory.ltasks[id].acc += capacity;
-            return [ id ];
+        var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0;});
+        
+        if (task) {
+            var task_add = 0;
+            
+            //s and mc always try to make full
+            if (task.type == "mc" || task.type == "s") {
+                task_add = 1000;
+            }
+            
+            var amount = Math.min(capacity, task.vol-task.acc-task.utx+task_add);
+            amount = Math.max(amount, 0);
+            
+            room.memory.ltasks[task.id].acc += amount;
+            return [ {id: task.id, vol: amount, utx: 0} ];
         }
         
         return [];
@@ -248,14 +289,14 @@ module.exports = {
         return room.memory.ltasks[taskid];
     }, 
     
-    markPickup: function(room, taskid, volume)
+    markPickup: function(room, taskid, acc, utx)
     {
         var id = taskid;
         
         if (room.memory.ltasks[id])
         {
-            room.memory.ltasks[id].acc -= volume;
-            room.memory.ltasks[id].utx += volume;
+            room.memory.ltasks[id].acc -= acc;
+            room.memory.ltasks[id].utx += utx;
             if (room.memory.ltasks[id].acc < 0) {
                 room.memory.ltasks[id].acc = 0;
             }
@@ -275,6 +316,51 @@ module.exports = {
             if (room.memory.ltasks[id].vol <= 0) {
                 delete room.memory.ltasks[id];
             }
+        }
+    }, 
+    
+    //cancel accepted tasks
+    markCancel: function(room, taskid, acc)
+    {
+        var id = taskid;
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].acc -= acc;
+            if (room.memory.ltasks[id].acc < 0) {
+                room.memory.ltasks[id].acc = 0;
+            }
+        }
+    }, 
+    
+    //abort task while transporting
+    markAbort: function(room, taskid, volume)
+    {
+        var id = taskid;
+        
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].utx -= volume;
+            if (room.memory.ltasks[id].utx < 0) {
+                room.memory.ltasks[id].utx = 0;
+            }
+            
+            //mc and l have less volume
+            var type = room.memory.ltasks[id].type;
+            if (type == "mc" || type == "l") {
+                room.memory.ltasks[id].vol -= volume;
+                if (room.memory.ltasks[id].vol <= 0) {
+                    delete room.memory.ltasks[id];
+                }
+            }
+        }
+    }, 
+    
+    setVolume: function(room, taskid, volume) {
+        var id = taskid;
+        
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].vol = volume;
         }
     }, 
     
