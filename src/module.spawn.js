@@ -52,7 +52,7 @@ module.exports = {
         {
             this.spawn(spawn, "upgrader");
         } else 
-        if (builderCount < sourceCount + room.memory.stats.add_creeps)
+        if (builderCount < 1 + room.memory.stats.add_creeps)
         {
             this.spawn(spawn, "builder");
         } else  

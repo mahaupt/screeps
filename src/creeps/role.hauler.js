@@ -96,7 +96,7 @@ module.exports = {
 		} else {
 			ret = creep.withdraw(s, resource, amount);
 		}
-		creep.say(ret);
+
 		if (ret  == ERR_NOT_IN_RANGE) {
 			creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
 		}
@@ -113,7 +113,6 @@ module.exports = {
 			{
 				creep.memory.pickup = false;
 				this.cancelAllOpenTasks(creep);
-				console.log(creep.room.name + " " + creep.name + ": Creep full, pickup false");
 			}
 		}
 		
@@ -121,11 +120,19 @@ module.exports = {
 		//edit task
 		if (ret == ERR_NOT_ENOUGH_RESOURCES) {
 			if (amount_avbl == 0) {
+				//wait one tick for res to arrive
+				if (!taskmem.tick) {
+					taskmem.tick = true;
+					return;
+				}
+				
 				var new_vol = task.vol - taskmem.vol;
 				Logistics.setVolume(creep.room, task.id, new_vol);
 				Logistics.markAbort(creep.room, task.id, taskmem.vol);
 				taskmem.vol = 0;
 				this.removeTask(creep, task.id);
+				console.log(creep.room.name + " " + creep.name + ": wrong numbers, edited task" + task.type);
+				console.log();
 			}
 		}
 	}, 
@@ -181,7 +188,7 @@ module.exports = {
 				if (storage_avbl >= amount_avbl) {
 					creep.memory.pickup = true;
 					creep.memory.tasks = [];
-					console.log(creep.room.name + " " + creep.name + ": Creep empty, looking for new tasks");
+					//console.log(creep.room.name + " " + creep.name + ": Creep empty, looking for new tasks");
 				}
 			}
 		}

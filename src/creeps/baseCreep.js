@@ -359,11 +359,11 @@ module.exports = {
 					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
 					return true;
 				}
-            } else {
+            }/* else {
                 //console.log("Spawnlink full");
 				var amt = spawnlink.store[RESOURCE_ENERGY];
 				moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
-            }
+            }*/
         }
         return false;
     }, 

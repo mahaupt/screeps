@@ -209,7 +209,8 @@ module.exports = {
         } else {
             //find unique id
             do {
-                id = baseCreep.getRandomString(5);
+                var time = Game.time - Math.floor(Game.time/1000)*1000;;
+                id = time + baseCreep.getRandomString(3);
             } while (room.memory.ltasks[id]);
             
             //insert
