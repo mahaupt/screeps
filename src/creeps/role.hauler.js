@@ -42,10 +42,10 @@ module.exports = {
 			var task = Logistics.getTask(creep.room, taskmem.id);
 			
 			if (!task) {
-				creep.memory.task_ptr = 0;
-				console.log(creep.room.name + " " + creep.name + ": error, invalid task: " + taskmem.id);
-				console.log(JSON.stringify(creep.memory.tasks));
 				this.removeTask(creep, taskmem.id);
+				if (creep.memory.task_ptr >= creep.memory.tasks.length) {
+					
+				}
 				return;
 			}
 			
@@ -131,8 +131,7 @@ module.exports = {
 				Logistics.markAbort(creep.room, task.id, taskmem.vol);
 				taskmem.vol = 0;
 				this.removeTask(creep, task.id);
-				console.log(creep.room.name + " " + creep.name + ": wrong numbers, edited task" + task.type);
-				console.log();
+				console.log(creep.room.name + " " + creep.name + ": wrong numbers, edited task " + task.type);
 			}
 		}
 	}, 
@@ -305,7 +304,7 @@ module.exports = {
 	{
 		creep.memory.task_ptr++;
 		if (creep.memory.task_ptr >= creep.memory.tasks.length) {
-			creep.memory.pickup = false;
+			creep.memory.pickup = !creep.memory.pickup;
 			creep.memory.task_ptr = 0;
 		}
 	},
@@ -334,7 +333,7 @@ module.exports = {
 	
 	confusionDropoff: function(creep)
 	{
-		var target = creep.room.terminal || creep.room.storage;
+		var target = creep.room.storage || creep.room.terminal;
 		if (target) {
 			var res_types = baseCreep.getStoredResourceTypes(creep.store);
 			creep.transfer(target, res_types[0]);

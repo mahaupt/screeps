@@ -166,9 +166,15 @@ module.exports = {
             var res = baseCreep.getStoredResourceTypes(s.store);
             for (var j in res) {
                 if (res[j] == RESOURCE_ENERGY) continue;
-                var amt = s.store[res[j]];
+                let amt = s.store[res[j]];
                 this.addTransportTask(room, s.id, room.terminal.id, amt, res[j]);
             }
+        }
+        
+        //put excess energy to storage
+        if (room.terminal.store[RESOURCE_ENERGY] > 30000) {
+            let amt = room.terminal.store[RESOURCE_ENERGY] - 30000;
+            this.addTransportTask(room, room.terminal.id, room.storage.id, amt, RESOURCE_ENERGY);
         }
     }, 
     

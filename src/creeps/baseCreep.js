@@ -147,7 +147,7 @@ module.exports = {
 		} else 
 		if (role=='hauler')
 		{
-			bodySize = Math.min(bodySize, 8);
+			bodySize = Math.min(bodySize, 5);
 			nwork=0;
 			ncarry = Math.min(2*bodySize+1, 25);
 			nmove = Math.min(2*bodySize-1, 25);
@@ -359,11 +359,11 @@ module.exports = {
 					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
 					return true;
 				}
-            }/* else {
+            } else {
                 //console.log("Spawnlink full");
 				var amt = spawnlink.store[RESOURCE_ENERGY];
 				moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
-            }*/
+            }
         }
         return false;
     }, 

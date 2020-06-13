@@ -1,6 +1,7 @@
 module.exports =  {
     run: function(room) {
         this.getTotalEnergyLevel(room);
+        this.getTransportStats(room);
     },
     
     
@@ -90,6 +91,21 @@ module.exports =  {
             room.memory.stats.energy_10k_dx30 = Math.round(room.memory.stats.energy_10k_dx30/30);
         }
     }, 
+    
+    getTransportStats: function(room)
+    {
+        var volume = 0;
+        for (var i in room.memory.ltasks) {
+            volume += room.memory.ltasks[i].vol;
+        }
+        
+        room.memory.stats.transports = volume;
+        
+        if (!room.memory.stats.transports_100) {
+            room.memory.stats.transports_100 = volume;
+        }
+        room.memory.stats.transports_100 = Math.round((room.memory.stats.transports_100*99+volume)/100);
+    }
     
     
 };

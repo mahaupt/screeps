@@ -10,6 +10,11 @@ module.exports = {
         var builderCount = counts.builder || 0;
         var haulerCount = counts.hauler || 0;
         
+        //calc needed haulers
+        var currentBodySize = Math.min(baseCreep.getSuitableBodySize("", room.energyAvailable), 5);
+        var haulerNeeded = Math.round(room.memory.stats.transports_100 / (currentBodySize*100) / 2);
+        haulerNeeded = Math.max(Math.min(haulerNeeded, 5), 1);
+        
         var sourceCount = room.find(FIND_SOURCES).length;
         var mineralCount = room.find(FIND_MINERALS, {
             filter: (s) => {
@@ -41,10 +46,7 @@ module.exports = {
         {
             this.spawn(spawn, "miner");
         } else
-        if (haulerCount < containerCount && 
-            haulerCount < sourceCount+1 &&
-            haulerCount < sourceCount - linkCount+2 || 
-            haulerCount < 1) 
+        if (haulerCount < haulerNeeded) 
         {
             this.spawn(spawn, "hauler");
         } else 
