@@ -66,7 +66,6 @@ module.exports = {
 		else 
 		{
 			//no task, idle
-			creep.say("Zzz");
 		}
 	}, 
 	
@@ -100,7 +99,7 @@ module.exports = {
 		} else {
 			ret = creep.withdraw(s, resource, amount);
 		}
-		creep.say("p: " + ret);
+		//creep.say("p: " + ret);
 
 		if (ret  == ERR_NOT_IN_RANGE) {
 			creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
@@ -171,7 +170,7 @@ module.exports = {
 			
 			//go to target and transfer
 			var ret = creep.transfer(target, resource, amount);
-			creep.say("d: " + ret);
+			//creep.say("d: " + ret);
 			
 			if(ret == ERR_NOT_IN_RANGE) {
 				creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
@@ -193,7 +192,7 @@ module.exports = {
 				}
 				
 				//creep will be empty in next tick
-				if (storage_avbl >= amount_avbl) {
+				if (amount >= creep.store.getUsedCapacity()) {
 					creep.memory.pickup = true;
 					creep.memory.tasks = [];
 					//console.log(creep.room.name + " " + creep.name + ": Creep empty, looking for new tasks");

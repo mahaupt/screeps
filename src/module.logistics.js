@@ -266,7 +266,7 @@ module.exports = {
             room.memory.ltasks_upd = false;
         }
         
-        var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*1000);
+        var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*2000);
         
         var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0;});
         //var task = _.find(tasks, (s) => { return s.acc== 0 && s.utx == 0;});
