@@ -6,9 +6,6 @@ module.exports = {
         if (!room.memory.ltasks) {
             room.memory.ltasks = {};
         }
-        if (room.memory.ltasks instanceof Object) {
-            room.memory.ltasks = [];
-        }
         room.memory.ltasks_upd = true;
         
         //ltasks = {prio, type:, src:, vol:, acc:, utx:, rec:, res:}
