@@ -20,8 +20,9 @@ module.exports = {
             room.visual.text(task.id, 1, 1+i, {align: 'left'});
             room.visual.text(task.type, 5, 1+i, {align: 'left'});
             room.visual.text(task.vol, 7, 1+i, {align: 'left'});
-            room.visual.text(task.acc, 9, 1+i, {align: 'left'});
-            room.visual.text(task.utx, 11, 1+i, {align: 'left'});
+            room.visual.text(task.res, 9, 1+i, {align: 'left'});
+            room.visual.text(task.acc, 11, 1+i, {align: 'left'});
+            room.visual.text(task.utx, 13, 1+i, {align: 'left'});
             
             
         }
