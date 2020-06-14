@@ -201,15 +201,11 @@ module.exports = {
             room.memory.ltasks[id].id = id;
             room.memory.ltasks[id].acc = accepted;
             room.memory.ltasks[id].utx = utx;
+            room.memory.ltasks[id].created_at = Game.time;
             
             //outgoing tasks
             if (task.type == "l" || task.type == "loot" || task.type == "mc") {
                 room.memory.ltasks[id].vol += utx;
-            } else {
-                room.memory.ltasks[id].vol -= utx;
-                if (room.memory.ltasks[id].vol < 0) {
-                    room.memory.ltasks[id].vol = 0;
-                }
             }
             
         } else {
@@ -222,6 +218,7 @@ module.exports = {
             //insert
             task.id = id;
             room.memory.ltasks[id] = task;
+            room.memory.ltasks[id].created_at = Game.time;
         }
     }, 
     
@@ -272,6 +269,7 @@ module.exports = {
         var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*1000);
         
         var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0;});
+        //var task = _.find(tasks, (s) => { return s.acc== 0 && s.utx == 0;});
         
         if (task) {
             var task_add = 0;

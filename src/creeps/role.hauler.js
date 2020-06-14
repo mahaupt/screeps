@@ -17,6 +17,9 @@ module.exports = {
 			creep.memory.tasks = [];
 			creep.memory.noRenew = true; //no autorenew
 		}
+		
+		//check previous pickup amount
+		this.checkPickup(creep);
 				
 		if (creep.memory.tasks.length == 0) 
 		{
@@ -44,7 +47,8 @@ module.exports = {
 			if (!task) {
 				this.removeTask(creep, taskmem.id);
 				if (creep.memory.task_ptr >= creep.memory.tasks.length) {
-					
+					creep.memory.task_ptr = 0;
+					creep.memory.pickup = !creep.memory.pickup;
 				}
 				return;
 			}
@@ -96,6 +100,7 @@ module.exports = {
 		} else {
 			ret = creep.withdraw(s, resource, amount);
 		}
+		creep.say("p: " + ret);
 
 		if (ret  == ERR_NOT_IN_RANGE) {
 			creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
@@ -107,6 +112,7 @@ module.exports = {
 			taskmem.utx += amount;
 			Logistics.markPickup(creep.room, task.id, taskmem.vol, amount);
 			this.nextTask(creep, task);
+			this.savePickup(creep, amount, task.id);
 
 			//creep will be full - switch to dropoff
 			if (amount >= storage_avbl) 
@@ -118,19 +124,22 @@ module.exports = {
 		
 		//Err - task invalid, not enough resources for transport
 		//edit task
-		if (ret == ERR_NOT_ENOUGH_RESOURCES) {
+		if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_INVALID_TARGET) {
 			if (amount_avbl == 0) {
 				//wait one tick for res to arrive
-				if (!taskmem.tick) {
-					taskmem.tick = true;
+				if (task.created_at == Game.time) {
 					return;
 				}
 				
-				var new_vol = task.vol - taskmem.vol;
-				Logistics.setVolume(creep.room, task.id, new_vol);
-				Logistics.markAbort(creep.room, task.id, taskmem.vol);
-				taskmem.vol = 0;
+				//Logistics.markPickup(creep.room, task.id, taskmem.vol, taskmem.vol);
+				//Logistics.markDropoff(creep.room, task.id, taskmem.vol);
+				Logistics.deleteTask(creep.room, task.id);
+				
 				this.removeTask(creep, task.id);
+				if (creep.memory.task_ptr >= creep.memory.tasks.length) {
+					creep.memory.task_ptr = 0;
+					creep.memory.pickup = !creep.memory.pickup;
+				}
 				console.log(creep.room.name + " " + creep.name + ": wrong numbers, edited task " + task.type);
 			}
 		}
@@ -162,7 +171,7 @@ module.exports = {
 			
 			//go to target and transfer
 			var ret = creep.transfer(target, resource, amount);
-			creep.say(ret);
+			creep.say("d: " + ret);
 			
 			if(ret == ERR_NOT_IN_RANGE) {
 				creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
@@ -309,6 +318,15 @@ module.exports = {
 		}
 	},
 	
+	getTaskMem: function(creep, taskid)
+	{
+		var index = _.findIndex(creep.memory.tasks, (s) => s.id == taskid);
+		if (index >= 0) {
+			return creep.memory.tasks[index];
+		}
+		return undefined;
+	}, 
+	
 	cancelAllOpenTasks: function(creep)
 	{
 		for (var i in creep.memory.tasks) {
@@ -339,6 +357,43 @@ module.exports = {
 			creep.transfer(target, res_types[0]);
 			creep.moveTo(target);
 		}
+	},
+	
+	savePickup: function(creep, amount, taskid)
+	{
+		creep.memory.previous_storage = creep.store.getUsedCapacity();
+		creep.memory.previous_amount = amount;
+		creep.memory.previous_taskid = taskid;
+	}, 
+	
+	checkPickup: function(creep)
+	{
+		if (!creep.memory.previous_taskid) return;
+		
+		var used_store = creep.store.getUsedCapacity();
+		var used_before = creep.memory.previous_storage;
+		var should_amount = creep.memory.previous_amount;
+		var is_amount = used_store - used_before;
+		
+		if (is_amount != should_amount) {
+			console.log(creep.room.name + " " + creep.name + ": Pickup Check detected wrong pickup");
+			var taskid = creep.memory.previous_taskid;
+			var task = Logistics.getTask(creep.room, taskid);
+			var taskmem = this.getTaskMem(creep, taskid);
+			var delta = is_amount - should_amount;
+			
+			if (taskmem) {
+				taskmem.utx += delta;
+			}
+			if (task) {
+				task.utx += delta;
+			}
+		}
+		
+		delete creep.memory.previous_storage;
+		delete creep.memory.previous_amount;
+		delete creep.memory.previous_taskid;
+		
 	},
 	
 	
