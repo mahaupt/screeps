@@ -147,10 +147,22 @@ module.exports = {
 		} else 
 		if (role=='hauler')
 		{
-			bodySize = Math.min(bodySize, 8);
+			bodySize = Math.min(bodySize, 5);
 			nwork=0;
 			ncarry = Math.min(2*bodySize+1, 25);
 			nmove = Math.min(2*bodySize-1, 25);
+		} else 
+		if (role=='upgrader') {
+			bodySize = Math.min(bodySize, 5);
+			nwork = bodySize;
+			ncarry = bodySize;
+			nmove = bodySize;
+		} else 
+		if (role == 'builder') {
+			bodySize = Math.min(bodySize, 10);
+			nwork = bodySize;
+			ncarry = bodySize;
+			nmove = bodySize;
 		} else 
 		if (role=='scout')
 		{
@@ -344,7 +356,7 @@ module.exports = {
                 if (link.transferEnergy(spawnlink) == OK) 
 				{
 					var amt = Math.round(link.store[RESOURCE_ENERGY] * (1-LINK_LOSS_RATIO));
-					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l", true);
+					moduleLogistics.addTransportTask(link.room, spawnlink, link.room.storage, amt, RESOURCE_ENERGY, 7, "l");
 					return true;
 				}
             } else {
