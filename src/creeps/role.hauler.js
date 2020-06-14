@@ -74,8 +74,8 @@ module.exports = {
 		//source is available check
 		var s = Game.getObjectById(task.src);
 		if (!s) { 
-			console.log(creep.room.name + " " + creep.name + ": source invalid, delete task");
-			console.log(JSON.stringify(task));
+			//console.log(creep.room.name + " " + creep.name + ": source invalid, delete task");
+			//console.log(JSON.stringify(task));
 			Logistics.deleteTask(creep.room, task.id);
 			this.removeTask(creep, task.id);
 			return; 
@@ -122,7 +122,6 @@ module.exports = {
 		}
 		
 		//Err - task invalid, not enough resources for transport
-		//edit task
 		if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_INVALID_TARGET) {
 			if (amount_avbl == 0) {
 				//wait one tick for res to arrive
@@ -130,8 +129,6 @@ module.exports = {
 					return;
 				}
 				
-				//Logistics.markPickup(creep.room, task.id, taskmem.vol, taskmem.vol);
-				//Logistics.markDropoff(creep.room, task.id, taskmem.vol);
 				Logistics.deleteTask(creep.room, task.id);
 				
 				this.removeTask(creep, task.id);
@@ -139,7 +136,7 @@ module.exports = {
 					creep.memory.task_ptr = 0;
 					creep.memory.pickup = !creep.memory.pickup;
 				}
-				console.log(creep.room.name + " " + creep.name + ": wrong numbers, edited task " + task.type);
+				//console.log(creep.room.name + " " + creep.name + ": wrong numbers, deleted task " + task.type);
 			}
 		}
 	}, 
@@ -375,7 +372,7 @@ module.exports = {
 		var is_amount = used_store - used_before;
 		
 		if (is_amount != should_amount) {
-			console.log(creep.room.name + " " + creep.name + ": Pickup Check detected wrong pickup");
+			//console.log(creep.room.name + " " + creep.name + ": Pickup Check detected wrong pickup");
 			var taskid = creep.memory.previous_taskid;
 			var task = Logistics.getTask(creep.room, taskid);
 			var taskmem = this.getTaskMem(creep, taskid);
