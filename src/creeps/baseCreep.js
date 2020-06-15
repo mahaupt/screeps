@@ -219,10 +219,15 @@ module.exports = {
 		} else
 		if (role == 'dismantler')
 		{
-			bodySize = Math.min(bodySize, 16);
-			nwork=bodySize;
 			ncarry=0;
-			nmove=Math.ceil(1.5*bodySize);//17; //50
+			
+			bodySize = Math.min(bodySize, 10);
+			
+			
+			ntough=bodySize; //10
+			nwork=Math.round(0.5*bodySize); // 100
+			nrattack=Math.round(0.5*bodySize);
+			nmove=Math.ceil(2.5*bodySize);//17; //50
 			nheal=Math.round(0.5*bodySize);//4; // 250
 		} else 
 		if (role == 'harvester')

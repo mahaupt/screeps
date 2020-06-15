@@ -99,12 +99,6 @@ module.exports = {
 		if (possibleBodyParts > creep.body.length > 0)
         {
 	        creep.memory.killSelf = true;
-			
-			//bugfix hauler didn't drop task
-			if (creep.memory.role == "hauler" && creep.memory.task) {
-				moduleLogistics.dropTask(creep.room, creep.memory.task, creep.store.getCapacity());
-				creep.memory.task.s = null;
-			}
         }
 	}
 };

@@ -1,8 +1,5 @@
 module.exports = {
     run: function(room) {
-        if (room.memory.ltasks instanceof Array) {
-            delete room.memory.ltasks;
-        }
         if (!room.memory.ltasks) {
             room.memory.ltasks = {};
         }
