@@ -67,7 +67,7 @@ module.exports = {
             {   //non producing labs - just check if res is sufficient
                 let amount = lab.store[mem.mineralType] || 0;
                 if (amount < mem.amount) {
-                    this.state = this.FILLING;
+                    mem.state = this.FILLING;
                     Game.notify(lab.room.name + ": Bug: Lab has not enough res: " + Game.time);
                 }
                 return;

@@ -2,7 +2,7 @@
 /*
 Memory Layout
 .role = "hauler"
-.harvesting = true/false
+.pickup = true/false
 .renewSelf = true/false
 .task = HAULING TASK
 .target = target.id
@@ -12,57 +12,72 @@ module.exports = {
 	name: 'hauler', 
 	run: function(creep) {
 		baseCreep.init(creep);
+		
+		if (!creep.memory.tasks) {
+			creep.memory.tasks = [];
+			creep.memory.noRenew = true; //no autorenew
+		}
+		
+		//check previous pickup amount
+		this.checkPickup(creep);
 				
-		if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0 || 
-			!creep.memory.task) {
-            creep.memory.harvesting = true;
-			delete creep.memory.target;
+		if (creep.memory.tasks.length == 0) 
+		{
+			if (creep.store.getUsedCapacity() > 0) {
+				this.confusionDropoff(creep);
+				return;
+			}
+			if (creep.ticksToLive < 200) {
+				creep.memory.renewSelf = true;
+				return;
+			}
+            creep.memory.pickup = true;
 			
 			//pick new task
-			creep.memory.task = moduleLogistics.getTask(creep.room, creep.store.getCapacity());
-			if (creep.memory.task && creep.memory.task.rec) {
-				creep.memory.target = creep.memory.task.rec;
-			}
+			creep.memory.tasks = Logistics.getNewTasks(creep.room, creep.store.getCapacity());
+			creep.memory.task_ptr = 0;
         }
-        if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
-            creep.memory.harvesting = false;
-			
-			//finish task
-			moduleLogistics.dropTask(
-				creep.room, 
-				creep.memory.task, 
-				creep.store.getCapacity(), 
-				creep.store.getCapacity()
-			);
-			creep.memory.task.src = null;
-			
-        }
+		
         
-		if (creep.memory.task) 
+		if (creep.memory.tasks.length > 0) 
 		{
+			var taskmem = creep.memory.tasks[creep.memory.task_ptr];
+			var task = Logistics.getTask(creep.room, taskmem.id);
+			
+			if (!task) {
+				this.removeTask(creep, taskmem.id);
+				if (creep.memory.task_ptr >= creep.memory.tasks.length) {
+					creep.memory.task_ptr = 0;
+					creep.memory.pickup = !creep.memory.pickup;
+				}
+				return;
+			}
+			
 			//has task - do things
-	        if (creep.memory.harvesting)
+	        if (creep.memory.pickup)
 	        {
-		        this.pickup(creep);
+		        this.pickup(creep, task, taskmem);
 	        } 
 	        else 
 	        {
-				this.dropoff(creep);
+				this.dropoff(creep, task, taskmem);
 		    }
 		} 
 		else 
 		{
 			//no task, idle
-			
 		}
 	}, 
 	
-	pickup: function(creep) 
+	pickup: function(creep, task, taskmem) 
 	{
-		var s = Game.getObjectById(creep.memory.task.src);
+		//source is available check
+		var s = Game.getObjectById(task.src);
 		if (!s) { 
-			moduleLogistics.deleteTask(creep.room, creep.memory.task);
-			delete creep.memory.task; 
+			//console.log(creep.room.name + " " + creep.name + ": source invalid, delete task");
+			//console.log(JSON.stringify(task));
+			Logistics.deleteTask(creep.room, task.id);
+			this.removeTask(creep, task.id);
 			return; 
 		}
 		
@@ -73,52 +88,65 @@ module.exports = {
 		}
 		
 		//select resource for pickup
-		var resource = creep.memory.task.res || RESOURCE_ENERGY;
-		var amount = s.amount || s.store[resource];
-		var multi_pickup = false;
-		if (creep.memory.task.type == "mc" || creep.memory.task.type == "loot") 
-		{
-			//mining container, pickup all resources
-			if (s instanceof Resource) {
-				amount = s.amount;
-				resource = s.resourceType;
-			} else {
-				amount = s.store.getUsedCapacity();
-				var res_types = baseCreep.getStoredResourceTypes(s.store);
-				resource = res_types[0];
-				multi_pickup = res_types.length > 1;
-			}
-		}
+		var resource = task.res || RESOURCE_ENERGY;
+		var amount_avbl = s.amount || s.store[resource];
+		var storage_avbl = creep.store.getFreeCapacity();
+		var amount = Math.min(amount_avbl, storage_avbl, taskmem.vol);
 		
 		var ret = null;
 		if (s instanceof Resource){
 			ret = creep.pickup(s);
 		} else {
-			ret = creep.withdraw(s, resource);
+			ret = creep.withdraw(s, resource, amount);
 		}
-		
+		//creep.say("p: " + ret);
+
 		if (ret  == ERR_NOT_IN_RANGE) {
 			creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
 		}
 		
 		
-		//no more energy in container - stop and carry to base
-		if (amount < creep.store.getFreeCapacity() && 
-			ret == OK && 
-			!multi_pickup || 
-			amount == 0)
-		{
-			creep.memory.harvesting = false;
-			moduleLogistics.deleteTask(creep.room, creep.memory.task);
+		//successful
+		if (ret == OK) {
+			taskmem.utx += amount;
+			Logistics.markPickup(creep.room, task.id, taskmem.vol, amount);
+			this.nextTask(creep, task);
+			this.savePickup(creep, amount, task.id);
+
+			//creep will be full - switch to dropoff
+			if (amount >= storage_avbl) 
+			{
+				creep.memory.pickup = false;
+				this.cancelAllOpenTasks(creep);
+			}
+		}
+		
+		//Err - task invalid, not enough resources for transport
+		if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_INVALID_TARGET) {
+			if (amount_avbl == 0) {
+				//wait one tick for res to arrive
+				if (task.created_at == Game.time) {
+					return;
+				}
+				
+				Logistics.deleteTask(creep.room, task.id);
+				
+				this.removeTask(creep, task.id);
+				if (creep.memory.task_ptr >= creep.memory.tasks.length) {
+					creep.memory.task_ptr = 0;
+					creep.memory.pickup = !creep.memory.pickup;
+				}
+				//console.log(creep.room.name + " " + creep.name + ": wrong numbers, deleted task " + task.type);
+			}
 		}
 	}, 
 	
 	
-	dropoff: function(creep) 
+	dropoff: function(creep, task, taskmem) 
 	{
 		//pick energy receiver
 		if (!creep.memory.target) {
-			this.pickReceiver(creep);
+			this.pickReceiver(creep, task);
 		}
 		
 		
@@ -131,33 +159,41 @@ module.exports = {
 				return;
 			}
 			
-			//select resource for transfer if target is storage
-			var resource = creep.memory.task.res || RESOURCE_ENERGY;
-			var stored_resources = baseCreep.getStoredResourceTypes(creep.store);
-			var multi_dropoff = false;
-			if (target.structureType == STRUCTURE_TERMINAL || 
-				target.structureType == STRUCTURE_CONTAINER || 
-				target.structureType == STRUCTURE_STORAGE) 
-			{
-				//multidropoff to terminal or / if there is no terminal / to storage
-				multi_dropoff = stored_resources.length > 1;
-				resource = stored_resources[0];
-			}
+			//select resource for transfer
+			var resource = task.res || RESOURCE_ENERGY;
+			var amount_avbl = creep.store[resource];
+			var storage_avbl = target.store.getFreeCapacity(resource);
+			var amount = Math.min(amount_avbl, storage_avbl, taskmem.utx);
 			
 			//go to target and transfer
-			var ret = creep.transfer(target, resource);
-			//console.log(creep.name + ":" + ret);
+			var ret = creep.transfer(target, resource, amount);
+			//creep.say("d: " + ret);
 			
 			if(ret == ERR_NOT_IN_RANGE) {
 				creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
 			}
+			
 			//target full - search new target
-			if (target.store.getFreeCapacity(resource) == 0 || ret == ERR_INVALID_TARGET) {
+			if (storage_avbl == 0 || ret == ERR_INVALID_TARGET) {
 				delete creep.memory.target;
 			}
+			
 			//transfer complete - search new target
-			if (ret == OK && !multi_dropoff) {
+			if (ret == OK) 
+			{
+				Logistics.markDropoff(creep.room, task.id, amount);
 				delete creep.memory.target;
+				
+				if (task.rec != null) {
+					this.removeTask(creep, task.id);
+				}
+				
+				//creep will be empty in next tick
+				if (amount >= creep.store.getUsedCapacity()) {
+					creep.memory.pickup = true;
+					creep.memory.tasks = [];
+					//console.log(creep.room.name + " " + creep.name + ": Creep empty, looking for new tasks");
+				}
 			}
 		}
 		else 
@@ -175,27 +211,26 @@ module.exports = {
 			{
 				creep.moveTo(spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
 			}
+			creep.say("??");
 			
 		}
 	}, 
 
 
-	pickReceiver: function(creep) {
-		var res_types = baseCreep.getStoredResourceTypes(creep.store);
-		var resource = res_types[0];
-		
-		var target = null;
-		
-		//if quick purge - select storage if avbl
-		if (creep.memory.task && creep.memory.task.type == "l") {
-			if (creep.room.storage) {
-				creep.memory.target = creep.room.storage.id;
+	pickReceiver: function(creep, task) {
+		//first pick task receiver
+		let taskrec = Game.getObjectById(task.rec);
+		if (taskrec) {
+			if (taskrec.store.getFreeCapacity(task.res) > 0) {
+				creep.memory.target = taskrec.id;
 				return;
 			}
 		}
 		
 		
-		if (resource == RESOURCE_ENERGY) 
+		var target = null;
+		
+		if (task.res == RESOURCE_ENERGY) 
 		{
 			//CARRY ENERGY TO PRIORITY TARGETS
 			// Prio 1: SPAWNS, Extensions
@@ -204,7 +239,7 @@ module.exports = {
 					filter: (structure) => {
 						return (structure.structureType == STRUCTURE_EXTENSION ||
 							structure.structureType == STRUCTURE_SPAWN) &&
-							structure.store.getFreeCapacity(resource) > 0;
+							structure.store.getFreeCapacity(task.res) > 0;
 					}
 				});
 			}
@@ -214,7 +249,7 @@ module.exports = {
 				target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 					filter: (structure) => {
 						return (structure.structureType == STRUCTURE_TOWER && 
-							structure.store.getFreeCapacity(resource) > 50);
+							structure.store.getFreeCapacity(task.res) > 50);
 					}
 				});
 			}
@@ -226,7 +261,7 @@ module.exports = {
 						return (structure.structureType == STRUCTURE_STORAGE || 
 							(structure.structureType == STRUCTURE_CONTAINER && structure.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
 							structure.pos.findInRange(FIND_MINERALS, 2).length == 0)) &&
-							structure.store.getFreeCapacity(resource) > 0;
+							structure.store.getFreeCapacity(task.res) > 0;
 					}
 				});
 			}
@@ -239,7 +274,7 @@ module.exports = {
 				target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 					filter: (structure) => {
 						return (structure.structureType == STRUCTURE_TERMINAL &&
-							structure.store.getFreeCapacity(resource) > 0);
+							structure.store.getFreeCapacity(task.res) > 0);
 					}
 				});
 			}
@@ -251,7 +286,7 @@ module.exports = {
 						return (structure.structureType == STRUCTURE_STORAGE || 
 							(structure.structureType == STRUCTURE_CONTAINER && structure.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
 							structure.pos.findInRange(FIND_MINERALS, 2).length == 0)) &&
-							structure.store.getFreeCapacity(resource) > 0;
+							structure.store.getFreeCapacity(task.res) > 0;
 					}
 				});
 			}
@@ -260,7 +295,102 @@ module.exports = {
 		if(target) {
 			creep.memory.target = target.id
 		}
-	}
+	}, 
+	
+	removeTask: function(creep, taskid)
+	{
+		var index = _.findIndex(creep.memory.tasks, (s) => s.id == taskid);
+		if (index >= 0) {
+			creep.memory.tasks.splice(index, 1);
+		}
+	}, 
+	
+	nextTask: function(creep, task)
+	{
+		creep.memory.task_ptr++;
+		if (creep.memory.task_ptr >= creep.memory.tasks.length) {
+			creep.memory.pickup = !creep.memory.pickup;
+			creep.memory.task_ptr = 0;
+		}
+	},
+	
+	getTaskMem: function(creep, taskid)
+	{
+		var index = _.findIndex(creep.memory.tasks, (s) => s.id == taskid);
+		if (index >= 0) {
+			return creep.memory.tasks[index];
+		}
+		return undefined;
+	}, 
+	
+	cancelAllOpenTasks: function(creep)
+	{
+		for (var i in creep.memory.tasks) {
+			var taskmem = creep.memory.tasks[i];
+			
+			//all tasks not started
+			if (taskmem.vol > 0 && taskmem.utx == 0)
+			{
+				Logistics.markCancel(creep.room, taskmem.id, taskmem.vol);
+				taskmem.vol = 0;
+			}
+		}
+		
+		this.removeEmptyTasks(creep);
+	}, 
+	
+	removeEmptyTasks: function(creep)
+	{
+		_.remove(creep.memory.tasks, (s) => s.vol == 0 && s.utx == 0);
+	}, 
+	
+	
+	confusionDropoff: function(creep)
+	{
+		var target = creep.room.storage || creep.room.terminal;
+		if (target) {
+			var res_types = baseCreep.getStoredResourceTypes(creep.store);
+			creep.transfer(target, res_types[0]);
+			creep.moveTo(target);
+		}
+	},
+	
+	savePickup: function(creep, amount, taskid)
+	{
+		creep.memory.previous_storage = creep.store.getUsedCapacity();
+		creep.memory.previous_amount = amount;
+		creep.memory.previous_taskid = taskid;
+	}, 
+	
+	checkPickup: function(creep)
+	{
+		if (!creep.memory.previous_taskid) return;
+		
+		var used_store = creep.store.getUsedCapacity();
+		var used_before = creep.memory.previous_storage;
+		var should_amount = creep.memory.previous_amount;
+		var is_amount = used_store - used_before;
+		
+		if (is_amount != should_amount) {
+			//console.log(creep.room.name + " " + creep.name + ": Pickup Check detected wrong pickup");
+			var taskid = creep.memory.previous_taskid;
+			var task = Logistics.getTask(creep.room, taskid);
+			var taskmem = this.getTaskMem(creep, taskid);
+			var delta = is_amount - should_amount;
+			
+			if (taskmem) {
+				taskmem.utx += delta;
+			}
+			if (task) {
+				task.utx += delta;
+			}
+		}
+		
+		delete creep.memory.previous_storage;
+		delete creep.memory.previous_amount;
+		delete creep.memory.previous_taskid;
+		
+	},
 	
 	
 	

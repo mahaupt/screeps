@@ -35,25 +35,30 @@ module.exports = {
         if (labs.length >= 3 && 
             (!room.memory.labs.production || room.memory.labs.production.length == 0)) 
         {
+            
             if (!this.resourceAvailable(room, "XGHO2", 1500)) {
                 Labs.Production.startProduction(room, "XGHO2", 3000);
-                return;
-            }
-            if (!this.resourceAvailable(room, "XUH2O", 1500)) {
-                Labs.Production.startProduction(room, "XUH2O", 3000);
-                return;
-            }
-            if (!this.resourceAvailable(room, "XKHO2", 1500)) {
-                Labs.Production.startProduction(room, "XKHO2", 3000);
-                return;
+                return; // RESISTANCE
             }
             if (!this.resourceAvailable(room, "XLHO2", 1500)) {
                 Labs.Production.startProduction(room, "XLHO2", 3000);
-                return;
+                return; // HEAL
+            }
+            if (!this.resourceAvailable(room, "XUH2O", 1500)) {
+                Labs.Production.startProduction(room, "XUH2O", 3000);
+                return; // ATTACK
+            }
+            if (!this.resourceAvailable(room, "XKHO2", 1500)) {
+                Labs.Production.startProduction(room, "XKHO2", 3000);
+                return; // RANGED ATTACK
             }
             if (!this.resourceAvailable(room, "XZHO2", 1500)) {
                 Labs.Production.startProduction(room, "XZHO2", 3000);
-                return;
+                return; // FATIGUE DECR
+            }
+            if (!this.resourceAvailable(room, "XZH2O", 1500)) {
+                Labs.Production.startProduction(room, "XZH2O", 3000);
+                return; // DISMANTLE
             }
         }
     },

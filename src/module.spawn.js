@@ -41,9 +41,7 @@ module.exports = {
         {
             this.spawn(spawn, "miner");
         } else
-        if (haulerCount < containerCount && 
-            haulerCount < sourceCount+1 &&
-            haulerCount < sourceCount - linkCount+2) 
+        if (haulerCount < room.memory.stats.haulers_needed) 
         {
             this.spawn(spawn, "hauler");
         } else 
@@ -51,7 +49,7 @@ module.exports = {
         {
             this.spawn(spawn, "upgrader");
         } else 
-        if (builderCount < sourceCount + room.memory.stats.add_creeps)
+        if (builderCount < 1 + room.memory.stats.add_creeps)
         {
             this.spawn(spawn, "builder");
         } else  

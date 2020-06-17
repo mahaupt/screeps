@@ -1,31 +1,34 @@
 module.exports = {
     run: function(room) {
         if (!room.memory.ltasks) {
-            room.memory.ltasks = [];
+            room.memory.ltasks = {};
         }
         room.memory.ltasks_upd = true;
         
-        //ltasks = {prio, type:, src:, vol:, acc:, [rec:, res:]}
-        //prio, type, source, volume, accepted volume, [receiver], [resource type]
-        //this.updateTaskList(room);
-        //this.sortTaskList(room);
+        //ltasks = {prio, type:, src:, vol:, acc:, utx:, rec:, res:}
+        //prio, type, source, total volume, accepted volume, under transport volume, [receiver], [resource type]
+        
+        room.visual.text("Transport Tasks", 1, 1, {align: 'left'});
+        var i = 0;
+        for (var id in room.memory.ltasks) {
+            var task = room.memory.ltasks[id];
+            i++;
+            
+            room.visual.text(task.id, 1, 1+i, {align: 'left'});
+            room.visual.text(task.type, 5, 1+i, {align: 'left'});
+            room.visual.text(task.vol, 7, 1+i, {align: 'left'});
+            room.visual.text(task.res, 9, 1+i, {align: 'left'});
+            room.visual.text(task.acc, 13, 1+i, {align: 'left'});
+            room.visual.text(task.utx, 15, 1+i, {align: 'left'});
+            
+            
+        }
     }, 
     
     updateTaskList: function(room)
     {
-        //this.removeInvalidTasks(room);
         this.genLootTasks(room);
-        //this.genLinkTask(room);
-        //this.genContainerTasks(room);
         this.genSpawnDistributionTask(room);
-    }, 
-    
-    removeInvalidTasks: function(room)
-    {
-        //also remove inactive MC and Links
-        _.remove(room.memory.ltasks, (s) => { 
-            return ((s.type == 'mc' || s.type == 'l') && s.acc == 0) || 
-                Game.getObjectById(s.src) == null; });
     }, 
     
     //generates hauling tasks for transporting loot
@@ -43,74 +46,35 @@ module.exports = {
         
         for (var i=0; i < targets.length; i++)
         {
-            var amount = targets[i].amount || targets[i].store.getUsedCapacity();
+            var resources = [];
+            if (targets[i] instanceof Resource) {
+                resources = [ targets[i].resourceType ];
+            } else {
+                resources = baseCreep.getStoredResourceTypes(targets[i].store);
+            }
             
-            if (amount > 10)
+            for (var res_type of resources) 
             {
-                var task = {};
-                task.id = "";
-                task.prio = 6;
-                task.type = "loot";
-                task.src = targets[i].id;
-                task.vol = amount;
-                task.acc = 0;
-                
-                this.insertOrUpdate(room, task);
+                var amount = targets[i].amount || targets[i].store[res_type];
+                if (amount > 10)
+                {
+                    var task = {};
+                    task.id = "";
+                    task.prio = 6;
+                    task.type = "loot";
+                    task.src = targets[i].id;
+                    task.vol = amount;
+                    task.acc = 0;
+                    task.utx = 0;
+                    task.rec = null;
+                    task.res = res_type;
+                    
+                    this.insertOrUpdate(room, task);
+                }
             }
         }
     }, 
     
-    //deprecated
-    genLinkTask: function(room)
-    {
-        //find base links
-        var links = room.find(FIND_STRUCTURES, {filter: (s) => {
-            return s.structureType == STRUCTURE_LINK &&
-            s.pos.findInRange(FIND_SOURCES, 2).length == 0 && 
-            s.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
-        }});
-        
-        for (var i=0; i<links.length; i++)
-        {
-            var task = {};
-            task.id = "";
-            task.prio = 7;
-            task.type = "l";
-            task.src = links[i].id;
-            task.vol = links[i].store.getUsedCapacity(RESOURCE_ENERGY);
-            task.acc = 0;
-            task.res = RESOURCE_ENERGY;
-            
-            this.insertOrUpdate(room, task);
-        }
-    }, 
-    
-    //deprecated
-    genContainerTasks: function(room)
-    {
-        //find mining containers without links
-        var mcontainers = room.find(FIND_STRUCTURES, {filter: (s) => {
-            return s.structureType == STRUCTURE_CONTAINER && 
-                (s.pos.findInRange(FIND_SOURCES, 2).length>0 || 
-                s.pos.findInRange(FIND_MINERALS, 2).length>0) && 
-                s.store.getUsedCapacity() >= s.store.getCapacity()*0.1 && 
-                s.pos.findInRange(FIND_STRUCTURES, 2, {filter: (t) => t.structureType == STRUCTURE_LINK}).length == 0;
-        }});
-        
-        for (var i=0; i < mcontainers.length; i++)
-        {
-            var task = {};
-            task.id = "";
-            task.prio = 5;
-            task.type = "mc";
-            task.src = mcontainers[i].id;
-            task.vol = mcontainers[i].store.getUsedCapacity();
-            task.acc = 0;
-            
-            this.insertOrUpdate(room, task);
-        }
-        
-    },
     
     //carries energy from Containers and Storages to Spawn
     genSpawnDistributionTask: function(room)
@@ -159,7 +123,7 @@ module.exports = {
             source = containers[0];
         }
         
-        if (source) {
+        if (source && energyNeeded > 0) {
             
             var energyForTransport = Math.min(energyNeeded, energyAvbl);
              
@@ -170,6 +134,7 @@ module.exports = {
             task.src = source.id;
             task.vol = energyForTransport;
             task.acc = 0;
+            task.utx = 0;
             task.rec = null;
             task.res = RESOURCE_ENERGY;
             
@@ -199,9 +164,15 @@ module.exports = {
             var res = baseCreep.getStoredResourceTypes(s.store);
             for (var j in res) {
                 if (res[j] == RESOURCE_ENERGY) continue;
-                var amt = s.store[res[j]];
+                let amt = s.store[res[j]];
                 this.addTransportTask(room, s.id, room.terminal.id, amt, res[j]);
             }
+        }
+        
+        //put excess energy to storage
+        if (room.terminal.store[RESOURCE_ENERGY] > 30000) {
+            let amt = room.terminal.store[RESOURCE_ENERGY] - 30000;
+            this.addTransportTask(room, room.terminal.id, room.storage.id, amt, RESOURCE_ENERGY);
         }
     }, 
     
@@ -209,33 +180,43 @@ module.exports = {
     //if ignoreSource=true, only compares task type
     insertOrUpdate: function(room, task, ignoreSource=false, force_new=false)
     {
-        var index = _.findIndex(
+        var id = _.findKey(
             room.memory.ltasks, 
             (s) => { 
                 return (s.src == task.src || ignoreSource) && 
                     s.type == task.type && 
-                    (!task.rec || s.rec == task.rec) &&
-                    (!task.res || s.res == task.res); 
+                    s.res == task.res && 
+                    (!task.rec || s.rec == task.rec); 
         });
         
-        if (index >= 0 && !force_new)
+        if (id && !force_new)
         {
             //update
-            var id = room.memory.ltasks[index].id;
-            var accepted = room.memory.ltasks[index].acc;
-            room.memory.ltasks[index] = task;
-            room.memory.ltasks[index].id = id;
-            room.memory.ltasks[index].acc = accepted;
+            var accepted = room.memory.ltasks[id].acc;
+            var utx = room.memory.ltasks[id].utx;
+            
+            room.memory.ltasks[id] = task;
+            room.memory.ltasks[id].id = id;
+            room.memory.ltasks[id].acc = accepted;
+            room.memory.ltasks[id].utx = utx;
+            room.memory.ltasks[id].created_at = Game.time;
+            
+            //outgoing tasks
+            if (task.type == "l" || task.type == "loot" || task.type == "mc") {
+                room.memory.ltasks[id].vol += utx;
+            }
+            
         } else {
             //find unique id
-            var id = "";
             do {
-                id = baseCreep.getRandomString(5);
-            } while (0 <= _.findIndex(room.memory.ltasks, (s) => s.id == id));
+                var time = Game.time - Math.floor(Game.time/1000)*1000;;
+                id = time + baseCreep.getRandomString(3);
+            } while (room.memory.ltasks[id]);
             
             //insert
             task.id = id;
-            room.memory.ltasks.push(task);
+            room.memory.ltasks[id] = task;
+            room.memory.ltasks[id].created_at = Game.time;
         }
     }, 
     
@@ -256,6 +237,7 @@ module.exports = {
             src: source,
             vol: amount,
             acc: 0,
+            utx: 0,
             rec: receiver,
             res: resource
         };
@@ -268,64 +250,126 @@ module.exports = {
     
     removeTaskGroup: function(room, taskgroup)
     {
-        room.memory.ltasks = _.remove(room.memory.ltasks, (s) => { return s.type != taskgroup; });
+        var tasks = _.filter(room.memory.ltasks, (s) => { return s.type == taskgroup; });
+        for (var t of tasks) {
+            delete room.memory.ltasks[t.id];
+        }
     },
     
     
-    sortTaskList: function(room)
-    {
-        room.memory.ltasks = _.sortBy(room.memory.ltasks, (s) => -(s.prio*1000000+s.vol-s.acc));
-    },
-    
-    
-    getTask: function(room, capacity)
+    getNewTasks: function(room, capacity)
     {
         if (room.memory.ltasks_upd) {
             this.updateTaskList(room);
             room.memory.ltasks_upd = false;
         }
-        this.sortTaskList(room);
         
-        var index = _.findIndex(room.memory.ltasks, (s) => { return s.vol > s.acc;});
+        var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*2000);
         
-        if (index >= 0) {
-            room.memory.ltasks[index].acc += capacity;
-            return room.memory.ltasks[index];
+        var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0;});
+        //var task = _.find(tasks, (s) => { return s.acc== 0 && s.utx == 0;});
+        
+        if (task) {
+            var task_add = 0;
+            
+            //s and mc always try to make full
+            if (task.type == "mc" || task.type == "s") {
+                task_add = 1000;
+            }
+            
+            var amount = Math.min(capacity, task.vol-task.acc-task.utx+task_add);
+            amount = Math.max(amount, 0);
+            
+            room.memory.ltasks[task.id].acc += amount;
+            return [ {id: task.id, vol: amount, utx: 0} ];
         }
         
-        return null;
+        return [];
     }, 
     
-    dropTask: function(room, task, capacity, drawnCapacity=0)
+    getTask: function(room, taskid)
     {
-        var index = _.findIndex(room.memory.ltasks, (s) => { return s.id == task.id; });
+        return room.memory.ltasks[taskid];
+    }, 
+    
+    markPickup: function(room, taskid, acc, utx)
+    {
+        var id = taskid;
         
-        
-        
-        if (index >= 0)
+        if (room.memory.ltasks[id])
         {
-            room.memory.ltasks[index].acc -= capacity;
-            room.memory.ltasks[index].vol -= drawnCapacity;
-            if (room.memory.ltasks[index].acc < 0) {
-                room.memory.ltasks[index].acc = 0;
-            }
-            if (room.memory.ltasks[index].vol <= 0) 
-            {
-                //no more to transport - delete task
-                room.memory.ltasks.splice(index, 1);
-                /*if (task.type == "l") {
-                    console.log(room.name + "/" + Game.time + ": l task finished");
-                }*/
+            room.memory.ltasks[id].acc -= acc;
+            room.memory.ltasks[id].utx += utx;
+            if (room.memory.ltasks[id].acc < 0) {
+                room.memory.ltasks[id].acc = 0;
             }
         }
     }, 
     
-    deleteTask: function(room, task)
+    markDropoff: function(room, taskid, volume) {
+        var id = taskid;
+        
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].utx -= volume;
+            room.memory.ltasks[id].vol -= volume;
+            if (room.memory.ltasks[id].utx < 0) {
+                room.memory.ltasks[id].utx = 0;
+            }
+            if (room.memory.ltasks[id].vol <= 0) {
+                delete room.memory.ltasks[id];
+            }
+        }
+    }, 
+    
+    //cancel accepted tasks
+    markCancel: function(room, taskid, acc)
     {
-        _.remove(room.memory.ltasks, (s) => s.id == task.id);
-        /*if (task.type == "l") {
-            console.log(room.name + "/" + Game.time + ": l task deleted");
-        }*/
+        var id = taskid;
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].acc -= acc;
+            if (room.memory.ltasks[id].acc < 0) {
+                room.memory.ltasks[id].acc = 0;
+            }
+        }
+    }, 
+    
+    //abort task while transporting
+    markAbort: function(room, taskid, volume)
+    {
+        var id = taskid;
+        
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].utx -= volume;
+            if (room.memory.ltasks[id].utx < 0) {
+                room.memory.ltasks[id].utx = 0;
+            }
+            
+            //mc and l have less volume
+            var type = room.memory.ltasks[id].type;
+            if (type == "mc" || type == "l") {
+                room.memory.ltasks[id].vol -= volume;
+                if (room.memory.ltasks[id].vol <= 0) {
+                    delete room.memory.ltasks[id];
+                }
+            }
+        }
+    }, 
+    
+    setVolume: function(room, taskid, volume) {
+        var id = taskid;
+        
+        if (room.memory.ltasks[id])
+        {
+            room.memory.ltasks[id].vol = volume;
+        }
+    }, 
+    
+    deleteTask: function(room, taskid)
+    {
+        delete room.memory.ltasks[taskid];
     }
     
     
