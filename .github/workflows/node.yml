@@ -23,7 +23,7 @@ jobs:
       - name: Install NPM dependencies
         run: npm install
 
-      - name: Compile assets
+      - name: Lint
         run: npm run lint
 
   build:
@@ -62,5 +62,5 @@ jobs:
       - name: Compile assets
         run: npm run build
 
-      - name: Compile assets
+      - name: Run Tests
         run: npm run test
