@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-import { IAi } from "Ai";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Mem } from "memory/Memory";
+import { IAi } from "Ai";
 
 function main(): void {
   Mem.load();

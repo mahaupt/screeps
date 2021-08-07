@@ -1,3 +1,1 @@
-export class Operator {
-
-}
+export class Operator {}

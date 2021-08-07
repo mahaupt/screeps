@@ -1,8 +1,7 @@
 export class Mem {
-
   // check cpu and pause if not enough cpu avbl
   public static pauseForCpu(): boolean {
-    return (Game.cpu.tickLimit < 500);
+    return Game.cpu.tickLimit < 500;
   }
 
   public static load(): void {

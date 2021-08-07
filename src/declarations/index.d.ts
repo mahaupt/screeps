@@ -1,16 +1,20 @@
-declare var global: any;
+declare let global: any;
 
 declare namespace NodeJS {
-	interface Global {
+  interface Global {
     Ai: IAi;
   }
 }
 
 interface IAi {
-  overseer: any;
-  colonies: any;
-  directives: any;
+  overseer: IOverseer;
+  colonies: { [roomName: string]: any };
+  directives: { [flagName: string]: any };
   run(): void;
 }
 
-declare var Ai: IAi;
+interface IOverseer {
+  registerDirective(directive: any): void;
+}
+
+declare let Ai: IAi;

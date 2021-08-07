@@ -1,14 +1,13 @@
-
 // colony wraps all objects
 // run road network
 // run logistics
 // run room planner
 export class Colony {
-  name: string; // name of room
-  room: Room; // the room object
-  flags: Flag[];
+  public name: string; // name of room
+  public room: Room; // the room object
+  public flags: Flag[];
 
-  constructor(name: string) {
+  public constructor(name: string) {
     this.name = name;
     this.room = Game.rooms[name];
 

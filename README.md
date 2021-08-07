@@ -1,22 +1,17 @@
 # Screeps AI
 
 
+
 ## Quickstart
 
-You will need:
+Make sure you have node and npm installed. Then copy the `screeps.sample.json` to `screeps.json` and edit it to your needs.
 
-- [Node.JS](https://nodejs.org/en/download) (10.x || 12.x)
-- A Package Manager ([Yarn](https://yarnpkg.com/en/docs/getting-started) or [npm](https://docs.npmjs.com/getting-started/installing-node))
-- Rollup CLI (Optional, install via `npm install -g rollup`)
-
-Download the latest source [here](https://github.com/screepers/screeps-typescript-starter/archive/master.zip) and extract it to a folder.
-
-Open the folder in your terminal and run your package manager to install the required packages and TypeScript declaration files:
-
-```bash
-# npm
-npm install
-
-# yarn
-yarn
 ```
+npm install
+npm build
+npm lint
+npm push-main
+```
+
+## Credits
+Thanks to @bencbartlett for inspiration and teaching me so much with his amazing Overmind Bot.

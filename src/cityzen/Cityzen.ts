@@ -1,3 +1,1 @@
-export class Cityzen {
-
-}
+export class Cityzen {}

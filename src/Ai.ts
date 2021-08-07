@@ -1,23 +1,23 @@
 import { Colony } from "colonies/Colony";
-import { log } from "console/log";
 import { Directive } from "directives/Directive";
-import { Operator } from "operators/Operator";
+import { log } from "console/log";
 import { Overseer } from "Overseer";
+import { Operator } from "operators/Operator";
 
 export class IAi {
-  colonies: {[name: string]: Colony};
-  directives: Directive[];
-  operators: Operator[];
-  overseer: Overseer;
+  public colonies: { [roomName: string]: Colony };
+  public directives: { [flagName: string]: Directive };
+  public operators: Operator[];
+  public overseer: Overseer;
 
-  constructor() {
+  public constructor() {
     log.debug("creating AI class");
 
     this.colonies = {};
-    this.directives = [];
+    this.directives = {};
     this.operators = [];
 
-    for(let roomName in Game.rooms) {
+    for (const roomName in Game.rooms) {
       this.colonies[roomName] = new Colony(roomName);
     }
 
