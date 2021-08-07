@@ -1,5 +1,3 @@
-import { IAi } from "Ai";
-
 declare var global: any;
 
 declare namespace NodeJS {
@@ -7,3 +5,12 @@ declare namespace NodeJS {
     Ai: IAi;
   }
 }
+
+interface IAi {
+  overseer: any;
+  colonies: any;
+  directives: any;
+  run(): void;
+}
+
+declare var Ai: IAi;

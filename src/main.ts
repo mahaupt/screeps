@@ -1,15 +1,17 @@
 'use strict';
 
-import { IAi } from "./Ai";
+import { IAi } from "Ai";
 import { ErrorMapper } from "utils/ErrorMapper";
-import { Mem } from "./memory/Memory";
+import { Mem } from "memory/Memory";
 
 function main(): void {
   Mem.load();
+  if (Mem.pauseForCpu()) return;
 
-  if (!Ai) {
+  if (!global.Ai) {
     global.Ai = new IAi();
   }
+
   Ai.run();
   Mem.clean();
 }
