@@ -3,6 +3,7 @@ import { Directive } from "directives/Directive";
 import { log } from "console/log";
 import { Overseer } from "Overseer";
 import { Operator } from "operators/Operator";
+import { DirectiveWrapper } from "directives/initializer";
 
 export class IAi {
   public colonies: { [roomName: string]: Colony };
@@ -19,6 +20,10 @@ export class IAi {
 
     for (const roomName in Game.rooms) {
       this.colonies[roomName] = new Colony(roomName);
+    }
+
+    for (const flagName in Game.flags) {
+      DirectiveWrapper(Game.flags[flagName]);
     }
 
     this.overseer = new Overseer();

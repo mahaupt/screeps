@@ -15,6 +15,7 @@ interface IAi {
 
 interface IOverseer {
   registerDirective(directive: any): void;
+  removeDirective(directive: any): void;
 }
 
 declare let Ai: IAi;

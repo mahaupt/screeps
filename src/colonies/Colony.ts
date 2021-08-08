@@ -1,6 +1,9 @@
 // colony wraps all objects
 // run road network
 // run logistics
+
+import { DirectiveHarvest } from "directives/resource/harvest";
+
 // run room planner
 export class Colony {
   public name: string; // name of room

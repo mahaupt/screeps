@@ -12,4 +12,5 @@ export class Overseer {
 
   public run(): void {}
   public registerDirective(directive: Directive): void {}
+  public removeDirective(directive: Directive): void {}
 }
