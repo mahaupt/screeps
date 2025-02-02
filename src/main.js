@@ -31,119 +31,88 @@ var moduleDefense = require('module.defense');
 var moduleEvents = require('module.events');
 var moduleBasePosCalc = require('module.baseposcalc');
 
-/*const profiler = require('screeps-profiler');
-profiler.registerObject(baseCreep, 'baseCreep');
-profiler.registerObject(moduleLogistics, 'moduleLogistics');
-profiler.registerObject(moduleSpawn, 'moduleSpawn');
-profiler.registerObject(moduleStrategy, 'moduleStrategy');
-profiler.registerObject(roleMiner, 'roleMiner');
-profiler.registerObject(roleUpgrader, 'roleUpgrader');
-profiler.registerObject(roleBuilder, 'roleBuilder');
-profiler.registerObject(roleRenewSelf, 'roleRenewSelf');
-profiler.registerObject(roleHauler, 'roleHauler');
-profiler.registerObject(roleScout, 'roleScout');
-profiler.registerObject(rolePioneer, 'rolePioneer');
-profiler.registerObject(roleClaimer, 'roleClaimer');
-profiler.registerObject(roleSoldier, 'roleSoldier');
-profiler.registerObject(moduleStats, 'moduleStats');
-profiler.registerObject(moduleAutobuilder, 'moduleAutobuilder');
-profiler.registerObject(moduleDefense, 'moduleDefense');*/
+Intel.init();
+console.log('Startup');
 
-if (!MODE_SIMULATION) console.log("reset detected");
+module.exports.loop = function () {    
+    //MODULES per ROOM
+    var i = 0;
+    for (var r in Game.rooms) 
+    {
+        var room = Game.rooms[r];
+        
+        moduleEvents.run(room);
+        
+        // ONLY CONTINUE IF ROOM IS MINE
+        if (!room.controller || !room.controller.my) continue;
 
-//profiler.enable();
-module.exports.loop = function () {
-    //profiler.wrap(function() {
+        moduleStats.run(room);
+        
+        if (Game.time % 100 == i++)
+            moduleAutobuilder.run(room);
+        if (room.terminal && Game.time % 20 == i++) {
+            Terminal.run(room);
+        }
+        
+        Labs.run(room);
+        moduleDefense.run(room);
+        moduleLogistics.run(room);
+    }
+
+    //MODULES per Spawn
+    for (var sname in Game.spawns)
+    {
+        var spawn = Game.spawns[sname];
+        if (Game.time % 10 == 0)
+            moduleSpawn.run(spawn);
+    }
     
+    //OPS
+    Ops.run();
     
-        //MODULES per ROOM
-        var i = 0;
-        for (var r in Game.rooms) 
+    //CREEPS
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        
+        if (creep.memory.renewSelf) {
+            roleRenewSelf.run(creep);
+        } else if (creep.memory.boostSelf) {
+            roleBoostSelf.run(creep);
+        } else if(creep.memory.role == 'miner') {
+            roleMiner.run(creep);
+        } else if(creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        } else if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        } else if(creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        } else if(creep.memory.role == 'hauler') {
+            roleHauler.run(creep);
+        } else if (creep.memory.role == 'scout') {
+            roleScout.run(creep);
+        } else if (creep.memory.role == 'pioneer') {
+            rolePioneer.run(creep);
+        } else if (creep.memory.role == 'claimer') {
+            roleClaimer.run(creep);
+        } else if (creep.memory.role == 'reserver') {
+            roleReserver.run(creep);
+        } else if (creep.memory.role == 'soldier') {
+            roleSoldier.run(creep);
+        } else if (creep.memory.role == 'drainer') {
+            roleDrainer.run(creep);
+        } else if (creep.memory.role == 'dismantler') {
+            roleDismantler.run(creep);
+        } else if (creep.memory.role == 'healer') {
+            roleHealer.run(creep);
+        }
+        
+        if (creep.ticksToLive <= 100 && !creep.memory.noRenew)
         {
-            var room = Game.rooms[r];
-            
-            moduleEvents.run(room);
-            
-            //OWN ROOM MODULES
-            if (room.controller && room.controller.my) 
-            {
-                moduleStats.run(room);
-                
-                if (Game.time % 100 == i++)
-                    moduleAutobuilder.run(room);
-                if (room.terminal && Game.time % 20 == i++) {
-                    Terminal.run(room);
-                }
-                
-                Labs.run(room);
-                moduleDefense.run(room);
-                moduleLogistics.run(room);
-            }
+            creep.memory.renewSelf = true;
         }
+    }
     
-        //MODULES per Spawn
-        for (var sname in Game.spawns)
-        {
-            var spawn = Game.spawns[sname];
-            if (Game.time % 10 == 0)
-                moduleSpawn.run(spawn);
-        }
-        
-        //OPS
-        Ops.run();
-        
-        //CREEPS
-        for(var name in Game.creeps) {
-            var creep = Game.creeps[name];
-            
-            //try {
-                if (creep.memory.renewSelf) {
-        	        roleRenewSelf.run(creep);
-                } else if (creep.memory.boostSelf) {
-                    roleBoostSelf.run(creep);
-                } else if(creep.memory.role == 'miner') {
-                    roleMiner.run(creep);
-                } else if(creep.memory.role == 'harvester') {
-                    roleHarvester.run(creep);
-                } else if(creep.memory.role == 'upgrader') {
-                    roleUpgrader.run(creep);
-                } else if(creep.memory.role == 'builder') {
-                    roleBuilder.run(creep);
-                } else if(creep.memory.role == 'hauler') {
-        	        roleHauler.run(creep);
-                } else if (creep.memory.role == 'scout') {
-                    roleScout.run(creep);
-                } else if (creep.memory.role == 'pioneer') {
-                    rolePioneer.run(creep);
-                } else if (creep.memory.role == 'claimer') {
-                   roleClaimer.run(creep);
-                } else if (creep.memory.role == 'reserver') {
-                   roleReserver.run(creep);
-                } else if (creep.memory.role == 'soldier') {
-                   roleSoldier.run(creep);
-                } else if (creep.memory.role == 'drainer') {
-                   roleDrainer.run(creep);
-                } else if (creep.memory.role == 'dismantler') {
-                   roleDismantler.run(creep);
-               } else if (creep.memory.role == 'healer') {
-                   roleHealer.run(creep);
-                }
-            /*}
-            catch(err)
-            {
-                console.log(err.message);
-            }*/
-            
-            if (creep.ticksToLive <= 100 && !creep.memory.noRenew)
-            {
-    	        creep.memory.renewSelf = true;
-            }
-        }
-        
-        
-        //use rest of cpu
-        moduleBasePosCalc.run();
-        
-        
-    //});
+    
+    //use rest of cpu
+    moduleBasePosCalc.run();
 };

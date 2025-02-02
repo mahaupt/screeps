@@ -19,13 +19,11 @@ module.exports = {
     {    
         baseCreep.init(creep);
         
-        
         //go home if lost
         if (creep.room.name != creep.memory.home) {
             baseCreep.moveToRoom(creep, creep.memory.home);
             return;
         }
-        
         
         var source = this.getSource(creep);
         var container = this.getContainer(creep, source);
@@ -265,11 +263,14 @@ module.exports = {
         }
 		
 		//find new unoccupied source
-		var sourcePicked = {};
+		let sourcePicked = {};
+        let enemies = creep.room.find(FIND_HOSTILE_CREEPS);
+
 		for (var source of sources)
 		{
 			sourcePicked[source.id] = 0;
 			
+            // count miners on source
 			for (var i in Memory.creeps)
 			{
 				if (Memory.creeps[i].source == source.id &&
@@ -278,6 +279,13 @@ module.exports = {
 					sourcePicked[source.id]++;
 				}
 			}
+
+            // count enemies on source
+            for (var enemy of enemies) {
+                if (enemy.pos.inRangeTo(source.pos, 3)) {
+                    sourcePicked[source.id] += 10;
+                }
+            }
 		}
 		
 		var min_picked = 9999;

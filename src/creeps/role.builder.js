@@ -22,7 +22,7 @@ module.exports = {
             return;
         }
         
-        //war mode
+        // war mode
         if (creep.room.memory.attacked_time + 30 > Game.time) {
             this.cancelUnimportantTargets(creep);
         }
@@ -204,8 +204,11 @@ module.exports = {
         if (walls.length > 0) {
             walls = _.sortBy(walls, (s) => s.hits);
             creep.memory.building = walls[0].id;
-            return;
+            return true;
         }
+        
+        // nothing to do, do normal stuff
+        this.pickBuildTarget(creep);
     }
     
 };

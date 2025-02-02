@@ -1,5 +1,5 @@
 {
-  "name": "cbacon93/screeps",
+  "name": "screeps",
   "version": "0.1.0",
   "description": "cbacon93s Screeps AI",
   "main": "src/main.js",

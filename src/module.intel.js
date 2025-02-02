@@ -20,7 +20,6 @@ module.exports = {
     },
     
     getIntel: function(roomname) {
-        this.init();
         return Memory.intel.list[roomname] || undefined;
     }, 
     
@@ -34,9 +33,6 @@ module.exports = {
             }
             return;
         }
-		this.init();
-		
-		
 		
 		//recent intel
 		if (Memory.intel.list[room.name] && 
