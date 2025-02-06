@@ -149,7 +149,6 @@ module.exports = {
 			this.pickReceiver(creep, task);
 		}
 		
-		
 		var target = Game.getObjectById(creep.memory.target);
 		if (target) 
 		{
@@ -344,14 +343,24 @@ module.exports = {
 		_.remove(creep.memory.tasks, (s) => s.vol == 0 && s.utx == 0);
 	}, 
 	
-	
+	// no task, figure out where to drop resources
 	confusionDropoff: function(creep)
 	{
-		var target = creep.room.storage || creep.room.terminal;
-		if (target) {
-			var res_types = baseCreep.getStoredResourceTypes(creep.store);
-			creep.transfer(target, res_types[0]);
-			creep.moveTo(target);
+		let res_types = baseCreep.getStoredResourceTypes(creep.store);
+
+		// pick new receiver
+		if (!creep.memory.target) {
+			this.pickReceiver(creep, {res: res_types[0]});
+		}
+
+		if (creep.memory.target) {
+            let target = Game.getObjectById(creep.memory.target);
+            if (!target) { delete creep.memory.target; return; }
+			if (creep.transfer(target, res_types[0]) == ERR_NOT_IN_RANGE) {
+				creep.moveTo(target);
+			} else {
+				delete creep.memory.target;
+			}
 		}
 	},
 	
