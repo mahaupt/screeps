@@ -31,20 +31,21 @@ module.exports = {
         //extractors that could be harvested
         extractor_count = Math.min(extractor_count, mineralCount);
         
+        // multiple miners per node if room is low level
         var minerMultiplyer = 1;
         if (spawn.room.controller.level <= 4) {
             minerMultiplyer = 2;
         }
-        
+
+        if (minerCount > 0 && haulerCount < room.memory.stats.haulers_needed) 
+        {
+            this.spawn(spawn, "hauler");
+        } else 
         if (minerCount < sourceCount*minerMultiplyer+extractor_count && 
             !spawn.room.memory.attacked)
         {
             this.spawn(spawn, "miner");
         } else
-        if (haulerCount < room.memory.stats.haulers_needed) 
-        {
-            this.spawn(spawn, "hauler");
-        } else 
         if (upgraderCount < 1)
         {
             this.spawn(spawn, "upgrader");
@@ -52,8 +53,7 @@ module.exports = {
         if (builderCount < 1 + room.memory.stats.add_creeps)
         {
             this.spawn(spawn, "builder");
-        } else  
-        
+        } else 
         if (room.memory.spawnList)
         {
             if (room.memory.spawnList.length > 0)

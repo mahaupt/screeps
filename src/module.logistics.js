@@ -20,13 +20,22 @@ module.exports = {
             room.visual.text(task.res, 9, 1+i, {align: 'left'});
             room.visual.text(task.acc, 13, 1+i, {align: 'left'});
             room.visual.text(task.utx, 15, 1+i, {align: 'left'});
-            
-            
         }
     }, 
     
     updateTaskList: function(room)
     {
+        // remove outdated tasks
+        for (var id in room.memory.ltasks) {
+            // source gone
+            if (!Game.getObjectById(room.memory.ltasks[id].src)) {
+                if (room.memory.ltasks[id].utx > 0) {
+                    room.memory.ltasks[id].vol = room.memory.ltasks[id].utx;
+                } else {
+                    delete room.memory.ltasks[id];
+                }
+            }
+        }
         this.genLootTasks(room);
         this.genSpawnDistributionTask(room);
     }, 
@@ -34,16 +43,17 @@ module.exports = {
     //generates hauling tasks for transporting loot
     genLootTasks: function(room)
     {
-        //todo: if room is attacked, skip looting
-        if (room.memory.attacked_time + 30 > Game.time) return;
-        
-        //get loot sources
         var res = room.find(FIND_DROPPED_RESOURCES);
         var ts = room.find(FIND_TOMBSTONES);
         var ru = room.find(FIND_RUINS);
+
+        //if room is attacked, skip looting tombstones and ruins
+        if (room.memory.attacked_time + 30 > Game.time) {
+            ts = [];
+            ru = [];
+        }
         
         var targets = [].concat(res, ts, ru);
-        
         for (var i=0; i < targets.length; i++)
         {
             var resources = [];
@@ -257,16 +267,18 @@ module.exports = {
     },
     
     
-    getNewTasks: function(room, capacity)
+    getNewTasks: function(room, capacity, filter=(task)=>true)
     {
         if (room.memory.ltasks_upd) {
             this.updateTaskList(room);
             room.memory.ltasks_upd = false;
         }
         
+        // sort task by volume and priority
         var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*2000);
         
-        var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0;});
+        // get task with open items and filter
+        var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0 && filter(s);});
         //var task = _.find(tasks, (s) => { return s.acc== 0 && s.utx == 0;});
         
         if (task) {
