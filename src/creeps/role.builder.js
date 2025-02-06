@@ -8,7 +8,6 @@ source = source id / container id
 building = id of building
 */
 
-
 module.exports = {
     name: 'builder', 
     run: function(creep) 
@@ -29,13 +28,15 @@ module.exports = {
         
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.harvesting = true;
-            delete creep.memory.source;
+            baseCreep.deleteSource(creep);
             delete creep.memory.building;
+            console.log(creep.name + " no more energy, going to harvest");
         }
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
-            delete creep.memory.source;
+            baseCreep.deleteSource(creep);
             delete creep.memory.building;
+            console.log(creep.name + " no more space, going to build");
         }
         
         if (creep.memory.harvesting)
@@ -178,7 +179,7 @@ module.exports = {
         {
             let dist = cpoint.getRangeTo(source.pos);
             if (dist > 6) {
-                delete creep.memory.source;
+                baseCreep.deleteSource(creep);
             }
         }
         

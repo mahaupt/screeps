@@ -30,11 +30,11 @@ module.exports = {
         
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.harvesting = true;
-            delete creep.memory.source;
+            baseCreep.deleteSource(creep);
         }
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
-            delete creep.memory.source;
+            baseCreep.deleteSource(creep);
         }
         
         if (creep.memory.harvesting)

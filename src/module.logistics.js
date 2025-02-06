@@ -26,16 +26,18 @@ module.exports = {
     updateTaskList: function(room)
     {
         // remove outdated tasks
+        // todo: check if this causes issues
         for (var id in room.memory.ltasks) {
             // source gone
             if (!Game.getObjectById(room.memory.ltasks[id].src)) {
                 if (room.memory.ltasks[id].utx > 0) {
                     room.memory.ltasks[id].vol = room.memory.ltasks[id].utx;
                 } else {
-                    delete room.memory.ltasks[id];
+                    this.deleteTask(room, id);
                 }
             }
         }
+
         this.genLootTasks(room);
         this.genSpawnDistributionTask(room);
     }, 
