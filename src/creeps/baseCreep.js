@@ -39,12 +39,12 @@ module.exports = {
 	        creep.memory.source = c.id;
 	    } else {
             // get loot from energy logistics
-            console.log(creep.name + " getting logistic task");
             let tasks = Logistics.getNewTasks(creep.room, creep.store.getFreeCapacity(RESOURCE_ENERGY), (task) => task.type == "loot" && task.res == RESOURCE_ENERGY);
             if (tasks.length > 0) {
                 let task = Logistics.getTask(creep.room, tasks[0].id);
                 creep.memory.task = tasks[0];
                 creep.memory.source = task.src;
+								console.log(creep.name + " getting logistic task " + task.id);
             }
 	    }
     },
@@ -55,7 +55,6 @@ module.exports = {
 		var source = Game.getObjectById(creep.memory.source);
         // source is gone, reset and abort task
         if (!source) { 
-            console.log(creep.name + " source is gone, deleting source and task");
             this.deleteSource(creep);
             return; 
         }
