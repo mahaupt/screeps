@@ -271,6 +271,12 @@ module.exports = {
     
     getNewTasks: function(room, capacity, filter=(task)=>true)
     {
+        if (!room) return [];
+        if (!capacity || capacity <= 0) {
+            // TODO: check if this is a problem or just sim bug
+            console.log(room.name + " logistics: invalid capacity: " + capacity);
+            return [];
+        }
         if (room.memory.ltasks_upd) {
             this.updateTaskList(room);
             room.memory.ltasks_upd = false;
@@ -290,7 +296,6 @@ module.exports = {
             if (task.type == "mc" || task.type == "s") {
                 task_add = 1000;
             }
-            
             var amount = Math.min(capacity, task.vol-task.acc-task.utx+task_add);
             amount = Math.max(amount, 0);
             
