@@ -1,10 +1,10 @@
 module.exports = {
-    cycle_timeout: 30000,
+    cycle_timeout: 15000,
     run: function(ops)
     {
         this.init(ops);
         
-        // 30000 cycle timeout // 48h
+        // 15000 cycle timeout // 24h
         if (ops.mem.cycle_timeout + this.cycle_timeout > Game.time) return;
         ops.mem.cycle_timeout = Game.time;
         
@@ -100,7 +100,7 @@ module.exports = {
             if (dist <= 1) 
             {
                 //source and mineral ops
-                //check if no harvest ops exist
+                //check if no harvest ops or claim ops exist
                 var j = _.findIndex(Memory.ops, (o) => { return o.target == intel.name; });
                 if (j < 0) {
                     Ops.new("harvest", ops.source, intel.name);

@@ -151,7 +151,7 @@ module.exports = {
 			bodySize = Math.min(bodySize, 3);
 			nwork = bodySize*2;
 			ncarry = 1;
-			nmove = 1;
+			nmove = bodySize;
 		} else 
 		if (role=='hauler')
 		{
