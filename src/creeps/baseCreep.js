@@ -516,7 +516,9 @@ module.exports = {
         //set home
         if (!creep.memory.home) {
             creep.memory.home = creep.room.name;
+            return true;
         }
+        return false;
     },
 
     getStoredResourceTypes: function (store) {

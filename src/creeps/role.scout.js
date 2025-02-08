@@ -9,7 +9,9 @@ Memory Layout
 module.exports =  {
     name: 'scout', 
     run: function(creep) {
-        baseCreep.init(creep);
+        if (baseCreep.init(creep)) {
+            creep.notifyWhenAttacked(false);
+        }
         
         //no target - go home
         if (!creep.memory.troom) 
