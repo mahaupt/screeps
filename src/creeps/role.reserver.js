@@ -1,4 +1,5 @@
 module.exports = {
+    name: 'reserver',
     run: function(creep)
     {
         baseCreep.init(creep);

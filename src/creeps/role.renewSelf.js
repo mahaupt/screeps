@@ -91,12 +91,12 @@ module.exports = {
 	killSelfDecision: function(creep) 
 	{
 		//never kill self creeps
-		if (creep.memory.rome == 'soldier') return;
+		if (creep.memory.role == 'soldier') return;
 		
 		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
         var possibleBodyParts = baseCreep.buildBody(creep.room, creep.memory.role, bodySize).length;
 
-		if (possibleBodyParts > creep.body.length > 0)
+		if (possibleBodyParts > creep.body.length)
         {
 	        creep.memory.killSelf = true;
         }

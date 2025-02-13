@@ -8,7 +8,7 @@ source = source id / container id
 */
 
 module.exports = {
-    name: 'claimer', 
+    name: 'upgrader', 
     run: function(creep) {
         baseCreep.init(creep);
         
