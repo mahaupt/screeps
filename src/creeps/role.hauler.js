@@ -208,7 +208,11 @@ module.exports = {
 			});
 			if (spawn.length > 0)
 			{
-				creep.moveTo(spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
+				if (!creep.pos.inRangeTo(spawn[0].pos, 1)) {
+					creep.moveTo(spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
+				} else if (creep.ticksToLive < (1500-600/creep.body.length)) {
+					spawn[0].renewCreep(creep);
+				}
 			}
 			creep.say("??");
 			

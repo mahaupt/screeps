@@ -16,16 +16,6 @@ module.exports = {
                 return s.mineralAmount > 0 || s.ticksToRegeneration <= 50;
             },
         }).length;
-        var containerCount = room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return structure.structureType == STRUCTURE_CONTAINER;
-            },
-        }).length;
-        var linkCount = room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return structure.structureType == STRUCTURE_LINK;
-            },
-        }).length;
         var extractor_count = room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_EXTRACTOR;
@@ -34,13 +24,13 @@ module.exports = {
         //extractors that could be harvested
         extractor_count = Math.min(extractor_count, mineralCount);
 
-        // multiple miners per node if room is low level
+        // multiple miners per node if room is low level 1-3
         var minerMultiplyer = 1;
-        if (spawn.room.controller.level <= 4) {
+        if (spawn.room.controller.level < 4) {
             minerMultiplyer = 2;
         }
 
-        if (minerCount > 0 && haulerCount < room.memory.stats.haulers_needed) {
+        if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || 3)) {
             this.spawn(spawn, "hauler");
         } else if (
             minerCount < sourceCount * minerMultiplyer + extractor_count &&

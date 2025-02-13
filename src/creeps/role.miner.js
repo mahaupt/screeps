@@ -3,6 +3,7 @@ Memory Layout
 .role = "miner"
 .harvesting = true/false
 .renewSelf = true/false
+.noRenew = false
 .source = source.id
 .container = container.id
 .link = link.id	
@@ -18,6 +19,7 @@ module.exports = {
     run: function(creep) 
     {    
         baseCreep.init(creep);
+        creep.memory.noRenew = true;
         
         //go home if lost
         if (creep.room.name != creep.memory.home) {
@@ -28,6 +30,12 @@ module.exports = {
         var source = this.getSource(creep);
         var container = this.getContainer(creep, source);
         var link = this.getLink(creep, source);
+
+        // spawn replacement
+        if (!creep.memory.replacementSpawned && creep.ticksToLive <= creep.memory.travelTime + 10) {
+            creep.memory.replacementSpawned = true;
+            this.replaceSelf(creep);
+        }
         
         //Special mode
         if (creep.memory.containerLinkPurge) {
@@ -61,14 +69,7 @@ module.exports = {
     
     
     harvest: function(creep, source, container, link)
-    {
-        //source depleted - time to renew?
-        if (creep.ticksToLive <= CREEP_LIFE_TIME/3) {
-            if (source.energy == 0 && source.ticksToRegeneration >= 50) {
-                creep.memory.renewSelf = true;
-            }
-        }
-        
+    {        
         //mineral depleted - kill self
         if (source instanceof Mineral) {
             if (source.mineralAmount == 0 && source.ticksToRegeneration >= 3600) {
@@ -80,6 +81,10 @@ module.exports = {
         //HARVEST
         if(creep.harvest(source) != OK) {
             creep.moveTo(source, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
+        } else {
+            if (!creep.memory.travelTime) {
+                creep.memory.travelTime = 1500 - creep.ticksToLive;
+            }
         }
         
         //link abvl - carry to link immediately
@@ -90,7 +95,7 @@ module.exports = {
             let ret = creep.transfer(link, RESOURCE_ENERGY);
             
             //link full, send to spawn
-            if (link.store.getFreeCapacity(RESOURCE_ENERGY) == 0 || creep.memory.renewSelf) {
+            if (link.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
                 baseCreep.sendLinkToSpawn(link);
             }
             
@@ -206,7 +211,6 @@ module.exports = {
 		
 		//find new unoccupied source
 		let sourcePicked = {};
-        let enemies = creep.room.find(FIND_HOSTILE_CREEPS);
 
 		for (var source of sources)
 		{
@@ -221,13 +225,6 @@ module.exports = {
 					sourcePicked[source.id]++;
 				}
 			}
-
-            // count enemies on source
-            for (var enemy of enemies) {
-                if (enemy.pos.inRangeTo(source.pos, 3)) {
-                    sourcePicked[source.id] += 10;
-                }
-            }
 		}
 		
 		var min_picked = 9999;
@@ -353,5 +350,21 @@ module.exports = {
                 5, 
                 "mc");
         }
+    },
+
+    replaceSelf: function(creep)
+    {
+        // get all creeps that have same source (self is excluded)
+        var creeps = _.filter(Game.creeps, (c) => c.memory.source == creep.memory.source && !c.memory.replacementSpawned);
+        if (creeps.length >= 1 && creep.room.controller.level >= 4) return; // there is already another miner
+        moduleSpawn.addSpawnList(
+            creep.room, 
+            "miner", 
+            {
+                source: creep.memory.source, 
+                container: creep.memory.container, 
+                link: creep.memory.link
+            }
+        );
     }
 };
