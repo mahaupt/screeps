@@ -25,8 +25,8 @@ var roleHealer = require('creeps_role.healer');
 var roleRenewSelf = require('creeps_role.renewSelf');
 var roleBoostSelf = require('creeps_role.boostSelf');
 
+var moduleMemory = require('module.memory');
 var moduleStats = require('module.stats');
-
 var moduleDefense = require('module.defense');
 var moduleEvents = require('module.events');
 var moduleBasePosCalc = require('module.baseposcalc');
@@ -34,7 +34,7 @@ var moduleBasePosCalc = require('module.baseposcalc');
 Intel.init();
 console.log('Startup');
 
-module.exports.loop = function () {    
+module.exports.loop = moduleMemory.wrapper(function () {    
     //MODULES per ROOM
     var i = 0;
     for (var r in Game.rooms) 
@@ -115,4 +115,4 @@ module.exports.loop = function () {
     
     //use rest of cpu
     moduleBasePosCalc.run();
-};
+});
