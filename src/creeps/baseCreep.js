@@ -210,14 +210,14 @@ module.exports = {
                 ncarry = 0;
                 ntough = bodySize; //10
                 nmove = 2 * bodySize + 1; //50
-                nrattack = bodySize; //80
+                nattack = bodySize; //80
                 nheal = 1; // 250
             } else {
                 nwork = 0;
                 ncarry = 0;
                 ntough = bodySize;
                 nmove = 2 * bodySize;
-                nrattack = bodySize;
+                nattack = bodySize;
             }
         } else if (role == "drainer") {
             bodySize = Math.min(bodySize, 16);
@@ -611,7 +611,27 @@ module.exports = {
         //drop energy and flee to next tower
     },
 
-    calcTankDps: function (creep) {},
+    calcDps: function (creep) {
+        var dps = 0;
+        for (var i in creep.body) {
+            if (creep.body[i].type == ATTACK) {
+                dps += 30;
+            } else if (creep.body[i].type == RANGED_ATTACK) {
+                dps += 10;
+            }
+        }
+        return dps;
+    },
+
+    calcHps: function (creep) {
+        var hps = 0;
+        for (var i in creep.body) {
+            if (creep.body[i].type == HEAL) {
+                hps += 12;
+            }
+        }
+        return hps;
+    },
 
     memCleanup: function (i) {
         // cancel open tasks
