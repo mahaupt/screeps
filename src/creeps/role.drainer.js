@@ -33,7 +33,7 @@ module.exports = {
             {
                 //idle around controller
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
             }
             delete creep.memory.embark;
             delete creep.memory.noRenew;
@@ -62,7 +62,7 @@ module.exports = {
             
                 //move in position
                 if (creep.memory.tx && creep.memory.ty) {
-                    creep.moveTo(creep.memory.tx, creep.memory.ty);
+                    baseCreep.moveTo(creep, creep.memory.tx, creep.memory.ty);
                     creep.say("🛡️");
                 } else {
                     var dir = creep.pos.getDirectionTo(25, 25);
@@ -89,7 +89,7 @@ module.exports = {
                 let exit = Game.map.findExit(creep.room.name, creep.memory.room_before_troom);
                 if (exit >= 0) {
                     var closest_exit = creep.pos.findClosestByPath(exit);
-                    creep.moveTo(closest_exit);
+                    baseCreep.moveTo(creep, closest_exit);
                     creep.say("🏃");
                 } else {
                     creep.say("panic");

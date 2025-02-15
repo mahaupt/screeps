@@ -13,15 +13,15 @@ module.exports = {
             return;
         }
         
-        
-        var ret = lab.boostCreep(creep);
-        if (ret == ERR_NOT_IN_RANGE) {
-            creep.moveTo(lab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+        if (!creep.pos.inRangeTo(lab, 1)) {
+            baseCreep.moveTo(creep, lab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
             creep.say("🦾");
-        } else if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_NOT_FOUND) {
-            this.reset(creep);
+        } else {
+            let ret = lab.boostCreep(creep);
+            if (ret == ERR_NOT_ENOUGH_RESOURCES || ret == ERR_NOT_FOUND) {
+                this.reset(creep);
+            }
         }
-        
     }, 
     
     

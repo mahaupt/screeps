@@ -74,8 +74,6 @@ module.exports = {
 		//source is available check
 		var s = Game.getObjectById(task.src);
 		if (!s) { 
-			//console.log(creep.room.name + " " + creep.name + ": source invalid, delete task");
-			//console.log(JSON.stringify(task));
 			Logistics.deleteTask(creep.room, task.id);
 			this.removeTask(creep, task.id);
 			return; 
@@ -84,6 +82,12 @@ module.exports = {
 		//travel to room
 		if (s.room.name != creep.room.name) {
 			baseCreep.moveToRoom(creep, s.room.name);
+			return;
+		}
+
+		// travel to source
+		if (!creep.pos.inRangeTo(s, 1)) {
+			baseCreep.moveTo(creep, s, {visualizePathStyle: {stroke: '#ff0000'}});
 			return;
 		}
 		
@@ -99,12 +103,6 @@ module.exports = {
 		} else {
 			ret = creep.withdraw(s, resource, amount);
 		}
-		//creep.say("p: " + ret);
-
-		if (ret  == ERR_NOT_IN_RANGE) {
-			creep.moveTo(s, {visualizePathStyle: {stroke: '#ff0000'}});
-		}
-		
 		
 		//successful
 		if (ret == OK) {
@@ -157,6 +155,12 @@ module.exports = {
 				baseCreep.moveToRoom(creep, target.room.name);
 				return;
 			}
+
+			// move to target
+			if (!creep.pos.inRangeTo(target, 1)) {
+				baseCreep.moveTo(creep, target, {visualizePathStyle: {stroke: '#00ff00'}});
+				return;
+			}
 			
 			//select resource for transfer
 			var resource = task.res || RESOURCE_ENERGY;
@@ -164,13 +168,8 @@ module.exports = {
 			var storage_avbl = target.store.getFreeCapacity(resource);
 			var amount = Math.min(amount_avbl, storage_avbl, taskmem.utx);
 			
-			//go to target and transfer
+			//transfer
 			var ret = creep.transfer(target, resource, amount);
-			//creep.say("d: " + ret);
-			
-			if(ret == ERR_NOT_IN_RANGE) {
-				creep.moveTo(target, {visualizePathStyle: {stroke: '#00ff00'}});
-			}
 			
 			//target full - search new target
 			if (storage_avbl == 0 || ret == ERR_INVALID_TARGET) {
@@ -209,7 +208,7 @@ module.exports = {
 			if (spawn.length > 0)
 			{
 				if (!creep.pos.inRangeTo(spawn[0].pos, 1)) {
-					creep.moveTo(spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
+					baseCreep.moveTo(creep, spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
 				} else if (creep.ticksToLive < (1500-600/creep.body.length)) {
 					spawn[0].renewCreep(creep);
 				}
@@ -360,9 +359,10 @@ module.exports = {
 		if (creep.memory.target) {
             let target = Game.getObjectById(creep.memory.target);
             if (!target) { delete creep.memory.target; return; }
-			if (creep.transfer(target, res_types[0]) == ERR_NOT_IN_RANGE) {
-				creep.moveTo(target);
+			if (!creep.pos.inRangeTo(target, 1)) {
+				baseCreep.moveTo(creep, target);
 			} else {
+				creep.transfer(target, res_types[0]);
 				delete creep.memory.target;
 			}
 		}

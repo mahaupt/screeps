@@ -25,7 +25,7 @@ module.exports =  {
             {
                 //idle around controller
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
                 delete creep.memory.noRenew;
             }
             return;

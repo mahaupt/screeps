@@ -64,41 +64,34 @@ module.exports = {
             return;
         }
 
+        if (!creep.pos.inRangeTo(source, 1)) {
+            this.moveTo(creep, source, {
+                range: 1,
+                visualizePathStyle: { stroke: "#ff0000" },
+            });
+            return;
+        }
+
         if (source instanceof Resource) {
-            if (creep.pickup(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {
-                    range: 1,
-                    visualizePathStyle: { stroke: "#ff0000" },
-                });
-            } else {
-                // pickup success
-                if (creep.memory.task) {
-                    Logistics.markPickup(
-                        creep.room,
-                        creep.memory.task.id,
-                        creep.memory.task.vol,
-                        creep.memory.task.vol,
-                    );
-                    Logistics.markDropoff(
-                        creep.room,
-                        creep.memory.task.id,
-                        creep.memory.task.vol,
-                    );
-                    delete creep.memory.task;
-                }
+            // pickup and mark task as done
+            creep.pickup(source);
+            if (creep.memory.task) {
+                Logistics.markPickup(
+                    creep.room,
+                    creep.memory.task.id,
+                    creep.memory.task.vol,
+                    creep.memory.task.vol,
+                );
+                Logistics.markDropoff(
+                    creep.room,
+                    creep.memory.task.id,
+                    creep.memory.task.vol,
+                );
+                delete creep.memory.task;
             }
         } else {
-            if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {
-                    range: 1,
-                    visualizePathStyle: { stroke: "#ff0000" },
-                });
-            }
-
-            //source empty - search other one
-            if (source.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
-                this.deleteSource(creep);
-            }
+            creep.withdraw(source, RESOURCE_ENERGY);
+            this.deleteSource(creep); // withdraw ok or not -> delete source
         }
     },
 
@@ -121,21 +114,18 @@ module.exports = {
                 if (amount > 0 && amount > dist * 10) {
                     //console.log("dropped res found - pickup");
 
+                    if (dist > 1) {
+                        this.moveTo(creep, targets[0], {
+                            range: 1,
+                            visualizePathStyle: { stroke: "#ff0000" },
+                        });
+                        return true;
+                    }
+
                     if (targets[0] instanceof Resource) {
-                        if (creep.pickup(targets[0]) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(targets[0], {
-                                visualizePathStyle: { stroke: "#ff0000" },
-                            });
-                        }
+                        creep.pickup(targets[0]);
                     } else {
-                        if (
-                            creep.withdraw(targets[0], RESOURCE_ENERGY) ==
-                            ERR_NOT_IN_RANGE
-                        ) {
-                            creep.moveTo(targets[0], {
-                                visualizePathStyle: { stroke: "#ff0000" },
-                            });
-                        }
+                        creep.withdraw(targets[0], RESOURCE_ENERGY);
                     }
 
                     return true;
@@ -394,7 +384,7 @@ module.exports = {
 
         if (cap > 800 && ratio <= 0.05) {
             creep.say("😴");
-            creep.moveTo(creep.room.controller);
+            this.moveTo(creep, creep.room.controller);
             return true;
         }
         return false;
@@ -451,6 +441,12 @@ module.exports = {
         });
     },
 
+    moveTo: function (creep, target, options = {}) {
+        options.reusePath = options.reusePath || 10;
+        //options.ignoreCreeps = options.ignoreCreeps || true;
+        creep.moveTo(target, options);
+    },
+
     //moves creep to room name, avoids source keeper
     moveToRoom: function (creep, name) {
         //follow room list
@@ -476,7 +472,7 @@ module.exports = {
 
         var pos = new RoomPosition(25, 25, nextRoom);
 
-        var ret = creep.moveTo(pos, {
+        var ret = this.moveTo(creep, pos, {
             reusePath: 50,
             costCallback: this.travelCostCallback,
             range: 5,
@@ -487,7 +483,7 @@ module.exports = {
         });
 
         if (ret == ERR_NO_PATH) {
-            creep.moveTo(creep.room.getPositionAt(25, 25), { range: 5 });
+            this.moveTo(creep, creep.room.getPositionAt(25, 25), { range: 5 });
 
             //mark room as blocked if walls exist
             var r = creep.room.name;
@@ -526,6 +522,8 @@ module.exports = {
         return _.filter(Object.keys(store), (resource) => store[resource] > 0);
     },
 
+    // return true if creep is ready and prepared
+    // return false if not ready yet
     prepareCreep: function (creep) {
         //creep is not home - reset prepare
         if (creep.room.name != creep.memory.home) {
@@ -539,13 +537,15 @@ module.exports = {
         });
 
         if (spawns.length > 0) {
-            var xx = spawns[0].renewCreep(creep);
-            if (xx == ERR_NOT_IN_RANGE) {
-                creep.moveTo(spawns[0], {
+            if (!creep.pos.inRangeTo(spawns[0], 1)) {
+                this.moveTo(creep, spawns[0], {
                     range: 1,
                     visualizePathStyle: { stroke: "#0000ff" },
                 });
-            } else if (xx == ERR_FULL) {
+                return false; //not ready
+            }
+
+            if (spawns[0].renewCreep(creep) == ERR_FULL) {
                 creep.memory.embark = true;
                 return true;
             }

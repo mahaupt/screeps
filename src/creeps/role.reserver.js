@@ -14,7 +14,7 @@ module.exports = {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
             }
             return;
         }
@@ -54,7 +54,7 @@ module.exports = {
         
         //in target room
         if (res != OK) {
-            creep.moveTo(creep.room.controller);
+            baseCreep.moveTo(creep, creep.room.controller);
         }
     }
 };

@@ -17,7 +17,7 @@ module.exports = {
             {
                 //idle around controller
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
                 delete creep.memory.noRenew;
             }
             return;
@@ -50,8 +50,10 @@ module.exports = {
             var target = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES);
             if (target) {
                 creep.say("⚔️");
-                if (creep.dismantle(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
+                if (!creep.pos.inRangeTo(target, 1)) {
+                    baseCreep.moveTo(creep, target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
+                } else {
+                    creep.dismantle(target);
                 }
             } else {
                 creep.memory.killSelf = true;

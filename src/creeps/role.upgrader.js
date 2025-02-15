@@ -23,7 +23,7 @@ module.exports = {
         if (creep.room.memory.attacked_time + 30 > Game.time) {
             var tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
             if (tower) {
-                creep.moveTo(tower, {range: 2, visualizePathStyle: {stroke: '#00ff00'}});
+                baseCreep.moveTo(creep, tower, {range: 2, visualizePathStyle: {stroke: '#00ff00'}});
                 return;
             }
         }
@@ -47,8 +47,10 @@ module.exports = {
 	        baseCreep.goGetEnergyFromSource(creep);
 	        
         } else {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+            if (!creep.pos.inRangeTo(creep.room.controller, 3)) {
+                baseCreep.moveTo(creep, creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+            } else {
+                creep.upgradeController(creep.room.controller)
             }
         }
 	}

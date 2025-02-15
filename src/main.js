@@ -34,7 +34,8 @@ var moduleBasePosCalc = require('module.baseposcalc');
 Intel.init();
 console.log('Startup');
 
-module.exports.loop = moduleMemory.wrapper(function () {    
+module.exports.loop = moduleMemory.wrapper(function () {
+
     //MODULES per ROOM
     var i = 0;
     for (var r in Game.rooms) 
@@ -112,7 +113,16 @@ module.exports.loop = moduleMemory.wrapper(function () {
         }
     }
     
+
+    // cpu stats
+    if (!Memory.stat_cpu) Memory.stat_cpu = Game.cpu.getUsed();
+    Memory.stat_cpu *= 99;
+    Memory.stat_cpu += Game.cpu.getUsed();
+    Memory.stat_cpu /= 100;
     
     //use rest of cpu
     moduleBasePosCalc.run();
+
+    // remove me
+    delete Memory.stat;
 });

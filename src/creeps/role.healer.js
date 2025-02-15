@@ -19,7 +19,7 @@ module.exports = {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
             }
             return;
         }
@@ -33,7 +33,7 @@ module.exports = {
             }
         }
         
-        creep.moveTo(target, {visualizePathStyle: {stroke: "#55ff55"}});
+        baseCreep.moveTo(creep, target, {visualizePathStyle: {stroke: "#55ff55"}});
         this.healTarget(creep, target);
     }, 
     

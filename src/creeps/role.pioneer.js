@@ -19,7 +19,7 @@ module.exports = {
         {
             //idle around controller
             creep.say("😴");
-            creep.moveTo(creep.room.controller);
+            baseCreep.moveTo(creep, creep.room.controller);
             return;
         }
         
@@ -76,7 +76,7 @@ module.exports = {
         if (source)
         {
             if (creep.harvest(source) != OK) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ff0000'}});
+                baseCreep.moveTo(creep, source, {visualizePathStyle: {stroke: '#ff0000'}});
             }
         
             //source empty
@@ -103,7 +103,7 @@ module.exports = {
         {
             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
             {
-                creep.moveTo(creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                baseCreep.moveTo(creep, creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
             }
         } 
         else 
@@ -117,7 +117,7 @@ module.exports = {
             var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (consite) {
                 if (creep.build(consite) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(consite, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                    baseCreep.moveTo(creep, consite, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                 }
             } else {
                 //transfer energy to spawn
@@ -127,7 +127,7 @@ module.exports = {
                             s.store.getFreeCapacity(RESOURCE_ENERGY) > 0});
                 if (spawn) {
                     if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(spawn, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
+                        baseCreep.moveTo(creep, spawn, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
                     }
                     //switch renew back on
                     if (creep.memory.noRenew) delete creep.memory.noRenew;
@@ -135,7 +135,7 @@ module.exports = {
                     //upgrade controller
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
                     {
-                        creep.moveTo(creep.room.controller, 
+                        baseCreep.moveTo(creep, creep.room.controller, 
                             {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
                     }
                 }

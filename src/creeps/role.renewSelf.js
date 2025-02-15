@@ -38,7 +38,7 @@ module.exports = {
 				if (nextlab) {
 					if (nextlab.unboostCreep(creep) == ERR_NOT_IN_RANGE) 
 					{
-						creep.moveTo(nextlab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+						baseCreep.moveTo(creep, nextlab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 						return;
 					}
 				}
@@ -47,7 +47,7 @@ module.exports = {
 			//carry energy to base
 	        if (creep.store[RESOURCE_ENERGY] > 0 && targets.length > 0) {
 		        if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(targets[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+	                baseCreep.moveTo(creep, targets[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 					return;
 	            }
 	        } 
@@ -57,7 +57,7 @@ module.exports = {
 	        {
 		        if (spawns[0].recycleCreep(creep) == ERR_NOT_IN_RANGE)
 		        {
-			        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+			        baseCreep.moveTo(creep, spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 		        }
 		        creep.say("☠");
 		        return;
@@ -65,7 +65,7 @@ module.exports = {
 				var ret = spawns[0].renewCreep(creep);
 		        if (ret == ERR_NOT_IN_RANGE || ret == ERR_BUSY)
 		        {
-			        creep.moveTo(spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+			        baseCreep.moveTo(creep, spawns[0], {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
 		        } else if (ret == ERR_FULL)
 				{
 					//renew successful

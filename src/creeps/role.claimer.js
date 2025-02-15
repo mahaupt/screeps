@@ -19,7 +19,7 @@ module.exports = {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
             }
             return;
         }
@@ -36,8 +36,10 @@ module.exports = {
         
         //capture controller
         if (!creep.room.controller.my) {
-            if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+            if (!creep.pos.inRangeTo(creep.room.controller, 1)) {
+                baseCreep.moveTo(creep, creep.room.controller, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
+            } else {
+                creep.claimController(creep.room.controller);
             }
         } else {
             //go back and kill self

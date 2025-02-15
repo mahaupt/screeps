@@ -50,10 +50,11 @@ module.exports = {
                 if (target) {
                     var res_types = baseCreep.getStoredResourceTypes(creep.store);
                     var resource = res_types[0];
-                    
-                    let ret = creep.transfer(target, resource);
-                    if (ret == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, {range:1, visualizePathStyle: {stroke: '#00ff00'}});
+
+                    if (!creep.pos.inRangeTo(target, 1)) {
+                        baseCreep.moveTo(creep, target, {range:1, visualizePathStyle: {stroke: '#00ff00'}});
+                    } else {
+                        creep.transfer(target, resource);
                     }
                 }
             }
@@ -100,10 +101,10 @@ module.exports = {
                 }
                 
                 // HARVEST
-                let ret = creep.harvest(source);
-                if (ret == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source, {range:1, visualizePathStyle: {stroke: '#ff0000'}});
-                } else if (ret == OK) {
+                if (!creep.pos.inRangeTo(source, 1)) {
+                    baseCreep.moveTo(creep, source, {range:1, visualizePathStyle: {stroke: '#ff0000'}});
+                } else {
+                    creep.harvest(source);
                     //calc travel time
                     if (!creep.memory.travelTime) {
                         creep.memory.travelTime = Game.time - creep.memory.startTravel;

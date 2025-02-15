@@ -66,26 +66,22 @@ module.exports = {
             var target = Game.getObjectById(creep.memory.building);
             if (!target) { delete creep.memory.building; return; }
             
+            if (!creep.pos.inRangeTo(target, 3)) {
+                baseCreep.moveTo(creep, target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                return;
+            }
+
             if (target instanceof ConstructionSite)
             {
-                //build
-                if(creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
-                }
+                creep.build(target)
             } 
             else if (target instanceof StructureController) 
             {
-                //upgrade
-                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
-                }
+                creep.upgradeController(creep.room.controller);
             }
             else 
             {
-                //repair
-                if(creep.repair(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
-                }
+                creep.repair(target);
                 if (target.hits == target.hitsMax)
                 {
                     delete creep.memory.building;
@@ -184,7 +180,7 @@ module.exports = {
         //creep outside base
         let dist = cpoint.getRangeTo(creep.pos);
         if (dist > 6) {
-            let dir = creep.moveTo(cpoint);
+            let dir = baseCreep.moveTo(creep, cpoint);
         }
     }, 
     

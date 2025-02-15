@@ -75,7 +75,7 @@ module.exports = {
         }
         
         //follow leader
-        creep.moveTo(leader);
+        baseCreep.moveTo(creep, leader);
     }, 
     
     leader: function(creep)
@@ -101,7 +101,7 @@ module.exports = {
             {
                 //idle around controller
                 creep.say("😴");
-                creep.moveTo(creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller);
                 this.pickTarget(creep);
             }
             delete creep.memory.noRenew;
@@ -146,7 +146,7 @@ module.exports = {
             //move in position
             if (creep.memory.tx && creep.memory.ty) 
             {
-                creep.moveTo(creep.memory.tx, creep.memory.ty);
+                baseCreep.moveTo(creep, creep.memory.tx, creep.memory.ty);
                 creep.say("🛡️");
             }
         } 
@@ -178,12 +178,11 @@ module.exports = {
     {
         creep.say("⚔️");
         
-        /*var ret = creep.attack(target);
-        if (ret == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
-        }*/
-        creep.rangedMassAttack();
-        creep.moveTo(target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
+        if (!creep.pos.inRangeTo(target, 1)) {
+            baseCreep.moveTo(creep, target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
+        } else {
+            creep.attack(target);
+        }
     }, 
     
     pickTarget: function(creep, findAtPos = null, range = -1)
