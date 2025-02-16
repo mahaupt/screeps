@@ -51,8 +51,8 @@ module.exports =  {
             if (room.memory.stats.energy_1k_dx > 1000 && elevel >= 0.15 || 
                 elevel >= 0.95) {
                 room.memory.stats.add_creeps += 1;
-                if (room.memory.stats.add_creeps > 6) {
-                    room.memory.stats.add_creeps = 6;
+                if (room.memory.stats.add_creeps > 5) {
+                    room.memory.stats.add_creeps = 5;
                 } else {
                     console.log(room.name + ": incr number of builders");
                 }
@@ -113,7 +113,7 @@ module.exports =  {
             room.memory.stats.transports_1k_30 = Math.round((room.memory.stats.transports_1k_30*29+volume)/30);
             
             //calc haulers
-            var haulerNeeded = Math.round(room.memory.stats.transports_1k_30 / (room.energyAvailable/50) / 2);
+            var haulerNeeded = Math.round(room.memory.stats.transports_1k_30 / (room.energyAvailable/2));
             haulerNeeded = Math.max(Math.min(haulerNeeded, 5), 1);
             
             if (room.memory.stats.haulers_needed < haulerNeeded) {
