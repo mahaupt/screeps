@@ -429,7 +429,6 @@ module.exports = {
             if (!creep.pos.inRangeTo(spawns[0], 1)) {
                 this.moveTo(creep, spawns[0], {
                     range: 1,
-                    : { stroke: "#0000ff" },
                 });
                 return false; //not ready
             }

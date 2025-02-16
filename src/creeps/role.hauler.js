@@ -87,7 +87,7 @@ module.exports = {
 
 		// travel to source
 		if (!creep.pos.inRangeTo(s, 1)) {
-			baseCreep.moveTo(creep, s});
+			baseCreep.moveTo(creep, s);
 			return;
 		}
 		
