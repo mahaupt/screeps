@@ -76,7 +76,7 @@ module.exports = {
         if (source)
         {
             if (creep.harvest(source) != OK) {
-                baseCreep.moveTo(creep, source, {visualizePathStyle: {stroke: '#ff0000'}});
+                baseCreep.moveTo(creep, source);
             }
         
             //source empty
@@ -103,7 +103,7 @@ module.exports = {
         {
             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
             {
-                baseCreep.moveTo(creep, creep.room.controller, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                baseCreep.moveTo(creep, creep.room.controller, {range: 3});
             }
         } 
         else 
@@ -117,7 +117,7 @@ module.exports = {
             var consite = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
             if (consite) {
                 if (creep.build(consite) == ERR_NOT_IN_RANGE) {
-                    baseCreep.moveTo(creep, consite, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                    baseCreep.moveTo(creep, consite, {range: 3});
                 }
             } else {
                 //transfer energy to spawn
@@ -127,7 +127,7 @@ module.exports = {
                             s.store.getFreeCapacity(RESOURCE_ENERGY) > 0});
                 if (spawn) {
                     if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        baseCreep.moveTo(creep, spawn, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
+                        baseCreep.moveTo(creep, spawn, {range: 1});
                     }
                     //switch renew back on
                     if (creep.memory.noRenew) delete creep.memory.noRenew;
@@ -136,7 +136,7 @@ module.exports = {
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)
                     {
                         baseCreep.moveTo(creep, creep.room.controller, 
-                            {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                            {range: 3});
                     }
                 }
                 

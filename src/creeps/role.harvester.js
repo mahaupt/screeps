@@ -52,7 +52,7 @@ module.exports = {
                     var resource = res_types[0];
 
                     if (!creep.pos.inRangeTo(target, 1)) {
-                        baseCreep.moveTo(creep, target, {range:1, visualizePathStyle: {stroke: '#00ff00'}});
+                        baseCreep.moveTo(creep, target, {range:1});
                     } else {
                         creep.transfer(target, resource);
                     }
@@ -102,7 +102,7 @@ module.exports = {
                 
                 // HARVEST
                 if (!creep.pos.inRangeTo(source, 1)) {
-                    baseCreep.moveTo(creep, source, {range:1, visualizePathStyle: {stroke: '#ff0000'}});
+                    baseCreep.moveTo(creep, source, {range:1});
                 } else {
                     creep.harvest(source);
                     //calc travel time

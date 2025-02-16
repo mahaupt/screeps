@@ -14,7 +14,7 @@ module.exports = {
         }
         
         if (!creep.pos.inRangeTo(lab, 1)) {
-            baseCreep.moveTo(creep, lab, {range: 1, visualizePathStyle: {stroke: '#0000ff'}});
+            baseCreep.moveTo(creep, lab, {range: 1});
             creep.say("🦾");
         } else {
             let ret = lab.boostCreep(creep);

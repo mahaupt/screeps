@@ -179,7 +179,7 @@ module.exports = {
         creep.say("⚔️");
         
         if (!creep.pos.inRangeTo(target, 1)) {
-            baseCreep.moveTo(creep, target, {range: 1, visualizePathStyle: {stroke: '#ff0000'}});
+            baseCreep.moveTo(creep, target, {range: 1});
         } else {
             creep.attack(target);
         }

@@ -87,7 +87,7 @@ module.exports = {
 
 		// travel to source
 		if (!creep.pos.inRangeTo(s, 1)) {
-			baseCreep.moveTo(creep, s, {visualizePathStyle: {stroke: '#ff0000'}});
+			baseCreep.moveTo(creep, s});
 			return;
 		}
 		
@@ -158,7 +158,7 @@ module.exports = {
 
 			// move to target
 			if (!creep.pos.inRangeTo(target, 1)) {
-				baseCreep.moveTo(creep, target, {visualizePathStyle: {stroke: '#00ff00'}});
+				baseCreep.moveTo(creep, target);
 				return;
 			}
 			
@@ -208,7 +208,7 @@ module.exports = {
 			if (spawn.length > 0)
 			{
 				if (!creep.pos.inRangeTo(spawn[0].pos, 1)) {
-					baseCreep.moveTo(creep, spawn[0], {visualizePathStyle: {stroke: '#00ff00'}});
+					baseCreep.moveTo(creep, spawn[0]);
 				} else if (creep.ticksToLive < (1500-600/creep.body.length)) {
 					spawn[0].renewCreep(creep);
 				}

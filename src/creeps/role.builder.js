@@ -67,7 +67,7 @@ module.exports = {
             if (!target) { delete creep.memory.building; return; }
             
             if (!creep.pos.inRangeTo(target, 3)) {
-                baseCreep.moveTo(creep, target, {range: 3, visualizePathStyle: {stroke: '#00ff00'}});
+                baseCreep.moveTo(creep, target, {range: 3});
                 return;
             }
 

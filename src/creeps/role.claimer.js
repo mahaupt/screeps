@@ -37,7 +37,7 @@ module.exports = {
         //capture controller
         if (!creep.room.controller.my) {
             if (!creep.pos.inRangeTo(creep.room.controller, 1)) {
-                baseCreep.moveTo(creep, creep.room.controller, {range: 1, visualizePathStyle: {stroke: '#00ff00'}});
+                baseCreep.moveTo(creep, creep.room.controller});
             } else {
                 creep.claimController(creep.room.controller);
             }

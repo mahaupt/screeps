@@ -67,7 +67,6 @@ module.exports = {
         if (!creep.pos.inRangeTo(source, 1)) {
             this.moveTo(creep, source, {
                 range: 1,
-                visualizePathStyle: { stroke: "#ff0000" },
             });
             return;
         }
@@ -117,7 +116,6 @@ module.exports = {
                     if (dist > 1) {
                         this.moveTo(creep, targets[0], {
                             range: 1,
-                            visualizePathStyle: { stroke: "#ff0000" },
                         });
                         return true;
                     }
@@ -431,7 +429,7 @@ module.exports = {
             if (!creep.pos.inRangeTo(spawns[0], 1)) {
                 this.moveTo(creep, spawns[0], {
                     range: 1,
-                    visualizePathStyle: { stroke: "#0000ff" },
+                    : { stroke: "#0000ff" },
                 });
                 return false; //not ready
             }

@@ -33,7 +33,7 @@ module.exports = {
             }
         }
         
-        baseCreep.moveTo(creep, target, {visualizePathStyle: {stroke: "#55ff55"}});
+        baseCreep.moveTo(creep, target);
         this.healTarget(creep, target);
     }, 
     
