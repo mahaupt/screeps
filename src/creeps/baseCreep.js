@@ -390,122 +390,13 @@ module.exports = {
         return false;
     },
 
-    roomCostCallback: function (rname, fromRoomName) {
-        //room status not equal - blocked
-        var fstatus = Game.map.getRoomStatus(fromRoomName);
-        var tstatus = Game.map.getRoomStatus(rname);
-        if (fstatus.status !== tstatus.status) {
-            return Infinity;
-        }
-
-        var intel = Intel.getIntel(rname);
-        if (intel) {
-            if (
-                (intel.threat == "core" && intel.time + 90000 > Game.time) ||
-                (intel.threat == "player" &&
-                    (intel.has_towers || intel.creeps > 0)) ||
-                intel.blocked
-            ) {
-                //avoid room
-                return Infinity;
-            }
-        }
-        return 1;
-    },
-
-    //source callback avoiding source keepers
-    travelCostCallback: function (rname, costs) {
-        var room = Game.rooms[rname];
-
-        //room not found
-        if (!room) return;
-
-        //no hostiles - return
-        if (room.find(FIND_HOSTILE_STRUCTURES).length <= 0) return;
-
-        var sources = room.find(FIND_SOURCES);
-        var minerals = room.find(FIND_MINERALS);
-        var avoids = [].concat(sources, minerals);
-
-        _.forEach(avoids, function (avoid) {
-            var xStart = avoid.pos.x - 4;
-            var xEnd = avoid.pos.x + 4;
-            var yStart = avoid.pos.y - 4;
-            var yEnd = avoid.pos.y + 4;
-
-            for (var x = xStart; x <= xEnd; x++) {
-                for (var y = yStart; y <= yEnd; y++) {
-                    costs.set(x, y, 10);
-                }
-            }
-        });
-    },
-
     moveTo: function (creep, target, options = {}) {
-        options.reusePath = options.reusePath || 10;
-        //options.ignoreCreeps = options.ignoreCreeps || true;
-        creep.moveTo(target, options);
+        creep.travelTo(target, options);
     },
 
     //moves creep to room name, avoids source keeper
     moveToRoom: function (creep, name) {
-        //follow room list
-        if (!creep.memory.roomPath || creep.memory.roomPathTarget != name) {
-            var rlist = Game.map.findRoute(creep.room.name, name, {
-                routeCallback: this.roomCostCallback,
-            });
-
-            creep.memory.roomPath = rlist;
-            creep.memory.roomPathTarget = name;
-        }
-
-        if (creep.memory.roomPath && creep.memory.roomPath[0]) {
-            if (creep.memory.roomPath[0].room == creep.room.name) {
-                creep.memory.roomPath.shift();
-            }
-        }
-
-        var nextRoom = name;
-        if (creep.memory.roomPath && creep.memory.roomPath[0]) {
-            nextRoom = creep.memory.roomPath[0].room;
-        }
-
-        var pos = new RoomPosition(25, 25, nextRoom);
-
-        var ret = this.moveTo(creep, pos, {
-            reusePath: 50,
-            costCallback: this.travelCostCallback,
-            range: 5,
-            plainCost: 1,
-            swampCost: 3,
-            maxOps: 4000,
-            visualizePathStyle: { stroke: "#ffff00" },
-        });
-
-        if (ret == ERR_NO_PATH) {
-            this.moveTo(creep, creep.room.getPositionAt(25, 25), { range: 5 });
-
-            //mark room as blocked if walls exist
-            var r = creep.room.name;
-            var walls = creep.room.find(FIND_STRUCTURES, {
-                filter: (s) => s.structureType == STRUCTURE_WALL,
-            });
-
-            if (
-                walls.length > 0 &&
-                Memory.intel.list[r] &&
-                !Memory.intel.list[r].blocked
-            ) {
-                Memory.intel.list[r].blocked = true;
-                Game.notify(
-                    creep.name +
-                        ": couldnt find way through room " +
-                        creep.room.name +
-                        " and marked as blocked",
-                );
-                delete creep.memory.roomPath;
-            }
-        }
+        creep.travelTo(new RoomPosition(25, 25, name), {range: 10});
     },
 
     init: function (creep) {
