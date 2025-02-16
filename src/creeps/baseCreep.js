@@ -153,9 +153,9 @@ module.exports = {
             nwork = bodySize*2;
             nmove = bodySize;
         } else if (role == "hauler") {
-            let bodySize = Math.floor(energy_avbl/100);
-            bodySize = Math.min(bodySize, 25);
-            ncarry = bodySize;
+            let bodySize = Math.floor(energy_avbl/150);
+            bodySize = Math.min(bodySize, 16);
+            ncarry = bodySize*2;
             nmove = bodySize;
         } else if (role == "upgrader" || role == "builder") {
             let bodySize = Math.floor(energy_avbl/200);
