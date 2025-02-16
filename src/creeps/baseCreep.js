@@ -134,48 +134,35 @@ module.exports = {
         return false;
     },
 
-    buildBody: function (room, role, bodySize) {
+    buildBody: function (role, energy_avbl) {
         var body = [];
 
-        var ntough = 0;
-        var nwork = bodySize;
-        var ncarry = bodySize;
-        var nclaim = 0;
-        var nmove = bodySize;
-        var nattack = 0;
-        var nrattack = 0;
-        var nheal = 0;
-
-        //statistics
-        var ncontainer = room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return structure.structureType == STRUCTURE_CONTAINER;
-            },
-        }).length;
+        var ntough = 0; // 10
+        var nwork = 0; // 100
+        var ncarry = 0; // 50
+        var nmove = 1; // 50
+        var nclaim = 0; // 600
+        var nattack = 0; // 80
+        var nrattack = 0; // 150
+        var nheal = 0; // 250
 
         if (role == "miner") {
-            bodySize = Math.min(bodySize, 3);
-            nwork = bodySize * 2;
+            let bodySize = Math.floor((energy_avbl-50)/250);
+            bodySize = Math.min(bodySize, 5);
             ncarry = 1;
+            nwork = bodySize*2;
             nmove = bodySize;
         } else if (role == "hauler") {
-            bodySize = Math.min(bodySize, 5);
-            nwork = 0;
-            ncarry = Math.min(2 * bodySize + 1, 25);
-            nmove = Math.min(2 * bodySize - 1, 25);
-        } else if (role == "upgrader") {
-            bodySize = Math.min(bodySize, 5);
-            nwork = bodySize;
+            let bodySize = Math.floor(energy_avbl/100);
+            bodySize = Math.min(bodySize, 25);
             ncarry = bodySize;
             nmove = bodySize;
-        } else if (role == "builder") {
-            bodySize = Math.min(bodySize, 10);
+        } else if (role == "upgrader" || role == "builder") {
+            let bodySize = Math.floor(energy_avbl/200);
             nwork = bodySize;
             ncarry = bodySize;
             nmove = bodySize;
         } else if (role == "scout") {
-            nwork = 0;
-            ncarry = 0;
             nmove = 1;
         } else if (role == "pioneer") {
             nwork = 2;
@@ -187,55 +174,39 @@ module.exports = {
             nclaim = 1;
             nmove = 1;
         } else if (role == "reserver") {
+            let bodySize = Math.floor(energy_avbl/650);
+            bodySize = Math.min(bodySize, 4);
             nwork = 0;
             ncarry = 0;
-            nclaim = Math.max(Math.round(bodySize / 2), 1);
-            nmove = 1;
+            nclaim = bodySize;
+            nmove = bodySize;
         } else if (role == "soldier") {
-            if (bodySize > 2) {
-                bodySize = Math.min(bodySize, 8);
-                nwork = 0;
-                ncarry = 0;
-                ntough = bodySize; //10
-                nmove = 2 * bodySize + 1; //50
-                nattack = bodySize; //80
-                nheal = 1; // 250
-            } else {
-                nwork = 0;
-                ncarry = 0;
-                ntough = bodySize;
-                nmove = 2 * bodySize;
-                nattack = bodySize;
-            }
+            let bodySize = Math.floor(energy_avbl/140);
+            ntough = bodySize;
+            nmove = bodySize;
+            nattack = bodySize;
         } else if (role == "drainer") {
-            bodySize = Math.min(bodySize, 16);
-            nwork = 0;
-            ncarry = 0;
-            ntough = bodySize * 2; //29; //10
-            nmove = Math.round(bodySize * 2.5); //17; //50
-            nheal = Math.round(bodySize * 0.5); //4; // 250
+            let bodySize = Math.floor(energy_avbl/300);
+            ntough = bodySize;
+            nmove = bodySize;
+            nheal = bodySize;
         } else if (role == "dismantler") {
-            ncarry = 0;
-
-            bodySize = Math.min(bodySize, 10);
-
-            ntough = bodySize; //10
-            nwork = Math.round(0.5 * bodySize); // 100
-            nrattack = Math.round(0.5 * bodySize);
-            nmove = Math.ceil(2.5 * bodySize); //17; //50
-            nheal = Math.round(0.5 * bodySize); //4; // 250
+            let bodySize = Math.floor(energy_avbl/150);
+            ntough =  bodySize;
+            nwork =  bodySize;
+            nrattack = bodySize;
+            nmove =  bodySize;
+            nheal =  bodySize; 
         } else if (role == "harvester") {
-            bodySize = Math.min(bodySize, 16);
-            nwork = Math.ceil(0.5 * bodySize);
+            let bodySize = Math.floor(energy_avbl/200);
+            nwork = bodySize;
             ncarry = bodySize;
-            nmove = Math.ceil(1.5 * bodySize);
+            nmove = bodySize;
         }
         if (role == "healer") {
-            bodySize = Math.min(bodySize, 25);
-            nwork = 0;
-            ncarry = 0;
-            nmove = bodySize; //50
-            nheal = bodySize; //250
+            let bodySize = Math.floor(energy_avbl/300);
+            nmove = bodySize;
+            nheal = bodySize;
         }
         //upgrader && builder == standard
 
@@ -288,17 +259,6 @@ module.exports = {
         }
 
         return body;
-    },
-
-    getSuitableBodySize: function (role, availableEnergy) {
-        var size = Math.floor(availableEnergy / 400);
-        size = Math.max(size, 1);
-
-        if (availableEnergy >= 500 && availableEnergy <= 800) {
-            size = 2;
-        }
-
-        return size;
     },
 
     //get equivalent body size considering boosts
@@ -542,4 +502,17 @@ module.exports = {
         }
         delete Memory.creeps[i];
     },
+
+    killSelfDecision: function(creep) 
+	{
+		//never kill self creeps
+		if (creep.memory.role == 'soldier') return;
+		
+        var possibleBodyParts = baseCreep.buildBody(creep.memory.role, creep.room.energyAvailable).length;
+
+		if (possibleBodyParts > creep.body.length)
+        {
+	        creep.memory.killSelf = true;
+        }
+	}
 };

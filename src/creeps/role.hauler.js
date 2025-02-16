@@ -190,7 +190,7 @@ module.exports = {
 				if (amount >= creep.store.getUsedCapacity()) {
 					creep.memory.pickup = true;
 					creep.memory.tasks = [];
-					//console.log(creep.room.name + " " + creep.name + ": Creep empty, looking for new tasks");
+					baseCreep.killSelfDecision(creep); // just think about ending it
 				}
 			}
 		}
@@ -209,12 +209,11 @@ module.exports = {
 			{
 				if (!creep.pos.inRangeTo(spawn[0].pos, 1)) {
 					baseCreep.moveTo(creep, spawn[0]);
-				} else if (creep.ticksToLive < (1500-600/creep.body.length)) {
+				} else if (!creep.memory.killSelf && creep.ticksToLive < (1500-600/creep.body.length)) {
 					spawn[0].renewCreep(creep);
 				}
 			}
-			creep.say("??");
-			
+			creep.say("c");
 		}
 	}, 
 

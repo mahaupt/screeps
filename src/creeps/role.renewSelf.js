@@ -27,7 +27,7 @@ module.exports = {
 	        //recycle self to build better creep
 	        if (!creep.memory.killSelf)
 	        {
-		        this.killSelfDecision(creep);
+		        baseCreep.killSelfDecision(creep);
 	        }
 			
 	        
@@ -86,19 +86,4 @@ module.exports = {
 	        }
         }
 	}, 
-	
-	
-	killSelfDecision: function(creep) 
-	{
-		//never kill self creeps
-		if (creep.memory.role == 'soldier') return;
-		
-		var bodySize = baseCreep.getSuitableBodySize(creep.memory.role, creep.room.energyAvailable);
-        var possibleBodyParts = baseCreep.buildBody(creep.room, creep.memory.role, bodySize).length;
-
-		if (possibleBodyParts > creep.body.length)
-        {
-	        creep.memory.killSelf = true;
-        }
-	}
 };

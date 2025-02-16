@@ -10,6 +10,15 @@ module.exports = {
         var builderCount = counts.builder || 0;
         var haulerCount = counts.hauler || 0;
 
+        // add replacement miner from spawn list
+        if (room.memory.spawnList) {
+            for (var i in room.memory.spawnList) {
+                if (room.memory.spawnList[i].role == "miner") {
+                    minerCount++;
+                }
+            }
+        }
+
         var sourceCount = room.find(FIND_SOURCES).length;
         var mineralCount = room.find(FIND_MINERALS, {
             filter: (s) => {
@@ -72,13 +81,9 @@ module.exports = {
             avbl_energy = spawn.room.energyCapacityAvailable;
         }
 
-        let bodySize = baseCreep.getSuitableBodySize(role, avbl_energy);
-        let body = baseCreep.buildBody(spawn.room, role, bodySize);
+        let body = baseCreep.buildBody(role, avbl_energy);
         let name = baseCreep.getName(spawn.room, role);
         var ret = spawn.spawnCreep(body, name, data);
-
-        //console.log(body);
-        //console.log(ret);
 
         if (ret == OK) {
             return true;
