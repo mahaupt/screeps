@@ -12,10 +12,21 @@ module.exports = {
 	name: 'hauler', 
 	run: function(creep) {
 		baseCreep.init(creep);
-		
+
 		if (!creep.memory.tasks) {
 			creep.memory.tasks = [];
 		}
+
+		// spawn replacement
+        if (creep.memory.killSelf && !creep.memory.replacementSpawned && creep.ticksToLive <= 300) {
+            creep.memory.replacementSpawned = true;
+            // count room haulers
+			let home = Game.rooms[creep.memory.home];
+			let haulerCount = _.filter(Game.creeps, (c) => c.memory.role == 'hauler' && c.room.memory.home == home.name).length;
+			if (home.memory.stats.haulers_needed >= haulerCount) {
+				moduleSpawn.addSpawnList(home, 'hauler', {}, true);
+			}
+        }
 		
 		//check previous pickup amount
 		this.checkPickup(creep);
@@ -64,7 +75,9 @@ module.exports = {
 		} 
 		else 
 		{
-			//no task, idle
+			// no task, idle
+			// walk out of the way
+			// renew?
 		}
 	}, 
 	

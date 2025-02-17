@@ -1,5 +1,6 @@
 module.exports = {
     run: function (spawn) {
+        if (spawn.spawning) return;
         this.memCleanup();
         var room = spawn.room;
 
@@ -87,13 +88,17 @@ module.exports = {
         }
     },
 
-    addSpawnList: function (room, role, memory = {}) {
+    addSpawnList: function (room, role, memory = {}, priority = false) {
         if (!room.memory.spawnList) {
             room.memory.spawnList = [];
         }
 
         var s = { role: role, mem: memory };
-        room.memory.spawnList.push(s);
+        if (priority) {
+            room.memory.spawnList.unshift(s);
+        } else {
+            room.memory.spawnList.push(s);
+        }
     },
 
     memCleanup: function () {

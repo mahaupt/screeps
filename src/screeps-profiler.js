@@ -155,7 +155,7 @@ function wrapFunction(name, originalFunction) {
 function hookUpPrototypes() {
   for (const { name, val } of Profiler.prototypes) {
     if (!val) {
-      console.log(`skipping prototype hook ${name}, object appears to be missing`);
+      //console.log(`skipping prototype hook ${name}, object appears to be missing`);
       continue;
     }
     profileObjectFunctions(val, name);

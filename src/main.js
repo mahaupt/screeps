@@ -64,7 +64,7 @@ profiler.registerObject(moduleBasePosCalc, 'moduleBasePosCalc');
 
 profiler.enable();
 Intel.init();
-console.log('Startup');
+//console.log('Startup');
 
 module.exports.loop = moduleMemory.wrapper(() => {
     profiler.wrap(() => {
