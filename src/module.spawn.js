@@ -2,6 +2,21 @@ module.exports = {
     run: function (spawn) {
         this.memCleanup();
 
+        // first, spawn from spawn list
+        // soldiers, replacement creeps
+        if (room.memory.spawnList && room.memory.spawnList.length > 0) {
+            var ret = this.spawn(
+                spawn,
+                room.memory.spawnList[0].role,
+                room.memory.spawnList[0].mem || {},
+            );
+            if (ret) {
+                room.memory.spawnList.shift();
+                return;
+            }
+        }
+
+        // then, spawn room creeps
         var room = spawn.room;
         var roomCreeps = room.find(FIND_MY_CREEPS);
         var counts = _.countBy(roomCreeps, "memory.role");
@@ -9,15 +24,6 @@ module.exports = {
         var upgraderCount = counts.upgrader || 0;
         var builderCount = counts.builder || 0;
         var haulerCount = counts.hauler || 0;
-
-        // add replacement miner from spawn list
-        if (room.memory.spawnList) {
-            for (var i in room.memory.spawnList) {
-                if (room.memory.spawnList[i].role == "miner") {
-                    minerCount++;
-                }
-            }
-        }
 
         var sourceCount = room.find(FIND_SOURCES).length;
         var mineralCount = room.find(FIND_MINERALS, {
@@ -50,17 +56,6 @@ module.exports = {
             this.spawn(spawn, "upgrader");
         } else if (builderCount < 1 + room.memory.stats.add_creeps) {
             this.spawn(spawn, "builder");
-        } else if (room.memory.spawnList) {
-            if (room.memory.spawnList.length > 0) {
-                var ret = this.spawn(
-                    spawn,
-                    room.memory.spawnList[0].role,
-                    room.memory.spawnList[0].mem || {},
-                );
-                if (ret) {
-                    room.memory.spawnList.shift();
-                }
-            }
         }
     },
 

@@ -191,12 +191,11 @@ module.exports = {
             nmove = bodySize;
             nheal = bodySize;
         } else if (role == "dismantler") {
-            let bodySize = Math.floor(energy_avbl/150);
-            ntough =  bodySize;
+            let bodySize = Math.floor((energy_avbl-300)/250);
+            ntough =  bodySize*3;
             nwork =  bodySize;
-            nrattack = bodySize;
-            nmove =  bodySize;
-            nheal =  bodySize; 
+            nmove =  bodySize*2+1;
+            nheal =  1; 
         } else if (role == "harvester") {
             let bodySize = Math.floor(energy_avbl/200);
             nwork = bodySize;
