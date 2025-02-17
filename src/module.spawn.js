@@ -1,6 +1,7 @@
 module.exports = {
     run: function (spawn) {
         this.memCleanup();
+        var room = spawn.room;
 
         // first, spawn from spawn list
         // soldiers, replacement creeps
@@ -17,7 +18,6 @@ module.exports = {
         }
 
         // then, spawn room creeps
-        var room = spawn.room;
         var roomCreeps = room.find(FIND_MY_CREEPS);
         var counts = _.countBy(roomCreeps, "memory.role");
         var minerCount = counts.miner || 0;
@@ -54,7 +54,7 @@ module.exports = {
             this.spawn(spawn, "miner");
         } else if (upgraderCount < 1) {
             this.spawn(spawn, "upgrader");
-        } else if (builderCount < 1 + room.memory.stats.add_creeps) {
+        } else if (builderCount < (1 + (room.memory.stats.add_creeps || 0))) {
             this.spawn(spawn, "builder");
         }
     },

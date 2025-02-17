@@ -26,6 +26,13 @@ module.exports = {
         }
         
         if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] == 0) {
+            if (creep.ticksToLive < 100) { 
+                // not enough ticks for building, recycle
+                creep.memory.renewSelf = true;
+                creep.memory.killSelf = true;
+                //TODO: spawn replacement
+                return;
+            }
             creep.memory.harvesting = true;
             baseCreep.deleteSource(creep);
             delete creep.memory.building;

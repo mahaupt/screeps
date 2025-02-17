@@ -30,7 +30,7 @@ module.exports = {
         var link = this.getLink(creep, source);
 
         // spawn replacement
-        if (!creep.memory.replacementSpawned && creep.ticksToLive <= creep.memory.travelTime + 10) {
+        if (!creep.memory.replacementSpawned && creep.ticksToLive <= creep.memory.travelTime) {
             creep.memory.replacementSpawned = true;
             this.replaceSelf(creep);
         }
@@ -82,7 +82,7 @@ module.exports = {
         } else {
             creep.harvest(source);
             if (!creep.memory.travelTime) {
-                creep.memory.travelTime = 1500 - creep.ticksToLive;
+                creep.memory.travelTime = 1500 - creep.ticksToLive + creep.body.length*3;
             }
         }
 
