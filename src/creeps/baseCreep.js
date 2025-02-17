@@ -140,7 +140,7 @@ module.exports = {
         var ntough = 0; // 10
         var nwork = 0; // 100
         var ncarry = 0; // 50
-        var nmove = 1; // 50
+        var nmove = 0; // 50
         var nclaim = 0; // 600
         var nattack = 0; // 80
         var nrattack = 0; // 150
@@ -169,15 +169,11 @@ module.exports = {
             ncarry = 4;
             nmove = 6;
         } else if (role == "claimer") {
-            nwork = 0;
-            ncarry = 0;
             nclaim = 1;
             nmove = 1;
         } else if (role == "reserver") {
             let bodySize = Math.floor(energy_avbl/650);
-            bodySize = Math.min(bodySize, 4);
-            nwork = 0;
-            ncarry = 0;
+            bodySize = Math.min(bodySize, 7);
             nclaim = bodySize;
             nmove = bodySize;
         } else if (role == "soldier") {
