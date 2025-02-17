@@ -64,14 +64,11 @@ module.exports = {
         //if target room - prepare for embarkation
         if (creep.memory.troom && !creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
-                //prepared - search for boost
-                creep.memory.noRenew = true;
                 baseCreep.boostCreep(creep, this.boost);
             }
             return;
         } else if (!creep.memory.troom) {
             delete creep.memory.embark;
-            delete creep.memory.noRenew;
         }
         
         //follow leader
@@ -104,7 +101,6 @@ module.exports = {
                 baseCreep.moveTo(creep, creep.room.controller);
                 this.pickTarget(creep);
             }
-            delete creep.memory.noRenew;
             delete creep.memory.embark;
             return;
         }
@@ -113,8 +109,6 @@ module.exports = {
         //if target room - prepare for embarkation
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
-                //prepared - search for boost
-                creep.memory.noRenew = true;
                 baseCreep.boostCreep(creep, this.boost_res);
             }
             return;

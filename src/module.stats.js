@@ -68,7 +68,7 @@ module.exports =  {
                 } else {
                     //remove one builder
                     console.log(room.name + ": decr number of builders");
-                    var creeps = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "builder" && !s.memory.killSelf });
+                    var creeps = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "builder" });
                     if (creeps.length > 0) {
                         creeps[0].memory.killSelf = true;
                         creeps[0].memory.renewSelf = true;
@@ -113,7 +113,8 @@ module.exports =  {
             room.memory.stats.transports_1k_30 = Math.round((room.memory.stats.transports_1k_30*29+volume)/30);
             
             //calc haulers
-            var haulerNeeded = Math.round(room.memory.stats.transports_1k_30 / (room.energyAvailable/2));
+            let carryPartPerHauler = baseCreep.buildBody('hauler', room.energyCapacityAvailable).filter((s) => s == CARRY).length;
+            var haulerNeeded = Math.round(room.memory.stats.transports_1k_30 / (carryPartPerHauler*50));
             haulerNeeded = Math.max(Math.min(haulerNeeded, 5), 1);
             
             if (room.memory.stats.haulers_needed < haulerNeeded) {
@@ -122,7 +123,7 @@ module.exports =  {
             } else if (room.memory.stats.haulers_needed > haulerNeeded) {
                 room.memory.stats.haulers_needed--;
                 console.log(room.name + ": decr number of haulers");
-                var creeps = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "hauler" && !s.memory.killSelf });
+                var creeps = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "hauler" });
                 if (creeps.length > 0) {
                     creeps[0].memory.killSelf = true;
                 }

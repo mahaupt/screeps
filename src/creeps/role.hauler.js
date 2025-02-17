@@ -15,7 +15,6 @@ module.exports = {
 		
 		if (!creep.memory.tasks) {
 			creep.memory.tasks = [];
-			creep.memory.noRenew = true; //no autorenew
 		}
 		
 		//check previous pickup amount

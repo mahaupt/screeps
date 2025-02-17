@@ -4,9 +4,6 @@ module.exports = {
     {
         baseCreep.init(creep);
         
-        //cannot be renewed
-        creep.memory.noRenew = true;
-        
         //go back home // wait for target
         if (!creep.memory.troom)
         {

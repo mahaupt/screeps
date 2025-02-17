@@ -27,7 +27,6 @@ module.exports = {
         if (!creep.memory.embark)
         {
             baseCreep.prepareCreep(creep);
-            creep.memory.noRenew = true;
             return;
         }
         
@@ -129,8 +128,6 @@ module.exports = {
                     if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         baseCreep.moveTo(creep, spawn, {range: 1});
                     }
-                    //switch renew back on
-                    if (creep.memory.noRenew) delete creep.memory.noRenew;
                 } else {
                     //upgrade controller
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE)

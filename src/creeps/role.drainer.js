@@ -36,14 +36,12 @@ module.exports = {
                 baseCreep.moveTo(creep, creep.room.controller);
             }
             delete creep.memory.embark;
-            delete creep.memory.noRenew;
             return;
         }
         
         //if target room - prepare for embarkation
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
-                creep.memory.noRenew = true;
                 baseCreep.boostCreep(creep, this.boost);
             }
             return;

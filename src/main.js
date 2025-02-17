@@ -139,11 +139,6 @@ module.exports.loop = moduleMemory.wrapper(() => {
             } else if (creep.memory.role == 'healer') {
                 roleHealer.run(creep);
             }
-            
-            if (creep.ticksToLive <= 100 && !creep.memory.noRenew)
-            {
-                creep.memory.renewSelf = true;
-            }
         }
         let elapsed = Game.cpu.getUsed() - start;
 

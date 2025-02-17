@@ -3,7 +3,6 @@ Memory Layout
 .role = "miner"
 .harvesting = true/false
 .renewSelf = true/false
-.noRenew = false
 .source = source.id
 .container = container.id
 .link = link.id	
@@ -19,7 +18,6 @@ module.exports = {
     run: function(creep) 
     {    
         baseCreep.init(creep);
-        creep.memory.noRenew = true;
         
         //go home if lost
         if (creep.room.name != creep.memory.home) {
