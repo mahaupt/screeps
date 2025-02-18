@@ -33,6 +33,13 @@ module.exports = {
             ops.mem.nearby_id++;
             return;
         }
+
+        // skip recently scouted rooms
+        let intel = Intel.getIntel(target);
+        if (intel && intel.time+10000 > Game.time) {
+            ops.mem.nearby_id++;
+            return;
+        }
         
         //start scout
         Ops.new("scout", ops.source, target);
