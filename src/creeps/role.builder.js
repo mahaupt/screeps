@@ -103,7 +103,7 @@ module.exports = {
         delete creep.memory.dismantle;
         
         //repairs needed
-        var repairs = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        var repairs = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (
                     structure.structureType != STRUCTURE_WALL && 
@@ -119,7 +119,7 @@ module.exports = {
         
         
         //dismantle
-        /*var dismantles = creep.pos.findClosestByPath(FIND_FLAGS, 
+        /*var dismantles = creep.pos.findClosestByRange(FIND_FLAGS, 
             {filter: (s) => s.name.search("dismantle") == 0});
         if (dismantles) {
             creep.memory.dismantle = true;
@@ -128,7 +128,7 @@ module.exports = {
         
         
         //construction sites
-        var targets = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        var targets = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
         if(targets) {
             creep.memory.building = targets.id;
             return;

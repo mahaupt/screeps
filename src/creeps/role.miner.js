@@ -205,11 +205,11 @@ module.exports = {
             ).length > 0) 
         {
             sources = sources.concat(creep.room.find(FIND_MINERALS));
-            
         }
 		
 		//find new unoccupied source
 		let sourcePicked = {};
+        let terrain = creep.room.getTerrain();
 
 		for (var source of sources)
 		{
@@ -224,6 +224,23 @@ module.exports = {
 					sourcePicked[source.id]++;
 				}
 			}
+
+            // count free spots on source
+            let pos = source.pos;
+            let free_spots = 0
+            for (var x = -1; x <= 1; x++) {
+                for (var y = -1; y <= 1; y++) {
+                    if (x == 0 && y == 0) continue;
+                    if (terrain.get(pos.x + x, pos.y + y) != TERRAIN_MASK_WALL) {
+                        free_spots++;
+                    }
+                }
+            }
+
+            // already too many miners on source
+            if (sourcePicked[source.id] >= free_spots) {
+                sourcePicked[source.id] = 9999;
+            }
 		}
 		
 		var min_picked = 9999;
