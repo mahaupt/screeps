@@ -372,7 +372,7 @@ module.exports = {
     {
         // get all creeps that have same source (self is excluded)
         var creeps = _.filter(Game.creeps, (c) => c.memory.source == creep.memory.source && !c.memory.replacementSpawned);
-        if (creeps.length >= 1 && creep.room.controller.level >= 4) return; // there is already another miner
+        if (creeps.length >= 1 && creep.body.length >= 10) return; // there is already another miner
         moduleSpawn.addSpawnList(
             creep.room, 
             "miner", 

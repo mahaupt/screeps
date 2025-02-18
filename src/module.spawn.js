@@ -40,10 +40,12 @@ module.exports = {
         //extractors that could be harvested
         extractor_count = Math.min(extractor_count, mineralCount);
 
-        // multiple miners per node if room is low level 1-3
+        // multiple miners per node if small miners (less than 10 body parts = 800 energy)
         var minerMultiplyer = 1;
-        if (spawn.room.controller.level < 4) {
-            minerMultiplyer = 2;
+        if (spawn.room.controller.level <= 3) {
+            if (spawn.room.energyCapacityAvailable < 800) {
+                minerMultiplyer = 2;
+            }
         }
 
         if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || 3)) {

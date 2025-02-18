@@ -159,6 +159,7 @@ module.exports = {
             nmove = bodySize;
         } else if (role == "upgrader" || role == "builder") {
             let bodySize = Math.floor(energy_avbl/200);
+            bodySize = Math.min(bodySize, 16);
             nwork = bodySize;
             ncarry = bodySize;
             nmove = bodySize;
@@ -178,39 +179,35 @@ module.exports = {
             nmove = bodySize;
         } else if (role == "soldier") {
             let bodySize = Math.floor(energy_avbl/140);
+            bodySize = Math.min(bodySize, 16);
             ntough = bodySize;
             nmove = bodySize;
             nattack = bodySize;
         } else if (role == "drainer") {
             let bodySize = Math.floor(energy_avbl/300);
+            bodySize = Math.min(bodySize, 16);
             ntough = bodySize;
             nmove = bodySize;
             nheal = bodySize;
         } else if (role == "dismantler") {
             let bodySize = Math.floor((energy_avbl-300)/250);
+            bodySize = Math.min(bodySize, 8);
             ntough =  bodySize*3;
             nwork =  bodySize;
             nmove =  bodySize*2+1;
             nheal =  1; 
         } else if (role == "harvester") {
             let bodySize = Math.floor(energy_avbl/200);
+            bodySize = Math.min(bodySize, 16);
             nwork = bodySize;
             ncarry = bodySize;
             nmove = bodySize;
         }
         if (role == "healer") {
             let bodySize = Math.floor(energy_avbl/300);
+            bodySize = Math.min(bodySize, 25);
             nmove = bodySize;
             nheal = bodySize;
-        }
-        //upgrader && builder == standard
-
-        //max 50 body parts - reducing
-        if (nwork + ncarry + nmove > 50) {
-            var above = nwork + ncarry + nmove - 50;
-            nwork -= Math.ceil((nwork / 50) * above);
-            ncarry -= Math.ceil((ncarry / 50) * above);
-            nmove -= Math.ceil((nmove / 50) * above);
         }
 
         //Tough

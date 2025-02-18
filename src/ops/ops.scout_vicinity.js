@@ -60,6 +60,7 @@ module.exports = {
         }
         
         ops.mem.nearby = this.getRoomsNearby(ops.source, range);
+        ops.mem.nearby.reverse(); // checking long distance rooms first, so we can skip shorter distances
         ops.mem.nearby_id = 0;
     }, 
     
