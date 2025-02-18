@@ -8,7 +8,8 @@ global.Labs = require('labs_labs');
 global.Terminal = require('module.terminal');
 global.Logistics = global.moduleLogistics;
 global.Intel = require('module.intel');
-global.moduleAutobuilder = require('module.autobuilder');
+global.Autobuilder = require('module.autobuilder');
+global.BasePlanner = require('module.baseplanner');
 
 var roleMiner = require('creeps_role.miner');
 var roleHarvester = require('creeps_role.harvester');
@@ -30,7 +31,6 @@ var moduleMemory = require('module.memory');
 var moduleStats = require('module.stats');
 var moduleDefense = require('module.defense');
 var moduleEvents = require('module.events');
-var moduleBasePosCalc = require('module.baseposcalc');
 
 const profiler = require('screeps-profiler');
 profiler.registerObject(baseCreep, 'baseCreep');
@@ -40,7 +40,8 @@ profiler.registerObject(Ops, 'Ops');
 profiler.registerObject(Labs, 'Labs');
 profiler.registerObject(Terminal, 'Terminal');
 profiler.registerObject(Intel, 'Intel');
-profiler.registerObject(moduleAutobuilder, 'moduleAutobuilder');
+profiler.registerObject(Autobuilder, 'Autobuilder');
+profiler.registerObject(BasePlanner, 'BasePlanner');
 profiler.registerObject(roleMiner, 'roleMiner');
 profiler.registerObject(roleHarvester, 'roleHarvester');
 profiler.registerObject(roleUpgrader, 'roleUpgrader');
@@ -60,7 +61,6 @@ profiler.registerObject(moduleMemory, 'moduleMemory');
 profiler.registerObject(moduleStats, 'moduleStats');
 profiler.registerObject(moduleDefense, 'moduleDefense');
 profiler.registerObject(moduleEvents, 'moduleEvents'); 
-profiler.registerObject(moduleBasePosCalc, 'moduleBasePosCalc');
 
 profiler.enable();
 Intel.init();
@@ -82,7 +82,7 @@ module.exports.loop = moduleMemory.wrapper(() => {
             moduleStats.run(room);
             
             if (Game.time % 100 == i++)
-                moduleAutobuilder.run(room);
+                Autobuilder.run(room);
             if (room.terminal && Game.time % 20 == i++) {
                 Terminal.run(room);
             }

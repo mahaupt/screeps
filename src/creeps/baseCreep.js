@@ -271,7 +271,7 @@ module.exports = {
     },
 
     getSpawnLink: function (room) {
-        var cpoint = moduleAutobuilder.getBaseCenterPoint(room);
+        var cpoint = Autobuilder.getBaseCenterPoint(room);
         var spawnlink = cpoint.findInRange(FIND_STRUCTURES, 2, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_LINK;

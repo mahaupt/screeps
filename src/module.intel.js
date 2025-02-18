@@ -36,7 +36,7 @@ module.exports = {
 		
 		//recent intel
 		if (Memory.intel.list[room.name] && 
-            Memory.intel.list[room.name].time+100 > Game.time) 
+            Memory.intel.list[room.name].time+3000 > Game.time) 
         {
 			return;
 		}
@@ -119,7 +119,7 @@ module.exports = {
             (intel.threat == "player" && !intel.has_spawn)) &&
             intel.sources >= 2) 
         {
-            this.addPotClaim(room.name);
+            this.addClaimable(room.name);
         }
     }, 
     
@@ -144,40 +144,18 @@ module.exports = {
         }
     },
     
-    addPotClaim: function(roomname)
+    addClaimable: function(roomname)
     {
         if (!Memory.intel.claimable) {
             Memory.intel.claimable = [];
         }
         
         var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
-        if (index < 0) {
-            var terrain = this.buildPotClaimTerrain(roomname);
-            Memory.intel.claimable.push({room: roomname, parsed: false, terrain: terrain.serialize()});
-        }
+        if (index >= 0) return; // room already in list
+            
+        let res = BasePlanner.getBaseCenter(roomname);
+        Memory.intel.claimable.push({room: roomname, center: res.pos, points: res.points});
     }, 
-    
-    //build cost matrix based on terrain
-    buildPotClaimTerrain: function(roomname)
-    {
-        var costs = new PathFinder.CostMatrix();
-        const terrain = Game.map.getRoomTerrain(roomname);
-        
-        for (var x = 1; x <= 48; x++) {
-            for (var y = 1; y <= 48; y++) {
-                switch(terrain.get(x,y)) {
-                    case TERRAIN_MASK_WALL:
-                        costs.set(x, y, 255);
-                        break;
-                    case TERRAIN_MASK_SWAMP:
-                        costs.set(x, y, 5);
-                        break;
-                }
-            }
-        }
-        return costs;
-    }, 
-    
     
     getPotClaimCenterPos: function(roomname)
     {
@@ -188,6 +166,7 @@ module.exports = {
         if (index >= 0) {
             if (Memory.intel.claimable[index].parsed) {
                 var center = Memory.intel.claimable[index].center;
+                if (!center || center === undefined) return undefined;
                 return new RoomPosition(center.x, center.y, roomname);
             }
         }

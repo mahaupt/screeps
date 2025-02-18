@@ -161,7 +161,7 @@ module.exports = {
     cancelUnimportantTargets: function(creep)
     {
         //if creep is outside bunker - move inside bunker
-        var cpoint = moduleAutobuilder.getBaseCenterPoint(creep.room);
+        var cpoint = Autobuilder.getBaseCenterPoint(creep.room);
         var building = Game.getObjectById(creep.memory.building);
         var source = Game.getObjectById(creep.memory.source);
         
@@ -193,7 +193,7 @@ module.exports = {
     
     pickBuildTargetInWar: function(creep)
     {
-        var cpoint = moduleAutobuilder.getBaseCenterPoint(creep.room);
+        var cpoint = Autobuilder.getBaseCenterPoint(creep.room);
         
         //pick wall and tower repairs
         var walls = creep.room.find(FIND_STRUCTURES, {filter: (s) => { 

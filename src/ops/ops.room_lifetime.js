@@ -1,10 +1,10 @@
 module.exports = {
-    cycle_timeout: 15000,
+    cycle_timeout: 30000,
     run: function(ops)
     {
         this.init(ops);
         
-        // 15000 cycle timeout // 24h
+        // 30000 cycle timeout // 24h
         if (ops.mem.cycle_timeout + this.cycle_timeout > Game.time) return;
         ops.mem.cycle_timeout = Game.time;
         
@@ -12,7 +12,7 @@ module.exports = {
         if (Ops.checkSrcRoomAvbl(ops)) return;
         
         //AUTO SCOUT
-        //Ops.new("scout_vicinity", ops.source, "");
+        Ops.new("scout_vicinity", ops.source, "");
         
         //AUTO CLAIM NEW ROOMS
         //this.autoClaim(ops);
@@ -50,7 +50,7 @@ module.exports = {
                     
                     //check claim calcs
                     var claim = Memory.intel.claimable[i];
-                    if (!claim.parsed) continue;
+                    if (!claim.pos || claim.pos === undefined) continue;
                     if (claim.points < -1600) continue;
                     
                     //check room not already owned
@@ -63,7 +63,7 @@ module.exports = {
                     
                     //check distance
                     var dist = Game.map.getRoomLinearDistance(ops.source, claim.room);
-                    if (dist > 10) continue;
+                    if (dist > 10 || dist <= 2) continue;
                     
                     //check no claim ops started
                     var index = _.findIndex(Memory.ops, (s) => s.type == "claim" && s.target == claim.room);
