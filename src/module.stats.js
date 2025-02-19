@@ -123,9 +123,12 @@ module.exports =  {
             } else if (room.memory.stats.haulers_needed > haulerNeeded) {
                 room.memory.stats.haulers_needed--;
                 console.log(room.name + ": decr number of haulers");
-                var creeps = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "hauler" });
-                if (creeps.length > 0) {
-                    creeps[0].memory.killSelf = true;
+                let hauler = room.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == "hauler" });
+                if (hauler.length > room.memory.stats.haulers_needed) {
+                    let diff = hauler.length - room.memory.stats.haulers_needed;
+                    for (let i = 0; i < diff; i++) {
+                        hauler[i].memory.killSelf = true;
+                    }
                 }
             }
         }
