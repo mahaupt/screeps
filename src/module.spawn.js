@@ -1,4 +1,6 @@
 module.exports = {
+    max_builders: 8, // TODO: balance this value
+    max_haulers: 3,
     run: function (room) {
         // first, spawn from spawn list
         // soldiers, replacement creeps
@@ -48,9 +50,13 @@ module.exports = {
             }
         }
 
-        room.memory.stats.builders_needed = room.memory.stats.add_creeps+1;
+        // TODO: remove me
+        if (room.memory.stats.add_creeps >= 0 && !room.memory.stats.builders_needed) {
+            room.memory.stats.builders_needed = room.memory.stats.add_creeps+1;
+        }
+        delete room.memory.stats.add_creeps;
 
-        if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || 3)) {
+        if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || this.max_haulers)) {
             this.spawn(room, "hauler");
         } else if (
             minerCount < sourceCount * minerMultiplyer + extractor_count &&
@@ -59,7 +65,7 @@ module.exports = {
             this.spawn(room, "miner");
         } else if (upgraderCount < 1) {
             this.spawn(room, "upgrader");
-        } else if (builderCount < (room.memory.stats.builders_needed || 8)) {
+        } else if (builderCount < (room.memory.stats.builders_needed || this.max_builders)) {
             this.spawn(room, "builder");
         }
     },

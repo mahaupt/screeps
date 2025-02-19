@@ -2,7 +2,6 @@ module.exports = {
     base_size: 7,
 
     getBaseCenter: function(roomName) {
-        let start = Game.cpu.getUsed();
         let distanceTransform = this.distanceTransform(roomName);
         let center = new RoomPosition(25, 25, roomName);
         let bestPos = undefined;
@@ -11,7 +10,7 @@ module.exports = {
         for (let x = 0; x < 50; ++x) {
             for (let y = 0; y < 50; ++y) {
                 let value = distanceTransform.get(x, y);
-                if (value < this.base_size+1) continue;
+                if (value < this.base_size) continue;
 
                 // source distance
                 let sources = Game.rooms[roomName].find(FIND_SOURCES);
@@ -35,7 +34,6 @@ module.exports = {
             }
         }
 
-        console.log('Base center calculation:', Game.cpu.getUsed() - start);
         return {pos: bestPos, points: bestValue};
     },
 

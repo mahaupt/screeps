@@ -51,8 +51,8 @@ module.exports =  {
             if (room.memory.stats.energy_1k_dx > 1000 && elevel >= 0.15 || 
                 elevel >= 0.95) {
                 room.memory.stats.builders_needed += 1;
-                if (room.memory.stats.builders_needed > 6) {
-                    room.memory.stats.builders_needed = 6;
+                if (room.memory.stats.builders_needed > moduleSpawn.max_builders) {
+                    room.memory.stats.builders_needed = moduleSpawn.max_builders;
                 } else {
                     console.log(room.name + ": incr number of builders");
                 }
@@ -101,7 +101,7 @@ module.exports =  {
         
         room.memory.stats.transports = volume;
         
-        if (Game.time % 1000 == 9) {
+        if (Game.time % 1000 == 10) {
             if (!room.memory.stats.transports_1k_30) {
                 room.memory.stats.transports_1k = volume;
                 room.memory.stats.transports_1k_30 = volume;
@@ -115,7 +115,7 @@ module.exports =  {
             //calc haulers
             let carryPartPerHauler = baseCreep.buildBody('hauler', room.energyCapacityAvailable).filter((s) => s == CARRY).length;
             var haulerNeeded = Math.round(room.memory.stats.transports_1k_30 / (carryPartPerHauler*50));
-            haulerNeeded = Math.max(Math.min(haulerNeeded, 5), 1);
+            haulerNeeded = Math.max(Math.min(haulerNeeded, moduleSpawn.max_haulers), 1);
             
             if (room.memory.stats.haulers_needed < haulerNeeded) {
                 room.memory.stats.haulers_needed++;
