@@ -78,6 +78,12 @@ module.exports = {
 			// no task, idle
 			// walk out of the way
 			// renew?
+			let center = Autobuilder.getBaseCenterPoint(creep.room);
+			let idleSpot = new RoomPosition(center.x - 2, center.y + 5, creep.room.name);
+			if (!creep.pos.inRangeTo(idleSpot, 1)) {
+				baseCreep.moveTo(creep, idleSpot, {range: 1});
+			}
+			creep.say("😴");
 		}
 	}, 
 	

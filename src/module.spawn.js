@@ -48,6 +48,8 @@ module.exports = {
             }
         }
 
+        room.memory.stats.builders_needed = room.memory.stats.add_creeps+1;
+
         if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || 3)) {
             this.spawn(room, "hauler");
         } else if (
@@ -57,7 +59,7 @@ module.exports = {
             this.spawn(room, "miner");
         } else if (upgraderCount < 1) {
             this.spawn(room, "upgrader");
-        } else if (builderCount < (1 + (room.memory.stats.add_creeps || 2))) {
+        } else if (builderCount < (room.memory.stats.builders_needed || 8)) {
             this.spawn(room, "builder");
         }
     },

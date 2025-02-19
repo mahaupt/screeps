@@ -355,13 +355,13 @@ module.exports = {
     
     buildRoads: function(room)
     {
-        var container = room.find(FIND_STRUCTURES, {
+        var targets = room.find(FIND_STRUCTURES, {
             filter: (s) => { 
                 return s.structureType == STRUCTURE_CONTAINER || 
-                    s.structureType == STRUCTURE_EXTRACTOR; 
+                    s.structureType == STRUCTURE_CONTROLLER; 
             }
         });
-        var targets = container.concat([room.controller]);
+
         if (targets.length > 0)
         {
             var centerPos = this.getBaseCenterPoint(room);
@@ -374,17 +374,19 @@ module.exports = {
                 
                 //bugfix, dont build road on controller
                 //it strangely needs 25k to complete
-                if (!(t instanceof StructureContainer)) {
+                if (t instanceof StructureController) {
                     path.pop();
                 }
                 
-                for (var i=0; i < path.length && builtRoads < 5; i++)
+                // build whole path
+                for (var i=0; i < path.length; i++)
                 {
                     if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
                     {
                         builtRoads++;
                     }
                 }
+
                 //console.log(builtRoads);
                 if (builtRoads > 0) break;	
             }

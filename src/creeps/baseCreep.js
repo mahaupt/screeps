@@ -334,7 +334,7 @@ module.exports = {
 
         if (cap > 800 && ratio <= 0.05) {
             creep.say("😴");
-            this.moveTo(creep, creep.room.controller);
+            this.moveTo(creep, creep.room.controller, {range: 4});
             return true;
         }
         return false;

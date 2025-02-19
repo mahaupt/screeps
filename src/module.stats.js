@@ -35,7 +35,7 @@ module.exports =  {
         if (Game.time % 1000 == 9) {
             if (!room.memory.stats.energy_1k) {
                 room.memory.stats.energy_1k = energy;
-                room.memory.stats.add_creeps = 2; // more builders in beginning
+                room.memory.stats.builders_needed = 6; // more builders in beginning
             }
             
             room.memory.stats.energy_1k_dx = room.memory.stats.energy - room.memory.stats.energy_1k;
@@ -50,9 +50,9 @@ module.exports =  {
             //add builders
             if (room.memory.stats.energy_1k_dx > 1000 && elevel >= 0.15 || 
                 elevel >= 0.95) {
-                room.memory.stats.add_creeps += 1;
-                if (room.memory.stats.add_creeps > 5) {
-                    room.memory.stats.add_creeps = 5;
+                room.memory.stats.builders_needed += 1;
+                if (room.memory.stats.builders_needed > 6) {
+                    room.memory.stats.builders_needed = 6;
                 } else {
                     console.log(room.name + ": incr number of builders");
                 }
@@ -62,9 +62,9 @@ module.exports =  {
             if (room.memory.stats.energy_1k_dx < 0 && elevel <= 0.15 ||
                 elevel <= 0.05)
             {
-                room.memory.stats.add_creeps -= 1;
-                if (room.memory.stats.add_creeps < 0) {
-                    room.memory.stats.add_creeps = 0;
+                room.memory.stats.builders_needed -= 1;
+                if (room.memory.stats.builders_needed < 1) {
+                    room.memory.stats.builders_needed = 1;
                 } else {
                     //remove one builder
                     console.log(room.name + ": decr number of builders");
