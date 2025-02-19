@@ -148,7 +148,7 @@ module.exports = {
 
         if (role == "miner") {
             let bodySize = Math.floor((energy_avbl-50)/250);
-            bodySize = Math.min(bodySize, 5);
+            bodySize = Math.min(bodySize, 4);
             ncarry = 1;
             nwork = bodySize*2;
             nmove = bodySize;

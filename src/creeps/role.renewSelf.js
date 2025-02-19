@@ -69,7 +69,7 @@ module.exports = {
 		        } else if (ret == ERR_FULL)
 				{
 					//renew successful
-					creep.memory.renewSelf = false;
+					delete creep.memory.renewSelf;
 				}
 				creep.say("❤");
 	        }
@@ -82,7 +82,7 @@ module.exports = {
         {
 	        if (creep.store[RESOURCE_ENERGY] == 0 && creep.room.energyAvailable < 10)
 	        {
-		        creep.memory.renewSelf = false;
+		        delete creep.memory.renewSelf;
 	        }
         }
 	}, 

@@ -22,7 +22,7 @@ module.exports = {
             creep.memory.replacementSpawned = true;
             // count room haulers
 			let home = Game.rooms[creep.memory.home];
-			let haulerCount = _.filter(Game.creeps, (c) => c.memory.role == 'hauler' && c.room.memory.home == home.name).length;
+			let haulerCount = _.filter(Game.creeps, (c) => c.memory.role == 'hauler' && c.memory.home == home.name).length;
 			if (home.memory.stats.haulers_needed >= haulerCount) {
 				moduleSpawn.addSpawnList(home, 'hauler', {}, true);
 			}

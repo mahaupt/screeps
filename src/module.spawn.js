@@ -1,14 +1,10 @@
 module.exports = {
-    run: function (spawn) {
-        if (spawn.spawning) return;
-        this.memCleanup();
-        var room = spawn.room;
-
+    run: function (room) {
         // first, spawn from spawn list
         // soldiers, replacement creeps
         if (room.memory.spawnList && room.memory.spawnList.length > 0) {
             var ret = this.spawn(
-                spawn,
+                room,
                 room.memory.spawnList[0].role,
                 room.memory.spawnList[0].mem || {},
             );
@@ -17,6 +13,10 @@ module.exports = {
                 return;
             }
         }
+
+        // save cpu
+        if (Game.time % 10 !== 0) return;
+        this.memCleanup();
 
         // then, spawn room creeps
         var roomCreeps = room.find(FIND_MY_CREEPS);
@@ -42,52 +42,80 @@ module.exports = {
 
         // multiple miners per node if small miners (less than 10 body parts = 800 energy)
         var minerMultiplyer = 1;
-        if (spawn.room.controller.level <= 3) {
-            if (spawn.room.energyCapacityAvailable < 800) {
+        if (room.controller.level <= 3) {
+            if (room.energyCapacityAvailable < 800) {
                 minerMultiplyer = 2;
             }
         }
 
         if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || 3)) {
-            this.spawn(spawn, "hauler");
+            this.spawn(room, "hauler");
         } else if (
             minerCount < sourceCount * minerMultiplyer + extractor_count &&
-            !spawn.room.memory.attacked
+            !room.memory.attacked
         ) {
-            this.spawn(spawn, "miner");
+            this.spawn(room, "miner");
         } else if (upgraderCount < 1) {
-            this.spawn(spawn, "upgrader");
-        } else if (builderCount < (1 + (room.memory.stats.add_creeps || 0))) {
-            this.spawn(spawn, "builder");
+            this.spawn(room, "upgrader");
+        } else if (builderCount < (1 + (room.memory.stats.add_creeps || 2))) {
+            this.spawn(room, "builder");
         }
     },
 
-    spawn: function (spawn, role, memory = {}) {
+    spawn: function (room, role, memory = {}) {
         let data = { memory: { ...{ role: role }, ...memory } };
 
-        var roomCreeps = spawn.room.find(FIND_MY_CREEPS);
+        var roomCreeps = room.find(FIND_MY_CREEPS);
         var counts = _.countBy(roomCreeps, "memory.role");
         var minerCount = counts.miner || 0;
         var haulerCount = counts.hauler || 0;
 
         //try to spawn creeps with full body parts
         //unless colony has to recover (miner or hauler missing, or energy level low)
-        var avbl_energy = spawn.room.energyAvailable;
+        var avbl_energy = room.energyAvailable;
         var energy_ratio =
-            spawn.room.memory.stats.energy / spawn.room.memory.stats.capacity;
+            room.memory.stats.energy / room.memory.stats.capacity;
         if (minerCount > 0 && haulerCount > 0 && energy_ratio >= 0.05) {
-            avbl_energy = spawn.room.energyCapacityAvailable;
+            avbl_energy = room.energyCapacityAvailable;
         }
 
+        // build creep
         let body = baseCreep.buildBody(role, avbl_energy);
-        let name = baseCreep.getName(spawn.room, role);
-        var ret = spawn.spawnCreep(body, name, data);
+        let name = baseCreep.getName(room, role);
+
+        // find free spawn and spawn
+        let spawn = this.getFreeSpawn(room);
+        if (!spawn) return false;
+        let ret = spawn.spawnCreep(body, name, data);
 
         if (ret == OK) {
             return true;
         } else {
             return false;
         }
+    },
+
+    getFreeSpawn: function(room) {
+        var spawns = room.find(FIND_MY_SPAWNS, {
+            filter: (spawn) => {
+                return spawn.spawning == null;
+            },
+        });
+
+        // check if no renewing creep is nearby
+        for(let spawn of spawns) {
+            let renewCreeps = spawn.pos.findInRange(FIND_MY_CREEPS, 1, {
+                filter: (creep) => {
+                    return creep.memory.renewSelf;
+                }
+            });
+            // if no renewing creeps, return this spawn
+            if (renewCreeps.length == 0) {
+                return spawn;
+            }
+        }
+
+        return false;
     },
 
     addSpawnList: function (room, role, memory = {}, priority = false) {

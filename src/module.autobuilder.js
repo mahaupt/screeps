@@ -8,15 +8,11 @@ module.exports = {
 	    //SPAWN
 	    var spawn_num = this.getTotalStructures(room, STRUCTURE_SPAWN);
         var spawn_built = this.getTotalStructures(room, STRUCTURE_SPAWN, true);
-	    var spawn_max = 1;
+	    var spawn_max = CONTROLLER_STRUCTURES[STRUCTURE_SPAWN][room.controller.level];
         if (spawn_num < spawn_max) {
-            var cpoint = this.getBaseCenterPoint(room);
-            if (cpoint) 
-            {
-                //center point avbl for build
-                this.buildAroundCenter(room, STRUCTURE_SPAWN, true);
+            if (this.buildAroundCenter(room, STRUCTURE_SPAWN, true)) {
+                constr_sites_num++;
             }
-            return;
         }
         
         //no spawn - abort autobuild
@@ -323,9 +319,16 @@ module.exports = {
         }
         
         //take calculated base pos
-        var cbpos = Intel.getPotClaimCenterPos(room.name);
+        let cbpos = Intel.getPotClaimCenterPos(room.name);
         if (cbpos) {
             room.memory.center = {x: cbpos.x, y: cbpos.y};
+            return true;
+        }
+
+        // calculate base pos ad hoc
+        cbpos = BasePlanner.getBaseCenter(room.name)
+        if (cbpos.pos) {
+            room.memory.center = {x: cbpos.pos.x, y: cbpos.pos.y};
             return true;
         }
         

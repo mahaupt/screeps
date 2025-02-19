@@ -80,6 +80,7 @@ module.exports.loop = moduleMemory.wrapper(() => {
             if (!room.controller || !room.controller.my) continue;
 
             moduleStats.run(room);
+            moduleSpawn.run(room);
             
             if (Game.time % 100 == i++)
                 Autobuilder.run(room);
@@ -90,14 +91,6 @@ module.exports.loop = moduleMemory.wrapper(() => {
             Labs.run(room);
             moduleDefense.run(room);
             moduleLogistics.run(room);
-        }
-
-        //MODULES per Spawn
-        for (var sname in Game.spawns)
-        {
-            var spawn = Game.spawns[sname];
-            if (Game.time % 10 == 0)
-                moduleSpawn.run(spawn);
         }
         
         //OPS

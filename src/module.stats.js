@@ -35,7 +35,7 @@ module.exports =  {
         if (Game.time % 1000 == 9) {
             if (!room.memory.stats.energy_1k) {
                 room.memory.stats.energy_1k = energy;
-                room.memory.stats.add_creeps = 1;
+                room.memory.stats.add_creeps = 2; // more builders in beginning
             }
             
             room.memory.stats.energy_1k_dx = room.memory.stats.energy - room.memory.stats.energy_1k;
