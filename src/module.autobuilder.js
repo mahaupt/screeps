@@ -42,8 +42,8 @@ module.exports = {
 		
 		//CONTAINERS
 		var containers_num = this.getTotalStructures(room, STRUCTURE_CONTAINER);
-		var source_num = room.find(FIND_SOURCES).length;
-        var mineral_num = room.find(FIND_MINERALS).length;
+		var source_num = room.sources.length;
+        var mineral_num = room.mineral?1:0;
 	    var containers_max = 5;
         
 	    if (containers_num < containers_max && extensions_num >= 4 && constr_sites_num < 2)
@@ -56,7 +56,7 @@ module.exports = {
 			    if (this.buildAroundCenter(room, STRUCTURE_CONTAINER, false)) {
                     constr_sites_num++;
                 }
-		    } else if (room.controller.level >= 6 && mineral_num >= 1) {
+		    } else if (room.controller.level >= 6 && room.mineral) {
                 //build container at 
                 if (this.buildMiningStructure(room, STRUCTURE_CONTAINER, 0)) {
                     constr_sites_num++;
@@ -104,9 +104,8 @@ module.exports = {
         var extractor_max = CONTROLLER_STRUCTURES[STRUCTURE_EXTRACTOR][room.controller.level];
         if (extractor_num < extractor_max && constr_sites_num < 2) 
         {
-            var minerals = room.find(FIND_MINERALS);
-            if (minerals.length > 0) {
-                if (room.createConstructionSite(minerals[0].pos, STRUCTURE_EXTRACTOR) == OK)
+            if (room.mineral) {
+                if (room.createConstructionSite(room.mineral.pos, STRUCTURE_EXTRACTOR) == OK)
                 {
                     constr_sites_num++;
                 }
@@ -151,9 +150,9 @@ module.exports = {
         var validPositions = [];
         
         //first - pick valid build positions
-	    var sources = room.find(FIND_SOURCES);
+	    var sources = room.sources;
         if (room.controller.level >= 6 && type != STRUCTURE_LINK) {
-            sources = sources.concat(room.find(FIND_MINERALS));
+            sources = sources.concat([room.mineral]);
         }
         
 	    for (var s of sources)

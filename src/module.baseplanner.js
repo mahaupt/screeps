@@ -1,7 +1,6 @@
-module.exports = {
-    base_size: 7,
-
-    getBaseCenter: function(roomName) {
+const BASE_SIZE = 7;
+class BasePlanner {
+    getBaseCenter(roomName) {
         let distanceTransform = this.distanceTransform(roomName);
         let center = new RoomPosition(25, 25, roomName);
         let bestPos = undefined;
@@ -10,10 +9,10 @@ module.exports = {
         for (let x = 0; x < 50; ++x) {
             for (let y = 0; y < 50; ++y) {
                 let value = distanceTransform.get(x, y);
-                if (value < this.base_size) continue;
+                if (value < BASE_SIZE) continue;
 
                 // source distance
-                let sources = Game.rooms[roomName].find(FIND_SOURCES);
+                let sources = Game.rooms[roomName].sources;
                 let sdistance = 0
                 for (let source of sources) {
                     sdistance += source.pos.getRangeTo(x, y);
@@ -35,9 +34,9 @@ module.exports = {
         }
 
         return {pos: bestPos, points: bestValue};
-    },
+    }
 
-    distanceTransform: function(roomName) {
+    distanceTransform(roomName) {
         let terrain = Game.map.getRoomTerrain(roomName);
         let topDownPass = new PathFinder.CostMatrix();
         for (let y = 0; y < 50; ++y) {
@@ -64,4 +63,6 @@ module.exports = {
         
         return topDownPass;
     }
-};
+}
+
+module.exports = new BasePlanner();

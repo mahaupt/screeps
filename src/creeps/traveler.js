@@ -95,6 +95,11 @@ class Traveler {
             if (state.cpu > REPORT_CPU_THRESHOLD) {
                 // see note at end of file for more info on this
                 console.log(`TRAVELER: heavy cpu use: ${creep.name}, cpu: ${state.cpu} origin: ${creep.pos}, dest: ${destination}`);
+                // mark room as blocked
+                if (creep.room.controller && !creep.room.controller.my) {
+                    Memory.intel.list[creep.room.name].blocked = true;
+                    Game.notify(`TRAVELER: path blocked at ${creep.room.name}`, 30);
+                }
             }
             let color = "orange";
             if (ret.incomplete) {
@@ -146,7 +151,7 @@ class Traveler {
      * @returns {RoomMemory|number}
      */
     static checkAvoid(roomName) {
-        return Memory.rooms && Memory.rooms[roomName] && Memory.rooms[roomName].avoid;
+        return Memory.intel.list[roomName] && (Memory.intel.list[roomName].avoid || Memory.intel.list[roomName].blocked);
     }
     /**
      * check if a position is an exit
@@ -195,10 +200,10 @@ class Traveler {
         }
         if (room.controller) {
             if (room.controller.owner && !room.controller.my) {
-                room.memory.avoid = 1;
+                Memory.intel.list[roomName].avoid = true;
             }
             else {
-                delete room.memory.avoid;
+                delete Memory.intel.list[roomName].avoid;
             }
         }
     }
@@ -500,35 +505,6 @@ class Traveler {
             return;
         }
         return new RoomPosition(x, y, origin.roomName);
-    }
-    /**
-     * convert room avoidance memory from the old pattern to the one currently used
-     * @param cleanup
-     */
-    static patchMemory(cleanup = false) {
-        if (!Memory.empire) {
-            return;
-        }
-        if (!Memory.empire.hostileRooms) {
-            return;
-        }
-        let count = 0;
-        for (let roomName in Memory.empire.hostileRooms) {
-            if (Memory.empire.hostileRooms[roomName]) {
-                if (!Memory.rooms[roomName]) {
-                    Memory.rooms[roomName] = {};
-                }
-                Memory.rooms[roomName].avoid = 1;
-                count++;
-            }
-            if (cleanup) {
-                delete Memory.empire.hostileRooms[roomName];
-            }
-        }
-        if (cleanup) {
-            delete Memory.empire.hostileRooms;
-        }
-        console.log(`TRAVELER: room avoidance data patched for ${count} rooms`);
     }
     static deserializeState(travelData, destination) {
         let state = {};

@@ -1,3 +1,5 @@
+require('prototypes_room');
+
 global.Traveler = require('creeps_traveler');
 global.baseCreep = require('creeps_baseCreep');
 global.baseGroup = require('creeps_baseGroup');

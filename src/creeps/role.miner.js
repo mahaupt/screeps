@@ -195,7 +195,7 @@ module.exports = {
     }, 
     
 	pickOwnSource: function(creep) {
-		var sources = creep.room.find(FIND_SOURCES);
+		var sources = creep.room.sources;
         
         //also add minerals if extractors present
         if (
@@ -204,7 +204,7 @@ module.exports = {
                 {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR}
             ).length > 0) 
         {
-            sources = sources.concat(creep.room.find(FIND_MINERALS));
+            sources = sources.concat([creep.room.mineral]);
         }
 		
 		//find new unoccupied source

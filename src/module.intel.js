@@ -43,7 +43,6 @@ module.exports = {
         
         var creeps = room.find(FIND_HOSTILE_CREEPS);
         var struct = room.find(FIND_HOSTILE_STRUCTURES);
-        var minerals = room.find(FIND_MINERALS);
         var deposits = room.find(FIND_DEPOSITS);
         var source_keeper = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_KEEPER_LAIR});
         var invaderCores = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_INVADER_CORE});
@@ -52,13 +51,13 @@ module.exports = {
         var intel = {};
         intel.name = room.name;
         intel.time = Game.time;
-        intel.sources = room.find(FIND_SOURCES).length;
+        intel.sources = room.sources.length;
         intel.minerals = null;
-        if (minerals.length > 0) {
-            intel.minerals = minerals[0].mineralType;
-            intel.minerals_amt = minerals[0].mineralAmount;
+        if (room.mineral) {
+            intel.minerals = room.mineral.mineralType;
+            intel.minerals_amt = room.mineral.mineralAmount;
             
-            var extractors = minerals[0].pos.findInRange(
+            var extractors = room.mineral.pos.findInRange(
                 FIND_STRUCTURES, 
                 0, 
                 {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR }

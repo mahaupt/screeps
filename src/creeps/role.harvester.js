@@ -142,13 +142,12 @@ module.exports = {
                 }
             }
             
-            var minerals = creep.room.find(FIND_MINERALS);
-            if (minerals.length > 0 && minerals[0].mineralAmount > 2000) {
-                var extractor = minerals[0].pos.findInRange(FIND_STRUCTURES, 0, {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR });
+            if (creep.room.mineral && creep.room.mineral.mineralAmount > 2000) {
+                var extractor = creep.room.mineral.pos.findInRange(FIND_STRUCTURES, 0, {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR });
                 
                 if (extractor.length > 0) {
-                    if (_.findIndex(colleagues, (s) => s.source == minerals[0].id) < 0) {
-                        creep.memory.source = minerals[0].id;
+                    if (_.findIndex(colleagues, (s) => s.source == creep.room.mineral.id) < 0) {
+                        creep.memory.source = creep.room.mineral.id;
                         creep.memory.source_type = 'mineral';
                         return;
                     }
@@ -156,7 +155,7 @@ module.exports = {
             }
         }
         
-        var sources = creep.room.find(FIND_SOURCES);
+        var sources = creep.room.sources;
         for (var src of sources) {
             if (_.findIndex(colleagues, (s) => s.source == src.id) < 0) {
                 creep.memory.source = src.id;
