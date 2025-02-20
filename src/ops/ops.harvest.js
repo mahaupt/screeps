@@ -48,8 +48,8 @@ module.exports = {
         }
         
         // PATH DISTANCE
-        var path = Game.map.findRoute(ops.source, ops.target, {routeCallback: baseCreep.roomCostCallback});
-        if (path == ERR_NO_PATH || path.length > 15) {
+        var path = Traveler.findRoute(ops.source, ops.target);
+        if (!_.isArray(ret) || path.length > 15) {
             console.log("Ops.Harvest: Path too long from " + ops.source + " to " + ops.target + ": Abort!");
             ops.finished = true;
             return;
