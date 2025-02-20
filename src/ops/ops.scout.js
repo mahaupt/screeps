@@ -38,7 +38,7 @@ module.exports = {
         
         
         //get room path and look for hostiles
-        var path = Traveler.findRoute(ops.source, ops.target);
+        var path = Game.map.findRoute(ops.source, ops.target);
         if (!_.isArray(ret) || path.length >= 20) 
         {
             ops.finished = true;

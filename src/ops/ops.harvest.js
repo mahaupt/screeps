@@ -48,7 +48,7 @@ module.exports = {
         }
         
         // PATH DISTANCE
-        var path = Traveler.findRoute(ops.source, ops.target);
+        var path = Game.map.findRoute(ops.source, ops.target);
         if (!_.isArray(ret) || path.length > 15) {
             console.log("Ops.Harvest: Path too long from " + ops.source + " to " + ops.target + ": Abort!");
             ops.finished = true;
