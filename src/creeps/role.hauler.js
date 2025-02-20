@@ -21,10 +21,9 @@ module.exports = {
         if (creep.memory.killSelf && !creep.memory.replacementSpawned && creep.ticksToLive <= 300) {
             creep.memory.replacementSpawned = true;
             // count room haulers
-			let home = Game.rooms[creep.memory.home];
 			let haulerCount = _.filter(Game.creeps, (c) => c.memory.role == 'hauler' && c.memory.home == home.name).length;
-			if (home.memory.stats.haulers_needed >= haulerCount) {
-				moduleSpawn.addSpawnList(home, 'hauler', {}, true);
+			if (creep.home.memory.stats.haulers_needed >= haulerCount) {
+				moduleSpawn.addSpawnList(creep.home, 'hauler', {}, true);
 			}
         }
 		
@@ -44,7 +43,7 @@ module.exports = {
             creep.memory.pickup = true;
 			
 			//pick new task
-			creep.memory.tasks = Logistics.getNewTasks(creep.room, creep.store.getCapacity());
+			creep.memory.tasks = Logistics.getNewTasks(creep.home, creep.store.getCapacity());
 			creep.memory.task_ptr = 0;
         }
 		
@@ -52,7 +51,7 @@ module.exports = {
 		if (creep.memory.tasks.length > 0) 
 		{
 			var taskmem = creep.memory.tasks[creep.memory.task_ptr];
-			var task = Logistics.getTask(creep.room, taskmem.id);
+			var task = Logistics.getTask(creep.home, taskmem.id);
 			
 			if (!task) {
 				this.removeTask(creep, taskmem.id);
@@ -78,8 +77,9 @@ module.exports = {
 			// no task, idle
 			// walk out of the way
 			// renew?
-			let center = Autobuilder.getBaseCenterPoint(creep.room);
-			let idleSpot = new RoomPosition(center.x - 2, center.y + 5, creep.room.name);
+			let idleSpot = Autobuilder.getBaseCenterPoint(creep.home);
+			idleSpot.x -= 2;
+			idleSpot.y += 5;
 			if (!creep.pos.inRangeTo(idleSpot, 1)) {
 				baseCreep.moveTo(creep, idleSpot, {range: 1});
 			}
@@ -92,15 +92,9 @@ module.exports = {
 		//source is available check
 		var s = Game.getObjectById(task.src);
 		if (!s) { 
-			Logistics.deleteTask(creep.room, task.id);
+			Logistics.deleteTask(creep.home, task.id);
 			this.removeTask(creep, task.id);
 			return; 
-		}
-		
-		//travel to room
-		if (s.room.name != creep.room.name) {
-			baseCreep.moveToRoom(creep, s.room.name);
-			return;
 		}
 
 		// travel to source
@@ -125,7 +119,7 @@ module.exports = {
 		//successful
 		if (ret == OK) {
 			taskmem.utx += amount;
-			Logistics.markPickup(creep.room, task.id, taskmem.vol, amount);
+			Logistics.markPickup(creep.home, task.id, taskmem.vol, amount);
 			this.nextTask(creep, task);
 			this.savePickup(creep, amount, task.id);
 
@@ -145,7 +139,7 @@ module.exports = {
 					return;
 				}
 				
-				Logistics.deleteTask(creep.room, task.id);
+				Logistics.deleteTask(creep.home, task.id);
 				
 				this.removeTask(creep, task.id);
 				if (creep.memory.task_ptr >= creep.memory.tasks.length) {
@@ -168,12 +162,6 @@ module.exports = {
 		var target = Game.getObjectById(creep.memory.target);
 		if (target) 
 		{
-			//move to room
-			if (target.room.name != creep.room.name) {
-				baseCreep.moveToRoom(creep, target.room.name);
-				return;
-			}
-
 			// move to target
 			if (!creep.pos.inRangeTo(target, 1)) {
 				baseCreep.moveTo(creep, target);
@@ -197,7 +185,7 @@ module.exports = {
 			//transfer complete - search new target
 			if (ret == OK) 
 			{
-				Logistics.markDropoff(creep.room, task.id, amount);
+				Logistics.markDropoff(creep.home, task.id, amount);
 				delete creep.memory.target;
 				
 				if (task.rec != null) {
@@ -218,7 +206,7 @@ module.exports = {
 			delete creep.memory.target;
 			
 			//no free capacity - just walk to spawn and wait
-			var spawn = creep.room.find(FIND_STRUCTURES, {
+			var spawn = creep.home.find(FIND_STRUCTURES, {
 				filter: (structure) => {
 					return (structure.structureType == STRUCTURE_SPAWN);
 				}
@@ -350,7 +338,7 @@ module.exports = {
 			//all tasks not started
 			if (taskmem.vol > 0 && taskmem.utx == 0)
 			{
-				Logistics.markCancel(creep.room, taskmem.id, taskmem.vol);
+				Logistics.markCancel(creep.home, taskmem.id, taskmem.vol);
 				taskmem.vol = 0;
 			}
 		}
@@ -404,7 +392,7 @@ module.exports = {
 		if (is_amount != should_amount) {
 			//console.log(creep.room.name + " " + creep.name + ": Pickup Check detected wrong pickup");
 			var taskid = creep.memory.previous_taskid;
-			var task = Logistics.getTask(creep.room, taskid);
+			var task = Logistics.getTask(creep.home, taskid);
 			var taskmem = this.getTaskMem(creep, taskid);
 			var delta = is_amount - should_amount;
 			

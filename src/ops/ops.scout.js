@@ -39,7 +39,7 @@ module.exports = {
         
         //get room path and look for hostiles
         var path = Game.map.findRoute(ops.source, ops.target);
-        if (!_.isArray(ret) || path.length >= 20) 
+        if (!_.isArray(path) || path.length >= 20) 
         {
             ops.finished = true;
             console.log("Scout ops " + ops.source + " to " + ops.target + " aborted. No suitable path found.");

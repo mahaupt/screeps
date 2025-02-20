@@ -1,8 +1,9 @@
 /*
 Memory Layout
 .role = "miner"
+.home = creep home room name
 .harvesting = true/false
-.renewSelf = true/false
+.troom = target room name
 .source = source.id
 .container = container.id
 .link = link.id	
@@ -10,7 +11,7 @@ Memory Layout
 Priorities of dropoff
 - Link
 - Container if link full or not avbl
-- Carry to base if Container full or no hauler avbl
+- drop mining
 */
 
 module.exports = {
@@ -19,9 +20,10 @@ module.exports = {
     {    
         baseCreep.init(creep);
         
-        //go home if lost
-        if (creep.room.name != creep.memory.home) {
-            baseCreep.moveToRoom(creep, creep.memory.home);
+        //go to target room
+        let troom = creep.memory.troom || creep.memory.home;
+        if (creep.room.name != troom) {
+            baseCreep.moveToRoom(creep, troom);
             return;
         }
         
@@ -46,9 +48,6 @@ module.exports = {
 	    //switching btn harvesting and dropping
         if (!creep.memory.harvesting && creep.store.getUsedCapacity() == 0) {
             creep.memory.harvesting = true;
-            
-            delete creep.memory.selfDropoff;
-            delete creep.memory.target;
         } else 
         if (creep.memory.harvesting && creep.store.getFreeCapacity() == 0) {
             creep.memory.harvesting = false;
@@ -73,6 +72,22 @@ module.exports = {
             if (source.mineralAmount == 0 && source.ticksToRegeneration >= 3600) {
                 creep.memory.killSelf = true;
                 creep.memory.renewSelf = true;
+            }
+        }
+
+        // if source depleted, repair container
+        if (source instanceof Source) {
+            if (source.energy == 0) {
+                if (container) {
+                    if (container.hits < container.hitsMax) {
+                        if (creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0) {
+                            creep.withdraw(container, RESOURCE_ENERGY, 48);
+                        } else {
+                            creep.repair(container);
+                        }
+                        return;
+                    }
+                }
             }
         }
         
@@ -119,15 +134,14 @@ module.exports = {
             creep.transfer(container, res_types[0]);
             
             if (!link) {
-                this.addContainerTransportTask(container);
+                this.addContainerTransportTask(creep, container);
             }
         }
 
-        // no link or container - drop
-        if (!link && !container) {
+        // ONLY AT HOME: no link or container - drop
+        if (creep.isAtHome && !link && !container) {
             let res_types = baseCreep.getStoredResourceTypes(creep.store);
             creep.drop(res_types[0]);
-            // TODO: update logistics task
         }
     }, 
     
@@ -147,8 +161,7 @@ module.exports = {
         }
         
         
-        if (container)
-        {
+        if (container) {
             if (container.store.getFreeCapacity() > 0) {
                 var res_types = baseCreep.getStoredResourceTypes(creep.store);
                 if (creep.transfer(container, res_types[0])== ERR_NOT_IN_RANGE)
@@ -156,10 +169,38 @@ module.exports = {
                     baseCreep.moveTo(creep, container, {range: 1});
                 }
                 if (!link) {
-                    this.addContainerTransportTask(container);
+                    this.addContainerTransportTask(creep, container);
                 }
                 return;
             } 
+        }
+
+        // Remote mining, build container
+        if (!creep.isAtHome && !container) {
+            // get construction site
+            var sites = source.pos.findInRange(FIND_CONSTRUCTION_SITES, 1, {
+                filter: (s) => s.structureType == STRUCTURE_CONTAINER
+            });
+            if (sites.length == 0) {
+                //check if creep is next to source
+                if (creep.pos.inRangeTo(source, 1)) {
+                    //build container
+                    creep.room.createConstructionSite(creep.pos, STRUCTURE_CONTAINER);
+                } else {
+                    //move to source
+                    baseCreep.moveTo(creep, source, {range: 1});
+                }
+            } else {
+                if (creep.build(sites[0]) == ERR_NOT_IN_RANGE) {
+                    baseCreep.moveTo(creep, sites[0], {range: 1});
+                }
+
+                // pickup dropped energy
+                var dropped = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
+                if (dropped.length > 0) {
+                    creep.pickup(dropped[0]);
+                }
+            }
         }
     }, 
     
@@ -350,7 +391,7 @@ module.exports = {
         }
     },
     
-    addContainerTransportTask: function(container)
+    addContainerTransportTask: function(creep, container)
     {
         var res_types = baseCreep.getStoredResourceTypes(container.store);
         res_types = _.sortBy(res_types, (r) => -container.store.getUsedCapacity(r));
@@ -358,7 +399,7 @@ module.exports = {
             container.store.getUsedCapacity(res_types[0]) >= 200) 
         {
             Logistics.addTransportTask(
-                container.room, 
+                creep.home, 
                 container.id, 
                 null, 
                 container.store.getUsedCapacity(res_types[0]), 
@@ -371,15 +412,16 @@ module.exports = {
     replaceSelf: function(creep)
     {
         // get all creeps that have same source (self is excluded)
-        var creeps = _.filter(Game.creeps, (c) => c.memory.source == creep.memory.source && !c.memory.replacementSpawned);
+        var creeps = _.filter(Memory.creeps, (c) => c.source == creep.memory.source && !c.replacementSpawned);
         if (creeps.length >= 1 && creep.body.length >= 10) return; // there is already another miner
         moduleSpawn.addSpawnList(
-            creep.room, 
+            creep.home, 
             "miner", 
             {
                 source: creep.memory.source, 
                 container: creep.memory.container, 
-                link: creep.memory.link
+                link: creep.memory.link,
+                troom: creep.memory.troom || undefined
             }
         );
     }

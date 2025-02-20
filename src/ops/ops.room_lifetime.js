@@ -12,7 +12,7 @@ module.exports = {
         if (Ops.checkSrcRoomAvbl(ops)) return;
         
         //AUTO SCOUT
-        Ops.new("scout_vicinity", ops.source, "");
+        //Ops.new("scout_vicinity", ops.source, "");
         
         //AUTO CLAIM NEW ROOMS
         //this.autoClaim(ops);

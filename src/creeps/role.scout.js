@@ -2,7 +2,7 @@
 Memory Layout
 .role = "scout"
 .renewSelf = true/false
-.troom = room.name
+.troom = target room name
 .home = creep home room name
 */
 
@@ -17,7 +17,7 @@ module.exports =  {
         {
             this.pickTarget(creep);
             
-            if (creep.room.name != creep.memory.home) {
+            if (!creep.isAtHome) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             }
             else 

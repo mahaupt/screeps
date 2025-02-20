@@ -367,7 +367,7 @@ module.exports = {
     // return false if not ready yet
     prepareCreep: function (creep) {
         //creep is not home - reset prepare
-        if (creep.room.name != creep.memory.home) {
+        if (!creep.isAtHome) {
             creep.memory.embark = true;
             return false;
         }

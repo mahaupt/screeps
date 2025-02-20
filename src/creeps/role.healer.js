@@ -15,7 +15,7 @@ module.exports = {
         
         if (!creep.memory.target) {
             this.healSelf(creep);
-            if (creep.memory.home != creep.room.name) {
+            if (!creep.isAtHome) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
                 creep.say("😴");

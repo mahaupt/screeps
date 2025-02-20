@@ -49,14 +49,14 @@ module.exports = {
         
         // PATH DISTANCE
         var path = Game.map.findRoute(ops.source, ops.target);
-        if (!_.isArray(ret) || path.length > 15) {
+        if (!_.isArray(path) || path.length > 15) {
             console.log("Ops.Harvest: Path too long from " + ops.source + " to " + ops.target + ": Abort!");
             ops.finished = true;
             return;
         }
         
         // EXISTING HARVESTER
-        var roomhvstr = _.filter(Memory.creeps, (s) => s.role == "harvester" && s.troom == ops.target);
+        var roomhvstr = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
         
         // DEPOSITS AND MINERALS ONLY ON >LVL 6 SOURCE ROOMS
         if (Game.rooms[ops.source].controller.level >= 6) {
@@ -83,10 +83,10 @@ module.exports = {
         
         // Pick Source
         if (intel.sources > 0 && path.length <= 1) {
-            let h = _.findIndex(roomhvstr, (s) => s.source_type == 'source' );
-            if (h < 0) {
-                //spawn harvester
-                moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
+            let h = roomhvstr.length;
+            if (h < intel.sources) {
+                //spawn miner
+                moduleSpawn.addSpawnList(Game.rooms[ops.source], "miner", {troom: ops.target});
                 return;
             }
         }

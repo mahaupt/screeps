@@ -36,7 +36,7 @@ module.exports = {
         
         //go home and offload
         if (!creep.memory.harvesting) {
-            if (creep.room.name != creep.memory.home) {
+            if (!creep.isAtHome) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             } else {
                 var target = creep.room.storage;
@@ -130,9 +130,8 @@ module.exports = {
             Memory.creeps, 
             (s) => s.role == 'harvester' && s.troom == creep.room.name
         );
-        var homeroom = Game.rooms[creep.memory.home];
         
-        if (homeroom.controller.level >= 6) {
+        if (creep.home.controller.level >= 6) {
             var deposits = creep.room.find(FIND_DEPOSITS);
             if (deposits.length > 0 && deposits[0].lastCooldown < 10) {
                 if (_.findIndex(colleagues, (s) => s.source == deposits[0].id) < 0) {

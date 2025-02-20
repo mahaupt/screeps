@@ -1,4 +1,5 @@
 require('prototypes_room');
+require('prototypes_creep');
 
 global.Traveler = require('creeps_traveler');
 global.baseCreep = require('creeps_baseCreep');

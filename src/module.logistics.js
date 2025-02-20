@@ -294,7 +294,7 @@ module.exports = {
             
             //s and mc always try to make full
             if (task.type == "mc" || task.type == "s") {
-                task_add = 1000;
+                task_add = 10000; // always take maximum amount
             }
             var amount = Math.min(capacity, task.vol-task.acc-task.utx+task_add);
             amount = Math.max(amount, 0);

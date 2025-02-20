@@ -15,7 +15,7 @@ module.exports = {
         baseCreep.init(creep);
         
         //go home if lost
-        if (creep.room.name != creep.memory.home) {
+        if (!creep.isAtHome) {
             baseCreep.moveToRoom(creep, creep.memory.home);
             return;
         }

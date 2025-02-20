@@ -26,7 +26,7 @@ module.exports = {
         //no target room - go home
         if (!creep.memory.troom) 
         {
-            if (creep.room.name != creep.memory.home) {
+            if (!creep.isAtHome) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
             }
             else 
