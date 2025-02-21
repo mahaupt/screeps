@@ -21,7 +21,7 @@ module.exports = {
         if (creep.memory.killSelf && !creep.memory.replacementSpawned && creep.ticksToLive <= 300) {
             creep.memory.replacementSpawned = true;
             // count room haulers
-			let haulerCount = _.filter(Game.creeps, (c) => c.memory.role == 'hauler' && c.memory.home == home.name).length;
+			let haulerCount = _.filter(Game.creeps, (c) => c.memory.role == 'hauler' && c.memory.home == creep.home.name).length;
 			if (creep.home.memory.stats.haulers_needed >= haulerCount) {
 				moduleSpawn.addSpawnList(creep.home, 'hauler', {}, true);
 			}
