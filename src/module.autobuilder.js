@@ -196,6 +196,9 @@ module.exports = {
         validPositions = _.sortBy(validPositions, s => -s.dist);
         if (validPositions.length > 0) {
             if (room.createConstructionSite(validPositions[0].pos, type) == OK) {
+                if (type == STRUCTURE_LINK) {
+                    this.removeRoads(room, validPositions[0].pos);
+                }
                 return true;
             }
         }
@@ -369,24 +372,7 @@ module.exports = {
             //roads from spawn to Structures
             for (var t of targets)
             {
-                var path = centerPos.findPathTo(t.pos, {ignoreCreeps: true});
-                
-                //bugfix, dont build road on controller
-                //it strangely needs 25k to complete
-                if (t instanceof StructureController) {
-                    path.pop();
-                }
-                
-                // build whole path
-                for (var i=0; i < path.length; i++)
-                {
-                    if (room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD) == OK)
-                    {
-                        builtRoads++;
-                    }
-                }
-
-                //console.log(builtRoads);
+                builtRoads += RoadPlanner.buildRoad(centerPos, t.pos);
                 if (builtRoads > 0) break;	
             }
             

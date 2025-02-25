@@ -29,7 +29,7 @@ module.exports = {
         var haulerCount = counts.hauler || 0;
 
         var sourceCount = room.sources.length;
-        var mineralCount = (room.mineral.mineralAmount > 0 || room.mineral.ticksToRegeneration <= 50) ? 1 : 0;
+        var mineralCount = (room.mineral && (room.mineral.mineralAmount > 0 || room.mineral.ticksToRegeneration <= 50)) ? 1 : 0;
         var extractor_count = room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_EXTRACTOR;

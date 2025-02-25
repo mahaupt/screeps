@@ -13,6 +13,7 @@ global.Logistics = global.moduleLogistics;
 global.Intel = require('module.intel');
 global.Autobuilder = require('module.autobuilder');
 global.BasePlanner = require('module.baseplanner');
+global.RoadPlanner = require('module.roadplanner');
 
 var roleMiner = require('creeps_role.miner');
 var roleHarvester = require('creeps_role.harvester');
