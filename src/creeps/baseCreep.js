@@ -322,24 +322,6 @@ module.exports = {
         return false;
     },
 
-    skipDueEnergyLevels: function (creep) {
-        //no skipping if room is attacked
-        if (creep.room.memory.attacked_time + 30 > Game.time) {
-            return false;
-        }
-
-        var energy = creep.room.memory.stats.energy;
-        var cap = creep.room.memory.stats.capacity;
-        var ratio = energy / cap;
-
-        if (cap > 800 && ratio <= 0.05) {
-            creep.say("😴");
-            this.moveTo(creep, creep.room.controller, {range: 4});
-            return true;
-        }
-        return false;
-    },
-
     moveTo: function (creep, target, options = {}) {
         creep.travelTo(target, options);
     },

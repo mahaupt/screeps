@@ -107,26 +107,6 @@ module.exports = {
             }
             return;
         }
-
-        //repair structures except walls below 10k hps
-        var structures = room.find(FIND_STRUCTURES, {
-            filter: (s) =>
-                s.hits < s.hitsMax &&
-                ((s.structureType != STRUCTURE_WALL &&
-                    s.structureType != STRUCTURE_RAMPART) ||
-                    s.hits < 10000),
-        });
-        if (structures.length > 0) {
-            for (let tower of towers) {
-                if (
-                    tower.store[RESOURCE_ENERGY] >
-                    tower.store.getCapacity(RESOURCE_ENERGY) / 2
-                ) {
-                    tower.repair(structures[0]);
-                }
-            }
-            return;
-        }
     },
 
     calcTowerDps: function (towers, pos) {

@@ -27,6 +27,7 @@ class RoadPlanner {
         // build whole path
         for (var i=0; i < path.length; i++)
         {
+            if (!Game.rooms[path[i].roomName]) continue; // room not visible, can not build roads
             const sites = path[i].lookFor(LOOK_CONSTRUCTION_SITES);
             if (sites.length > 0) {
                 continue;

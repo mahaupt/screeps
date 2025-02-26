@@ -57,6 +57,7 @@ module.exports = {
         
         // EXISTING HARVESTER
         var roomhvstr = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
+        let troom = Game.rooms[ops.target];
         
         // DEPOSITS AND MINERALS ONLY ON >LVL 6 SOURCE ROOMS
         if (Game.rooms[ops.source].controller.level >= 6) {
@@ -89,9 +90,27 @@ module.exports = {
                 moduleSpawn.addSpawnList(Game.rooms[ops.source], "miner", {troom: ops.target});
                 return;
             }
+
+            // build roads for sources
+            if (troom) {
+                let containers = troom.find(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_CONTAINER }});
+                if (containers.length > 0) {
+                    let center = Autobuilder.getBaseCenterPoint(Game.rooms[ops.source]);
+                    for(let c of containers) {
+                        if (RoadPlanner.buildRoad(center, c.pos) > 0) {
+                            ConstructionManager.recalculateRoom(Game.rooms[ops.source]);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // source exists - prevent timeout
+            return;
         }
         
         //no harvester exist and nothing to harvest - wait
+        // TODO: prevent this from executing
         ops.mem.timeout = Game.time + this.core_timeout;
     }, 
     

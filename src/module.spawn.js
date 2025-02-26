@@ -26,7 +26,7 @@ module.exports = {
         var minerCount = counts.miner || 0;
         var upgraderCount = counts.upgrader || 0;
         var builderCount = counts.builder || 0;
-        var haulerCount = counts.hauler || 0;
+        var haulerCount = _.find(Memory.creeps, (c) => c.role == "hauler" && c.home == room.name).length;
 
         var sourceCount = room.sources.length;
         var mineralCount = (room.mineral && (room.mineral.mineralAmount > 0 || room.mineral.ticksToRegeneration <= 50)) ? 1 : 0;

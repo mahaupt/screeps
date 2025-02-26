@@ -42,16 +42,16 @@ module.exports = {
             res = creep.reserveController(creep.room.controller);
         }
         
-        if (res != ERR_NOT_IN_RANGE) {
+        /*if (res != ERR_NOT_IN_RANGE) {
             creep.signController(
                 creep.room.controller, 
                 "Expansion Room"
             );
-        }
+        }*/
         
         //in target room
         if (res != OK) {
-            baseCreep.moveTo(creep, creep.room.controller);
+            baseCreep.moveTo(creep, creep.room.controller, {range: 1});
         }
     }
 };

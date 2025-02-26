@@ -130,18 +130,23 @@ module.exports = {
                 constr_sites_num++;
             }
         }
-        
 	    
 	    //build roads - nothing other to build
 	    if (containers_num > 1 && constr_sites_num == 0)
 	    {
-		    this.buildRoads(room);
+		    constr_sites_num += this.buildRoads(room);
 	    }
         
         //building walls from lvl 4
         if (room.controller.level >= 4 && constr_sites_num == 0) {
             //this.buildAroundCenter(room, STRUCTURE_RAMPART, false);
             //this.buildAroundCenter(room, STRUCTURE_WALL, true);
+            //constr_sites_num++;
+        }
+
+        // update construction manager 
+        if (constr_sites_num > 0) {
+            ConstructionManager.recalculateRoom(room);
         }
     },
     
@@ -364,22 +369,25 @@ module.exports = {
             }
         });
 
-        if (targets.length > 0)
+        if (targets.length <= 0) return 0;
+        
+        let centerPos = this.getBaseCenterPoint(room);
+        let builtRoads = 0;
+        
+        //roads from spawn to Structures
+        for (let t of targets)
         {
-            var centerPos = this.getBaseCenterPoint(room);
-            var builtRoads = 0;
-            
-            //roads from spawn to Structures
-            for (var t of targets)
-            {
-                builtRoads += RoadPlanner.buildRoad(centerPos, t.pos);
-                if (builtRoads > 0) break;	
-            }
-            
-            //roads around spawn
-            if (builtRoads == 0) {
-                this.buildAroundCenter(room, STRUCTURE_ROAD, false);
+            builtRoads += RoadPlanner.buildRoad(centerPos, t.pos);
+            if (builtRoads > 0) break;	
+        }
+        
+        //roads around spawn
+        if (builtRoads == 0) {
+            if (this.buildAroundCenter(room, STRUCTURE_ROAD, false)) {
+                builtRoads++;
             }
         }
+
+        return builtRoads;
     }
 };

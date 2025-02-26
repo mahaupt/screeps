@@ -14,6 +14,7 @@ global.Intel = require('module.intel');
 global.Autobuilder = require('module.autobuilder');
 global.BasePlanner = require('module.baseplanner');
 global.RoadPlanner = require('module.roadplanner');
+global.ConstructionManager = require('module.construction');
 
 var roleMiner = require('creeps_role.miner');
 var roleHarvester = require('creeps_role.harvester');
@@ -46,6 +47,8 @@ profiler.registerObject(Terminal, 'Terminal');
 profiler.registerObject(Intel, 'Intel');
 profiler.registerObject(Autobuilder, 'Autobuilder');
 profiler.registerObject(BasePlanner, 'BasePlanner');
+profiler.registerObject(RoadPlanner, 'RoadPlanner');
+profiler.registerObject(ConstructionManager, 'ConstructionManager');
 profiler.registerObject(roleMiner, 'roleMiner');
 profiler.registerObject(roleHarvester, 'roleHarvester');
 profiler.registerObject(roleUpgrader, 'roleUpgrader');
@@ -85,7 +88,8 @@ module.exports.loop = moduleMemory.wrapper(() => {
 
             moduleStats.run(room);
             moduleSpawn.run(room);
-            
+            ConstructionManager.run(room);
+
             if (Game.time % 100 == i++)
                 Autobuilder.run(room);
             if (room.terminal && Game.time % 20 == i++) {
