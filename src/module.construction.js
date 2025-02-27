@@ -21,6 +21,9 @@ class ConstructionManager {
         let constructionTask;
 
         for (let r of rooms) {
+            // skip room due attack
+            if (r.memory.attacked_time + 300 > Game.time) continue;
+
             // repairs
             if (this.emergencyRepairs[r.name] >= 0 || this.repairPoints[r.name] >= energyAvbl*REPAIR_POWER) {
                 this.emergencyRepairs[r.name] = 0; // reset emergency repairs

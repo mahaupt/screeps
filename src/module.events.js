@@ -14,7 +14,7 @@ module.exports = {
                         target.memory.attacked_time = Game.time;
                     }
                     
-                    room.attacked_time = Game.time;
+                    room.memory.attacked_time = Game.time;
                 }
             }
         }

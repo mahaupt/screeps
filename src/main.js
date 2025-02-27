@@ -108,6 +108,7 @@ module.exports.loop = moduleMemory.wrapper(() => {
         let start = Game.cpu.getUsed();
         for(var name in Game.creeps) {
             var creep = Game.creeps[name];
+            if (creep.spawning) continue;
             
             if (creep.memory.renewSelf) {
                 roleRenewSelf.run(creep);

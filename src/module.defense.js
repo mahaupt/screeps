@@ -79,6 +79,7 @@ module.exports = {
 		var towers = room.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_TOWER },
         });
+        if (towers.length == 0) return;
 
         //shoot hostiles
         var shooters = _.filter(room.memory.hostiles, (h) => h.shoot == true);

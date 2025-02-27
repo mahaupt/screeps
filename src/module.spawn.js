@@ -2,9 +2,14 @@ module.exports = {
     max_builders: 8, // TODO: balance this value
     max_haulers: 3,
     run: function (room) {
+        let roomCreeps = _.filter(Memory.creeps, (c) => c.home == room.name && !(c.role == "miner" && c.troom));
+        let counts = _.countBy(roomCreeps, (r) => r.role);
+        let haulerCount = counts.hauler || 0;
+        let minerCount = counts.miner || 0;
+
         // first, spawn from spawn list
         // soldiers, replacement creeps
-        if (room.memory.spawnList && room.memory.spawnList.length > 0) {
+        if (haulerCount > 0 && minerCount > 0 && room.memory.spawnList && room.memory.spawnList.length > 0) {
             var ret = this.spawn(
                 room,
                 room.memory.spawnList[0].role,
@@ -21,12 +26,8 @@ module.exports = {
         this.memCleanup();
 
         // then, spawn room creeps
-        var roomCreeps = room.find(FIND_MY_CREEPS);
-        var counts = _.countBy(roomCreeps, "memory.role");
-        var minerCount = counts.miner || 0;
         var upgraderCount = counts.upgrader || 0;
         var builderCount = counts.builder || 0;
-        var haulerCount = _.find(Memory.creeps, (c) => c.role == "hauler" && c.home == room.name).length;
 
         var sourceCount = room.sources.length;
         var mineralCount = (room.mineral && (room.mineral.mineralAmount > 0 || room.mineral.ticksToRegeneration <= 50)) ? 1 : 0;

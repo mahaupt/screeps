@@ -7,6 +7,7 @@ module.exports = {
         
         //ltasks = {prio, type:, src:, vol:, acc:, utx:, rec:, res:}
         //prio, type, source, total volume, accepted volume, under transport volume, [receiver], [resource type]
+        // prio: 5 norm - higher better prio
         
         room.visual.text("Transport Tasks", 1, 1, {align: 'left'});
         var i = 0;
@@ -141,7 +142,7 @@ module.exports = {
              
             var task = {};
             task.id = "";
-            task.prio = 5;
+            task.prio = 6;
             task.type = "s";
             task.src = source.id;
             task.vol = energyForTransport;

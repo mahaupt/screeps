@@ -112,9 +112,17 @@ module.exports =  {
             room.memory.stats.transports_1k = volume;
             room.memory.stats.transports_1k_30 = Math.round((room.memory.stats.transports_1k_30*29+volume)/30);
             
-            //calc haulers
-            let carryPartPerHauler = baseCreep.buildBody('hauler', room.energyCapacityAvailable).filter((s) => s == CARRY).length;
-            var haulerNeeded = Math.round(room.memory.stats.transports_1k_30 / (carryPartPerHauler*50));
+            //calc haulers needed
+            let haulers = _.filter(Game.creeps, (c) => c.memory && c.memory.home == room.name && c.memory.role == "hauler");
+            let carries = 0;
+            for (let h of haulers) {
+                carries += h.body.length * 2 / 3;
+            }
+
+            let carryPartPerHauler = Math.round(carries / haulers);
+            // take short term and long term into consideration
+            let avg_transports = room.memory.stats.transports_1k + room.memory.stats.transports_1k_30 / 2;
+            let haulerNeeded = Math.round(avg_transports / (carryPartPerHauler*50));
             haulerNeeded = Math.max(Math.min(haulerNeeded, moduleSpawn.max_haulers), 1);
             
             if (room.memory.stats.haulers_needed < haulerNeeded) {

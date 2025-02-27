@@ -1,6 +1,6 @@
 module.exports = {
     sleep_timeout: 1000,
-    attack_timeout: 30000,
+    attack_timeout: 1500,
     core_timeout: 90000,
     run: function(ops)
     {
@@ -82,8 +82,8 @@ module.exports = {
         }
         
         
-        // Pick Source
-        if (intel.sources > 0 && path.length <= 1) {
+        // Pick Source, max 2 distance
+        if (intel.sources >= path.length && path.length <= 2) {
             let h = roomhvstr.length;
             if (h < intel.sources) {
                 //spawn miner
@@ -93,7 +93,7 @@ module.exports = {
 
             // build roads for sources
             if (troom) {
-                let containers = troom.find(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_CONTAINER }});
+                let containers = troom.find(FIND_STRUCTURES, { filter: { structureType: STRUCTURE_CONTAINER }});
                 if (containers.length > 0) {
                     let center = Autobuilder.getBaseCenterPoint(Game.rooms[ops.source]);
                     for(let c of containers) {
@@ -103,6 +103,11 @@ module.exports = {
                         }
                     }
                 }
+            }
+
+            // spawn reserver when roads been built
+            if (troom.controller && (!troom.controller.reservation || troom.controller.reservation.ticksToEnd <= this.sleep_timeout)) {
+                moduleSpawn.addSpawnList(Game.rooms[ops.source], "reserver", {troom: ops.target});
             }
 
             // source exists - prevent timeout
@@ -116,7 +121,8 @@ module.exports = {
     
     attackTimeout: function(ops)
     {
-        var roomhvstr = _.filter(Memory.creeps, (s) => s.role == "harvester" && s.troom == ops.target && s.attacked_time+this.sleep_timeout > Game.time);
+        // timeout if 
+        var roomhvstr = _.filter(Memory.creeps, (s) => s.troom == ops.target && s.attacked_time+this.sleep_timeout > Game.time);
         if (roomhvstr.length > 0) {
             ops.mem.timeout = Game.time + this.attack_timeout;
             var msg = "Ops." + ops.type + "(" + ops.target + "): attack on harvester detected. Pausing...";

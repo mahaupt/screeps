@@ -24,19 +24,12 @@ module.exports = {
 
     pickEnergySource: function (creep) {
         //try to find half full containers
-        var c = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        let capacity = creep.store.getFreeCapacity(RESOURCE_ENERGY);
+        let c = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
-                return (
-                    (structure.structureType == STRUCTURE_CONTAINER &&
-                        structure.store.getUsedCapacity(RESOURCE_ENERGY) /
-                            structure.store.getCapacity(RESOURCE_ENERGY) >
-                            0.3) ||
-                    ((structure.structureType == STRUCTURE_CONTAINER ||
+                return (structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                        structure.pos.findInRange(FIND_SOURCES, 2).length ==
-                            0 &&
-                        structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0)
-                );
+                        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= capacity;
             },
         });
         if (c) {
@@ -44,12 +37,12 @@ module.exports = {
         } else {
             // get loot from energy logistics
             let tasks = Logistics.getNewTasks(
-                creep.room,
+                creep.home,
                 creep.store.getFreeCapacity(RESOURCE_ENERGY),
-                (task) => task.type == "loot" && task.res == RESOURCE_ENERGY,
+                (task) => (task.type == "loot" || task.type == "mc") && task.res == RESOURCE_ENERGY,
             );
             if (tasks.length > 0) {
-                let task = Logistics.getTask(creep.room, tasks[0].id);
+                let task = Logistics.getTask(creep.home, tasks[0].id);
                 creep.memory.task = tasks[0];
                 creep.memory.source = task.src;
             }
@@ -76,13 +69,13 @@ module.exports = {
             creep.pickup(source);
             if (creep.memory.task) {
                 Logistics.markPickup(
-                    creep.room,
+                    creep.home,
                     creep.memory.task.id,
                     creep.memory.task.vol,
                     creep.memory.task.vol,
                 );
                 Logistics.markDropoff(
-                    creep.room,
+                    creep.home,
                     creep.memory.task.id,
                     creep.memory.task.vol,
                 );
@@ -148,18 +141,18 @@ module.exports = {
 
         if (role == "miner") {
             let bodySize = Math.floor((energy_avbl-50)/250);
-            bodySize = Math.min(bodySize, 4);
+            bodySize = Math.max(Math.min(bodySize, 4), 1);
             ncarry = 1;
             nwork = bodySize*2;
             nmove = bodySize;
         } else if (role == "hauler") {
             let bodySize = Math.floor(energy_avbl/150);
-            bodySize = Math.min(bodySize, 16);
+            bodySize = Math.max(Math.min(bodySize, 16), 1);
             ncarry = bodySize*2;
             nmove = bodySize;
         } else if (role == "upgrader" || role == "builder") {
             let bodySize = Math.floor(energy_avbl/200);
-            bodySize = Math.min(bodySize, 16);
+            bodySize = Math.max(Math.min(bodySize, 16), 1);
             nwork = bodySize;
             ncarry = bodySize;
             nmove = bodySize;
@@ -174,38 +167,38 @@ module.exports = {
             nmove = 1;
         } else if (role == "reserver") {
             let bodySize = Math.floor(energy_avbl/650);
-            bodySize = Math.min(bodySize, 7);
+            bodySize = Math.max(Math.min(bodySize, 7), 1);
             nclaim = bodySize;
             nmove = bodySize;
         } else if (role == "soldier") {
             let bodySize = Math.floor(energy_avbl/140);
-            bodySize = Math.min(bodySize, 16);
+            bodySize = Math.max(Math.min(bodySize, 16), 1);
             ntough = bodySize;
             nmove = bodySize;
             nattack = bodySize;
         } else if (role == "drainer") {
             let bodySize = Math.floor(energy_avbl/300);
-            bodySize = Math.min(bodySize, 16);
+            bodySize = Math.max(Math.min(bodySize, 16), 1);
             ntough = bodySize;
             nmove = bodySize;
             nheal = bodySize;
         } else if (role == "dismantler") {
             let bodySize = Math.floor((energy_avbl-300)/250);
-            bodySize = Math.min(bodySize, 8);
+            bodySize = Math.max(Math.min(bodySize, 8), 1);
             ntough =  bodySize*3;
             nwork =  bodySize;
             nmove =  bodySize*2+1;
             nheal =  1; 
         } else if (role == "harvester") {
             let bodySize = Math.floor(energy_avbl/200);
-            bodySize = Math.min(bodySize, 16);
+            bodySize = Math.max(Math.min(bodySize, 16), 1);
             nwork = bodySize;
             ncarry = bodySize;
             nmove = bodySize;
         }
         if (role == "healer") {
             let bodySize = Math.floor(energy_avbl/300);
-            bodySize = Math.min(bodySize, 25);
+            bodySize = Math.max(Math.min(bodySize, 25), 1);
             nmove = bodySize;
             nheal = bodySize;
         }
@@ -421,7 +414,7 @@ module.exports = {
         }
         if (creep.memory.task) {
             Logistics.markCancel(
-                creep.room,
+                creep.home,
                 creep.memory.task.id,
                 creep.memory.task.vol,
             );

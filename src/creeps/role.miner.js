@@ -28,6 +28,7 @@ module.exports = {
         }
         
         var source = this.getSource(creep);
+        if (!source) return;
         var container = this.getContainer(creep, source);
         var link = this.getLink(creep, source);
 
@@ -66,7 +67,7 @@ module.exports = {
     
     
     harvest: function(creep, source, container, link)
-    {        
+    {
         //mineral depleted - kill self
         if (source instanceof Mineral) {
             if (source.mineralAmount == 0 && source.ticksToRegeneration >= 3600) {
