@@ -457,6 +457,10 @@ class Traveler {
         for (let structure of impassibleStructures) {
             matrix.set(structure.pos.x, structure.pos.y, 0xff);
         }
+        // own room add center point
+        if (room.controller && room.controller.my && room.storage) {
+            matrix.set(room.storage.pos.x, room.storage.pos.y-1, 20);
+        }
         return matrix;
     }
     /**

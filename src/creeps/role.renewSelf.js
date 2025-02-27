@@ -7,7 +7,7 @@ module.exports = {
             }
         });
         
-        if (spawns.length == 0 && creep.room.name != creep.home.name)
+        if (spawns.length == 0)
 		{
 			//no spawn in room - try to go home
 			baseCreep.moveToRoom(creep, creep.home.name);

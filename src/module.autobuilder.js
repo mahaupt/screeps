@@ -371,7 +371,7 @@ module.exports = {
 
         if (targets.length <= 0) return 0;
         
-        let centerPos = this.getBaseCenterPoint(room);
+        let centerPos = room.storage?room.storage.pos:this.getBaseCenterPoint(room);
         let builtRoads = 0;
         
         //roads from spawn to Structures

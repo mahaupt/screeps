@@ -6,11 +6,11 @@ module.exports = {
     {
         this.init(ops);
         
-        if (ops.mem.timeout + this.sleep_timeout > Game.time) return;
-        ops.mem.timeout = Game.time;
-        
-        //Attack pause
+        // Attack check
         this.attackTimeout(ops);
+
+        if (ops.mem.timeout > Game.time) return;
+        ops.mem.timeout = Game.time + this.sleep_timeout;
         
         // OWN ROOM - SKIP
         if (Game.rooms[ops.target] && Game.rooms[ops.target].controller && Game.rooms[ops.target].my) {
@@ -58,15 +58,16 @@ module.exports = {
         // EXISTING HARVESTER
         var roomhvstr = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
         let troom = Game.rooms[ops.target];
+        let sroom = Game.rooms[ops.source];
         
         // DEPOSITS AND MINERALS ONLY ON >LVL 6 SOURCE ROOMS
-        if (Game.rooms[ops.source].controller.level >= 6) {
+        if (sroom.controller.level >= 6) {
             // PICK Deposits
             if (intel.deposits && intel.deposits_cooldown < 10) {
                 let h = _.findIndex(roomhvstr, (s) => s.source_type == 'deposit' );
                 if (h < 0) {
                     //spawn harvester
-                    moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
+                    moduleSpawn.addSpawnList(sroom, "harvester", {troom: ops.target});
                     return;
                 }
             }
@@ -75,7 +76,7 @@ module.exports = {
                 let h = _.findIndex(roomhvstr, (s) => s.source_type == 'mineral' );
                 if (h < 0) {
                     //spawn harvester
-                    moduleSpawn.addSpawnList(Game.rooms[ops.source], "harvester", {troom: ops.target});
+                    moduleSpawn.addSpawnList(sroom, "harvester", {troom: ops.target});
                     return;
                 }
             }
@@ -87,7 +88,7 @@ module.exports = {
             let h = roomhvstr.length;
             if (h < intel.sources) {
                 //spawn miner
-                moduleSpawn.addSpawnList(Game.rooms[ops.source], "miner", {troom: ops.target});
+                moduleSpawn.addSpawnList(sroom, "miner", {troom: ops.target});
                 return;
             }
 
@@ -95,10 +96,10 @@ module.exports = {
             if (troom) {
                 let containers = troom.find(FIND_STRUCTURES, { filter: { structureType: STRUCTURE_CONTAINER }});
                 if (containers.length > 0) {
-                    let center = Autobuilder.getBaseCenterPoint(Game.rooms[ops.source]);
+                    let center = sroom.storage ? sroom.storage.pos : Autobuilder.getBaseCenterPoint(sroom);
                     for(let c of containers) {
                         if (RoadPlanner.buildRoad(center, c.pos) > 0) {
-                            ConstructionManager.recalculateRoom(Game.rooms[ops.source]);
+                            ConstructionManager.recalculateRoom(sroom);
                             return;
                         }
                     }
@@ -107,7 +108,7 @@ module.exports = {
 
             // spawn reserver when roads been built
             if (troom.controller && (!troom.controller.reservation || troom.controller.reservation.ticksToEnd <= this.sleep_timeout)) {
-                moduleSpawn.addSpawnList(Game.rooms[ops.source], "reserver", {troom: ops.target});
+                moduleSpawn.addSpawnList(sroom, "reserver", {troom: ops.target});
             }
 
             // source exists - prevent timeout
@@ -121,15 +122,20 @@ module.exports = {
     
     attackTimeout: function(ops)
     {
-        // timeout if 
-        var roomhvstr = _.filter(Memory.creeps, (s) => s.troom == ops.target && s.attacked_time+this.sleep_timeout > Game.time);
-        if (roomhvstr.length > 0) {
+        let troom = Game.rooms[ops.target];
+        if (!troom) return; // visibility check
+        if (troom.memory.attacked_time+10 > Game.time) {
             ops.mem.timeout = Game.time + this.attack_timeout;
             var msg = "Ops." + ops.type + "(" + ops.target + "): attack on harvester detected. Pausing...";
             Game.notify(msg);
-            return true;
+            return;
         }
-        return false;
+
+        // find invaders
+        let hostiles = troom.find(FIND_HOSTILE_CREEPS, {filter: (h) => h.owner.username == "Invader"});
+        if (hostiles.length > 0) {
+            ops.mem.timeout = Game.time + hostiles[0].ticksToLive;
+        }
     }, 
     
     

@@ -20,7 +20,7 @@ module.exports = {
         }
 
         //remove finished
-        _.remove(Memory.ops, (s) => s.finished == true);
+        _.remove(Memory.ops, (s) => !s || s.finished == true);
 
         //run
         for (var i in Memory.ops) {
