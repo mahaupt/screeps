@@ -96,7 +96,7 @@ class Traveler {
                 // see note at end of file for more info on this
                 console.log(`TRAVELER: heavy cpu use: ${creep.name}, cpu: ${state.cpu} origin: ${creep.pos}, dest: ${destination}`);
                 // mark room as blocked
-                if (creep.room.controller && !creep.room.controller.my) {
+                if (!creep.room.my) {
                     Memory.intel.list[creep.room.name].blocked = true;
                     Game.notify(`TRAVELER: path blocked at ${creep.room.name}`, 30);
                 }
@@ -151,7 +151,8 @@ class Traveler {
      * @returns {RoomMemory|number}
      */
     static checkAvoid(roomName) {
-        return Memory.intel.list[roomName] && (Memory.intel.list[roomName].avoid || Memory.intel.list[roomName].blocked);
+        let intel = Intel.get(roomName);
+        return intel && (intel.avoid || intel.blocked);
     }
     /**
      * check if a position is an exit
@@ -199,7 +200,7 @@ class Traveler {
             return;
         }
         if (room.controller) {
-            if (room.controller.owner && !room.controller.my) {
+            if (room.controller.owner && !room.my) {
                 Memory.intel.list[roomName].avoid = true;
             }
             else {
@@ -458,7 +459,7 @@ class Traveler {
             matrix.set(structure.pos.x, structure.pos.y, 0xff);
         }
         // own room add center point
-        if (room.controller && room.controller.my && room.storage) {
+        if (room.my && room.storage) {
             matrix.set(room.storage.pos.x, room.storage.pos.y-1, 20);
         }
         return matrix;

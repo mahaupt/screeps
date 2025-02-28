@@ -45,6 +45,11 @@ module.exports = {
                 let task = Logistics.getTask(creep.home, tasks[0].id);
                 creep.memory.task = tasks[0];
                 creep.memory.source = task.src;
+            } else {
+                // no storage in room, no tasks avbl, get from home storage
+                if (creep.home.storage) {
+                    creep.memory.source = creep.home.storage.id;
+                }
             }
         }
     },
@@ -175,7 +180,7 @@ module.exports = {
             nmove = bodySize;
         } else if (role == "soldier") {
             let bodySize = Math.floor(energy_avbl/140);
-            bodySize = Math.max(Math.min(bodySize, 16), 1);
+            bodySize = Math.max(Math.min(bodySize, 10), 1);
             ntough = bodySize;
             nmove = bodySize;
             nattack = bodySize;

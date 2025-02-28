@@ -15,10 +15,7 @@ module.exports = {
             }
             return;
         }
-        
-        //collect intel        
-        Intel.collectIntel(creep, creep.room);
-        
+                
         //move to target room
         if (creep.room.name != creep.memory.troom)
         {
@@ -28,7 +25,7 @@ module.exports = {
         
         
         //delete target - invalid
-        if (!creep.room.controller || creep.room.controller.my) {
+        if (!creep.room.controller || creep.room.my) {
             delete creep.memory.troom;
             return;
         }

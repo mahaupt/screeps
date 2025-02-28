@@ -77,6 +77,9 @@ Intel.init();
 
 module.exports.loop = moduleMemory.wrapper(() => {
     profiler.wrap(() => {
+
+        Intel.run();
+
         //MODULES per ROOM
         var i = 0;
         for (var r in Game.rooms) 
@@ -86,21 +89,22 @@ module.exports.loop = moduleMemory.wrapper(() => {
             moduleEvents.run(room);
             
             // ONLY CONTINUE IF ROOM IS MINE
-            if (!room.controller || !room.controller.my) continue;
+            if (!room.my) continue;
 
             moduleStats.run(room);
             moduleSpawn.run(room);
             ConstructionManager.run(room);
 
-            if (Game.time % 100 == i++)
+            if (Game.time % 100 == i)
                 Autobuilder.run(room);
-            if (room.terminal && Game.time % 20 == i++) {
+            if (room.terminal && Game.time % 20 == i) {
                 Terminal.run(room);
             }
             
             Labs.run(room);
             moduleDefense.run(room);
             moduleLogistics.run(room);
+            i++;
         }
         
         //OPS

@@ -33,16 +33,13 @@ module.exports = {
     
     autoClaim: function(ops)
     {
-        var myrooms = _.filter(Game.rooms, (s) => s.controller && s.controller.my);
+        var myrooms = _.filter(Game.rooms, (s) => s.my);
         if (myrooms.length < Game.gcl.level) 
         {
             //only claim if reached level 4 or higher
             var myroom = Game.rooms[ops.source];
             if (myroom.controller.level >= 4) 
-            {
-                //pick best room
-                if (!Memory.intel || !Memory.intel.claimable) return;
-                
+            {                
                 var bestroom = false;
                 var bestroom_pts = -99999;
                 
@@ -55,10 +52,10 @@ module.exports = {
                     
                     //check room not already owned
                     var room = Game.rooms[claim.room];
-                    if (room && room.controller && room.controller.my) continue;
+                    if (room && room.my) continue;
                     
                     //check intel
-                    var intel = Intel.getIntel(claim.room);
+                    var intel = Intel.get(claim.room);
                     if (intel.threat != "none") continue;
                     
                     //check distance

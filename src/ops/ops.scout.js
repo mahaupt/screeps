@@ -4,13 +4,12 @@ module.exports = {
         this.init(ops);
         
         //check if scout has completed
-        var intel = Intel.getIntel(ops.target);
-        if (intel) 
-        {    
-            if (intel.time > Game.time - 200) {
-                ops.finished = true;
-                return;
-            }
+        let intel = Intel.get(ops.target);
+        if (intel && intel[Intel.EXPIRATION]+1500 > Game.time) 
+        {
+            // recent intel already exists, abort
+            ops.finished = true;
+            return;
         }
         
         //spawn cooldown
@@ -29,8 +28,7 @@ module.exports = {
         
         //skip if room is my own
         if (Game.rooms[ops.target] && 
-            Game.rooms[ops.target].controller && 
-            Game.rooms[ops.target].controller.my)
+            Game.rooms[ops.target].my)
         {
             ops.finished = true;
             return;
@@ -38,7 +36,7 @@ module.exports = {
         
         
         //get room path and look for hostiles
-        var path = Game.map.findRoute(ops.source, ops.target);
+        let path = Game.map.findRoute(ops.source, ops.target);
         if (!_.isArray(path) || path.length >= 20) 
         {
             ops.finished = true;
@@ -47,9 +45,9 @@ module.exports = {
         }
         
         
-        //if not completed, spawn new creep
-        var scouts = _.sum(Memory.creeps, (s) => s.role == "scout");
-        if (scouts < 2) 
+        //if not completed, spawn new scout
+        let scouts = _.sum(Memory.creeps, (s) => s.role == "scout");
+        if (scouts.length < 2) 
         {
             //spawn new scout
             moduleSpawn.addSpawnList(Game.rooms[ops.source], "scout", {troom: ops.target});
@@ -69,6 +67,5 @@ module.exports = {
         if (ops.mem.init) return;
         ops.mem.init = true;
         ops.mem.cooldown = 0;
-        
     }, 
 };

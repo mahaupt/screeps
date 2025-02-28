@@ -30,10 +30,6 @@ module.exports = {
             }
         }
         
-        //collect intel        
-        Intel.collectIntel(creep, creep.room);
-
-        
         //go home and offload
         if (!creep.memory.harvesting) {
             if (!creep.isAtHome) {

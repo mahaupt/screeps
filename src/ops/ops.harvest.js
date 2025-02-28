@@ -1,5 +1,5 @@
 module.exports = {
-    sleep_timeout: 1000,
+    sleep_timeout: 500,
     attack_timeout: 1500,
     core_timeout: 90000,
     run: function(ops)
@@ -13,7 +13,7 @@ module.exports = {
         ops.mem.timeout = Game.time + this.sleep_timeout;
         
         // OWN ROOM - SKIP
-        if (Game.rooms[ops.target] && Game.rooms[ops.target].controller && Game.rooms[ops.target].my) {
+        if (Game.rooms[ops.target] && Game.rooms[ops.target].my) {
             console.log("Ops.Harvest: Own room. Aborting");
             ops.finished = true;
             return;
@@ -28,23 +28,55 @@ module.exports = {
         
         
         // GET INTEL
-        if (!Memory.intel || !Memory.intel.list || !Memory.intel.list[ops.target]) 
+        let intel = Intel.get(ops.target);
+        if (!intel) 
         {
             Ops.new("scout", ops.source, ops.target);
             return;
         }
-        var intel = Memory.intel.list[ops.target];
+
+        let troom = Game.rooms[ops.target];
+        let sroom = Game.rooms[ops.source];
         
         // AVOID DANGERS
-        if (intel.threat == "player" || intel.threat == "keeper") {
+        if (intel[Intel.OWNER] || intel[Intel.KEEPERS]) {
             console.log("Ops.Harvest: Player or Keepers in Room. Aborting");
             ops.finished = true;
             return;
-        } else 
-        if (intel.threat == "core") {
-            //core in room - wait until gone
-            ops.mem.timeout = Game.time + this.core_timeout;
+        } 
+        if (intel[Intel.INVADER_CORE_LVL] >= 0) {
+            // core in room - attack when lvl 0
+            ops.mem.timeout = Game.time + this.attack_timeout + 200;
+            
+            if (intel[Intel.INVADER_CORE_LVL] == 0) {
+                moduleSpawn.addSpawnList(sroom, "soldier", {troom: ops.target});
+                Game.notify("Ops.Harvest: Invader core in room " + ops.target);
+            } else {
+                ops.mem.timeout = Game.time + this.core_timeout;
+                // multi level - wait longer
+            }
+
+            // send creeps home
+            let miners = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
+            for(let m of miners) {
+                m.killSelf = true;
+                m.renewSelf = true;
+            }
+
             return;
+        }
+        delete ops.mem.soldier_spawned;
+
+        if (intel[Intel.RESERVATION_OWNER] === "Invader") {
+            // invader reserved, wait until reservation gone
+            let timeout = intel[Intel.TIME] + intel[Intel.RESERVATION_TICKS];
+            if (timeout >= Game.time) {
+                ops.mem.timeout = timeout+5;
+                return;
+            } else {
+                Ops.new("scout", ops.source, ops.target); // check if target clear
+                return;
+            }
         }
         
         // PATH DISTANCE
@@ -57,13 +89,11 @@ module.exports = {
         
         // EXISTING HARVESTER
         var roomhvstr = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
-        let troom = Game.rooms[ops.target];
-        let sroom = Game.rooms[ops.source];
         
         // DEPOSITS AND MINERALS ONLY ON >LVL 6 SOURCE ROOMS
         if (sroom.controller.level >= 6) {
             // PICK Deposits
-            if (intel.deposits && intel.deposits_cooldown < 10) {
+            if (intel[Intel.DEPOSIT] && intel[Intel.DEPOSIT_COOLDOWN] < 10) {
                 let h = _.findIndex(roomhvstr, (s) => s.source_type == 'deposit' );
                 if (h < 0) {
                     //spawn harvester
@@ -71,22 +101,22 @@ module.exports = {
                     return;
                 }
             }
-            // PICK Minerals
-            if (intel.minerals && intel.minerals_extr && intel.minerals_amt > 2000) {
+            // PICK Minerals - Extractor only avbl on claimed rooms
+            /*if (intel.minerals && intel.minerals_extr && intel.minerals_amt > 2000) {
                 let h = _.findIndex(roomhvstr, (s) => s.source_type == 'mineral' );
                 if (h < 0) {
                     //spawn harvester
                     moduleSpawn.addSpawnList(sroom, "harvester", {troom: ops.target});
                     return;
                 }
-            }
+            }*/
         }
         
         
         // Pick Source, max 2 distance
-        if (intel.sources >= path.length && path.length <= 2) {
+        if (intel[Intel.SOURCES] >= path.length && path.length <= 2) {
             let h = roomhvstr.length;
-            if (h < intel.sources) {
+            if (h < intel[Intel.SOURCES]) {
                 //spawn miner
                 moduleSpawn.addSpawnList(sroom, "miner", {troom: ops.target});
                 return;
@@ -135,6 +165,13 @@ module.exports = {
         let hostiles = troom.find(FIND_HOSTILE_CREEPS, {filter: (h) => h.owner.username == "Invader"});
         if (hostiles.length > 0) {
             ops.mem.timeout = Game.time + hostiles[0].ticksToLive;
+
+            // send creeps home
+            let miners = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
+            for(let m of miners) {
+                m.killSelf = true;
+                m.renewSelf = true;
+            }
         }
     }, 
     

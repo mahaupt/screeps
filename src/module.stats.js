@@ -121,7 +121,7 @@ module.exports =  {
 
             let carryPartPerHauler = Math.round(carries / haulers);
             // take short term and long term into consideration
-            let avg_transports = room.memory.stats.transports_1k + room.memory.stats.transports_1k_30 / 2;
+            let avg_transports = (room.memory.stats.transports_1k + room.memory.stats.transports_1k_30) / 2;
             let haulerNeeded = Math.round(avg_transports / (carryPartPerHauler*50));
             haulerNeeded = Math.max(Math.min(haulerNeeded, moduleSpawn.max_haulers), 1);
             

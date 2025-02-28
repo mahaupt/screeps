@@ -37,16 +37,13 @@ module.exports =  {
         } else {
             //target finished
             delete creep.memory.troom;
-        }
-        
-        //scout
-        Intel.collectIntel(creep, creep.room);
+        }        
     },
     
     
     pickTarget: function(creep) 
     {
-        if (Memory.intel && Memory.intel.req && Memory.intel.req.length > 0) {
+        if (Memory.intel.req.length > 0) {
             creep.memory.troom = Memory.intel.req.shift();
         } else {
             creep.memory.renewSelf = true;

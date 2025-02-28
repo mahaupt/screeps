@@ -105,7 +105,6 @@ module.exports = {
             return;
         }
         
-        
         //if target room - prepare for embarkation
         if (!creep.memory.embark) {
             if (baseCreep.prepareCreep(creep)) {
@@ -113,11 +112,6 @@ module.exports = {
             }
             return;
         }
-        
-        
-        //collect intel        
-        Intel.collectIntel(creep, creep.room);
-        
         
         //in target room
         if (creep.room.name == creep.memory.troom) 

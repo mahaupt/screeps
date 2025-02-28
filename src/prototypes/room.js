@@ -17,3 +17,20 @@ Object.defineProperty(Room.prototype, 'mineral', {
 	},
 	configurable: true,
 });
+
+Object.defineProperty(Room.prototype, 'deposit', {
+	get() {
+		if (!this._deposit) {
+			this._deposit = this.find(FIND_DEPOSITS)[0];
+		}
+		return this._deposit;
+	},
+	configurable: true,
+});
+
+Object.defineProperty(Room.prototype, 'my', {
+	get() {
+		return this.controller && this.controller.my;
+	},
+	configurable: true,
+});

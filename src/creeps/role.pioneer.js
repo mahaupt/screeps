@@ -29,10 +29,7 @@ module.exports = {
             baseCreep.prepareCreep(creep);
             return;
         }
-        
-        //collect intel        
-        Intel.collectIntel(creep, creep.room);
-        
+                
         //move to target room
         if (creep.room.name != creep.memory.troom)
         {
@@ -41,7 +38,7 @@ module.exports = {
         }
         
         //wait for controller to be captured
-        if (!creep.room.controller.my) {
+        if (!creep.room.my) {
             if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 this.harvest(creep);
             }

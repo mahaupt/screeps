@@ -23,10 +23,7 @@ module.exports = {
             }
             return;
         }
-        
-        //collect intel        
-        Intel.collectIntel(creep, creep.room);
-        
+                
         //move to target room
         if (creep.room.name != creep.memory.troom)
         {
@@ -35,7 +32,7 @@ module.exports = {
         }
         
         //capture controller
-        if (!creep.room.controller.my) {
+        if (!creep.room.my) {
             if (!creep.pos.inRangeTo(creep.room.controller, 1)) {
                 baseCreep.moveTo(creep, creep.room.controller);
             } else {

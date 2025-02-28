@@ -45,12 +45,7 @@ module.exports = {
                 baseCreep.boostCreep(creep, this.boost);
             }
             return;
-        }
-        
-        
-        //intel
-        Intel.collectIntel(creep, creep.room);
-        
+        }        
         
         //move to target room
         if (creep.room.name == creep.memory.troom) {

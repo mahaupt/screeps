@@ -29,13 +29,13 @@ module.exports = {
         
         //skip own room scouting
         var room = Game.rooms[target];
-        if (room && room.controller && room.controller.my) {
+        if (room && room.my) {
             ops.mem.nearby_id++;
             return;
         }
 
         // skip recently scouted rooms
-        let intel = Intel.getIntel(target);
+        let intel = Intel.get(target);
         if (intel && intel.time+10000 > Game.time) {
             ops.mem.nearby_id++;
             return;

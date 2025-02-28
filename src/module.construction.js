@@ -39,10 +39,8 @@ class ConstructionManager {
         }
 
         // controller upgrade
-        if (!constructionTask && !this.skipUpgradeDueEnergy[room.name]) {
-            if (room.controller && room.controller.my) {
-                return { t: "upgrade", r: room.name, l: [ room.controller.id ] }
-            }
+        if (!constructionTask && !this.skipUpgradeDueEnergy[room.name] && room.my) {
+            return { t: "upgrade", r: room.name, l: [ room.controller.id ] }
         }
         
         return constructionTask;

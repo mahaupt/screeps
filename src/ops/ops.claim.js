@@ -64,7 +64,7 @@ module.exports = {
         {
             //check if Controller has been claimed
             let room = Game.rooms[ops.target];
-            if (room && room.controller && room.controller.my === true) 
+            if (room && room.my === true) 
             {
                 ops.mem.state = this.BUILDING;
                 ops.mem.state_started = Game.time;

@@ -1,7 +1,31 @@
 module.exports = {
+    INTEL_EXPIRATION_TIME: 3000,
+
     FRIEND: 'friend',
     ENEMY: 'enemy',
     NEUTRAL: 'neutral',
+
+    TIME: 't',
+    EXPIRATION: 'x',
+    SOURCES: 's',
+    MINERAL: 'm',
+    DEPOSIT: 'd',
+    DEPOSIT_COOLDOWN: 'dc',
+    KEEPERS: 'k',
+    CONTROLLER: 'c',
+    CONTROLLER_LVL: 'cl',
+
+    INVADER_CORE_LVL: 'il',
+    INVADER_CORE_TICKS_TO_DEPLOY: 'it',
+
+    OWNER: 'p',
+    RESERVATION_OWNER: 'rp',
+    RESERVATION_TICKS: 'rt',
+    SPAWNS: 'bs',
+    TOWERS: 'bt',
+    STRUCTS: 'b',
+    CREEPS: 'z',
+
     
     init: function()
     {
@@ -17,106 +41,102 @@ module.exports = {
         if (!Memory.intel.diplo) {
 			Memory.intel.diplo = [];
 		}
+        if (!Memory.intel.claimable) {
+            Memory.intel.claimable = [];
+        }
+    },
+
+    run: function()
+    {
+        for (var r in Game.rooms) 
+        {
+            if (Game.rooms[r]) { // room visible
+                this.collectIntel(Game.rooms[r]);
+            }
+        }
     },
     
-    getIntel: function(roomname) {
-        return Memory.intel.list[roomname] || undefined;
+    get: function(room_name) {
+        return Memory.intel.list[room_name] || undefined;
     }, 
     
-    collectIntel: function(creep, room) {
+    collectIntel: function(room) {
         //skip own rooms
-        if (room.controller && room.controller.my) {
-            
+        if (room.my) {
             //delete own intel pages
-            if (Memory.intel && Memory.intel.list && Memory.intel.list[room.name]) {
+            if (Memory.intel.list[room.name]) {
                 delete Memory.intel.list[room.name];
             }
             return;
         }
 		
 		//recent intel
-		if (Memory.intel.list[room.name] && 
-            Memory.intel.list[room.name].time+3000 > Game.time) 
-        {
-			return;
-		}
+        let intel = this.get(room.name) || {};
         
-        var creeps = room.find(FIND_HOSTILE_CREEPS);
-        var struct = room.find(FIND_HOSTILE_STRUCTURES);
-        var deposits = room.find(FIND_DEPOSITS);
-        var source_keeper = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_KEEPER_LAIR});
-        var invaderCores = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_INVADER_CORE});
-        
-        
-        var intel = {};
-        intel.name = room.name;
-        intel.time = Game.time;
-        intel.sources = room.sources.length;
-        intel.minerals = null;
-        if (room.mineral) {
-            intel.minerals = room.mineral.mineralType;
-            intel.minerals_amt = room.mineral.mineralAmount;
-            
-            var extractors = room.mineral.pos.findInRange(
-                FIND_STRUCTURES, 
-                0, 
-                {filter: (s) => s.structureType == STRUCTURE_EXTRACTOR }
-            );
-            intel.minerals_extr = (extractors.length == 1);
+        intel[this.TIME] = Game.time;
+
+        // record permanent data -- record once
+        if (intel[this.SOURCES] === undefined) {
+            intel[this.SOURCES] = room.sources.length;
+            intel[this.MINERAL] = room.mineral ? room.mineral.mineralType : undefined;
+            intel[this.DEPOSIT] = room.deposit ? room.deposit.depositType : undefined;
+            intel[this.KEEPERS] = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_KEEPER_LAIR}).length || undefined;
+            intel[this.CONTROLLER] = room.controller ? true : undefined;
         }
-        intel.deposits = null;
-        if (deposits.length > 0) {
-            intel.deposits = deposits[0].depositType;
-            intel.deposits_cooldown = deposits[0].lastCooldown;
+        if (intel[this.DEPOSIT]) {
+            intel[this.DEPOSIT_COOLDOWN] = room.deposit.lastCooldown;
         }
-        intel.threat = "none";
-        if (invaderCores.length > 0) {
-            intel.threat = "core";
-        } else if (source_keeper.length > 0) {
-            intel.threat = "keeper";
+
+        // record controller data - record every time
+        if (intel[this.CONTROLLER]) {
+            intel[this.CONTROLLER_LVL] = room.controller.level;
+            intel[this.OWNER] = room.controller.owner ? room.controller.owner.username : undefined;
+
+            if (room.controller.reservation) {
+                intel[this.RESERVATION_OWNER] = room.controller.reservation.username;
+                intel[this.RESERVATION_TICKS] = room.controller.reservation.ticksToEnd;
+            } else {
+                intel[this.RESERVATION_OWNER] = undefined;
+                intel[this.RESERVATION_TICKS] = undefined;
+            }
         }
-        
-        intel.ctrl = false;
-        intel.ctrl_lvl = 0;
-        if (room.controller) {
-            intel.ctrl = true;
-            intel.ctrl_lvl = room.controller.level;
-            
-            if (room.controller.owner) {
-                intel.threat = "player";
-                intel.owner = room.controller.owner.username;
-                intel.has_spawn = false;
-                var spawns = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN});
-                if (spawns.length > 0) {
-                    intel.has_spawn = true;
-                }
-                
-                intel.has_towers = false;
-                var towers = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER});
-                if (towers.length > 0) {
-                    intel.has_towers = true;
-                }
+
+        // structure data - record every 3000 ticks
+        if ((intel[this.EXPIRATION] || 0) <= Game.time) {
+            intel[this.EXPIRATION] = Game.time + this.INTEL_EXPIRATION_TIME;
+            if (intel[this.CONTROLLER]) {
+                intel[this.SPAWNS] = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_SPAWN}).length;
+                intel[this.TOWERS] = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TOWER}).length;
+                intel[this.STRUCTS] = room.find(FIND_HOSTILE_STRUCTURES).length;
+            }
+            intel[this.CREEPS] = room.find(FIND_HOSTILE_CREEPS).length;
+        }
+
+        // record invasion data if applicable
+        if (intel[this.RESERVATION_OWNER] == "Invader" || intel[this.OWNER] == "Invader") {
+            let invaderCores = room.find(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_INVADER_CORE});
+            if (invaderCores.length > 0) {
+                intel[this.INVADER_CORE_LVL] = invaderCores[0].level;
+                intel[this.INVADER_CORE_TICKS_TO_DEPLOY] = invaderCores[0].ticksToDeploy;
+            } else {
+                intel[this.INVADER_CORE_LVL] = undefined;
+                intel[this.INVADER_CORE_TICKS_TO_DEPLOY] = undefined;
             }
         }
         
-        intel.creeps = creeps.length;
-        intel.structs = struct.length;
-        
         //save intel
-        if (Memory.intel.list[room.name]) delete Memory.intel.list[room.name];
         Memory.intel.list[room.name] = intel;
         
         //if room is in req, remove from req
-        var index = Memory.intel.req.indexOf(room.name);
+        let index = Memory.intel.req.indexOf(room.name);
         if (index >= 0) {
             Memory.intel.req.splice(index, 1);
         }
         
         //potential new room?
-        if (intel.ctrl && 
-            (intel.threat == "none" || 
-            (intel.threat == "player" && !intel.has_spawn)) &&
-            intel.sources >= 2) 
+        if (intel[this.CONTROLLER] && 
+            intel[this.SOURCES] >= 2 &&
+            !intel[this.OWNER])
         {
             this.addClaimable(room.name);
         }
@@ -145,10 +165,6 @@ module.exports = {
     
     addClaimable: function(roomname)
     {
-        if (!Memory.intel.claimable) {
-            Memory.intel.claimable = [];
-        }
-        
         var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname);
         if (index >= 0) return; // room already in list
             
@@ -157,10 +173,7 @@ module.exports = {
     }, 
     
     getPotClaimCenterPos: function(roomname)
-    {
-        if (!Memory.intel) return undefined;
-        if (!Memory.intel.claimable) return undefined;
-        
+    {        
         var index = _.findIndex(Memory.intel.claimable, (s) => s.room == roomname && s.parsed==true);
         if (index >= 0) {
             if (Memory.intel.claimable[index].parsed) {
