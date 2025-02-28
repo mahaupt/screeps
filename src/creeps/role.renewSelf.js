@@ -1,7 +1,7 @@
 module.exports = {
 	name: 'renewSelf', 
 	run: function(creep) {		
-        var spawns = creep.room.find(FIND_MY_STRUCTURES, {
+        let spawns = creep.room.find(FIND_MY_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_SPAWN;
             }

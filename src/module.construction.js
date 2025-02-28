@@ -25,10 +25,11 @@ class ConstructionManager {
             if (r.memory.attacked_time + 300 > Game.time) continue;
 
             // repairs
-            if (this.emergencyRepairs[r.name] >= 0 || this.repairPoints[r.name] >= energyAvbl*REPAIR_POWER) {
+            if (this.emergencyRepairs[r.name] > 0 || this.repairPoints[r.name] >= energyAvbl*REPAIR_POWER) {
                 this.emergencyRepairs[r.name] = 0; // reset emergency repairs
                 this.repairPoints[r.name] = Math.max(0, this.repairPoints[r.name] - energyAvbl*REPAIR_POWER);
-                return { t: "repair", r: r.name, l: [...this.repairSites[r.name]] }
+                // pass repair sites by reference, builders unshift by themselves
+                return { t: "repair", r: r.name, l: this.repairSites[r.name] }
             }
 
             // construction

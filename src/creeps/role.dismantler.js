@@ -41,19 +41,34 @@ module.exports = {
             baseCreep.moveToRoom(creep, creep.memory.troom);
         } 
         else 
-        {            
-            var target = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES);
-            if (target) {
-                creep.say("⚔️");
-                if (!creep.pos.inRangeTo(target, 1)) {
-                    baseCreep.moveTo(creep, target, {range: 1});
-                } else {
-                    creep.dismantle(target);
-                }
-            } else {
+        {
+            let target;
+            if (creep.memory.target) {
+                target = Game.getObjectById(creep.memory.target);
+                if (!target) delete creep.memory.target;
+            }
+            if (!creep.memory.target) {
+                target = !creep.memory.stypes 
+                    ? creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES) 
+                    : creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.structureType == creep.memory.stypes});
+                if (target) creep.memory.target = target.id;
+            }
+            
+            // done - no more targets
+            if (!target) {
                 creep.memory.killSelf = true;
                 creep.memory.renewSelf = true;
                 delete creep.memory.troom;
+                delete creep.memory.target;
+                return
+            }
+
+            // attack
+            creep.say("⚔️");
+            if (!creep.pos.inRangeTo(target, 1)) {
+                baseCreep.moveTo(creep, target, {range: 1});
+            } else {
+                creep.dismantle(target);
             }
         }
         

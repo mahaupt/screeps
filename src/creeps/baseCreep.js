@@ -156,6 +156,9 @@ module.exports = {
             nwork = bodySize;
             ncarry = bodySize;
             nmove = bodySize;
+        } else if (role == "queen") {
+            ncarry = 2;
+            nmove = 1;
         } else if (role == "scout") {
             nmove = 1;
         } else if (role == "pioneer") {
@@ -277,39 +280,10 @@ module.exports = {
     sendLinkToSpawn: function (link) {
         if (link.cooldown > 0) return false;
         var spawnlink = this.getSpawnLink(link.room);
-        if (spawnlink) {
-            //spawnlink has full capacity
-            if (
-                spawnlink.store.getFreeCapacity(RESOURCE_ENERGY) ==
-                LINK_CAPACITY
-            ) {
-                if (link.transferEnergy(spawnlink) == OK) {
-                    var amt = Math.round(
-                        link.store[RESOURCE_ENERGY] * (1 - LINK_LOSS_RATIO),
-                    );
-                    moduleLogistics.addTransportTask(
-                        link.room,
-                        spawnlink,
-                        link.room.storage,
-                        amt,
-                        RESOURCE_ENERGY,
-                        7,
-                        "l",
-                    );
-                    return true;
-                }
-            } else {
-                //console.log("Spawnlink full");
-                var amt = spawnlink.store[RESOURCE_ENERGY];
-                moduleLogistics.addTransportTask(
-                    link.room,
-                    spawnlink,
-                    link.room.storage,
-                    amt,
-                    RESOURCE_ENERGY,
-                    7,
-                    "l",
-                );
+        // check if link is full
+        if (spawnlink && spawnlink.store.getFreeCapacity(RESOURCE_ENERGY) == LINK_CAPACITY) {
+            if (link.transferEnergy(spawnlink) == OK) {
+                return true;
             }
         }
         return false;

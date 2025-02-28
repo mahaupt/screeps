@@ -156,12 +156,12 @@ module.exports = {
             }
             
             //wait for fellow creeps
-            var follower = creep.pos.findInRange(FIND_MY_CREEPS, 5).length;
+            /*var follower = creep.pos.findInRange(FIND_MY_CREEPS, 5).length;
             if (creep.memory.grp_follow && follower-1 < creep.memory.grp_follow.length) {
                 this.checkFollower(creep);
                 creep.say("Zzz");
                 return; //waiting
-            }
+            }*/
             
             //move
             baseCreep.moveToRoom(creep, creep.memory.troom);
@@ -185,35 +185,37 @@ module.exports = {
             findAtPos = creep.pos;
         }
         
-        var hostiles = null;
-        var structures = null;
+        let hostiles = null;
+        let structures = null;
         
         if (range <= 0) {
             hostiles = findAtPos.findClosestByPath(FIND_HOSTILE_CREEPS, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
-            structure = findAtPos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+            structures = findAtPos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
                 filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
-                    s.structureType == STRUCTURE_SPAWN) && 
+                    s.structureType == STRUCTURE_SPAWN ||
+                    s.structureType == STRUCTURE_INVADER_CORE) && 
                     Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
         } else {
             hostiles = findAtPos.findInRange(FIND_HOSTILE_CREEPS, range, {filter: (s) => Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
-            structure = findAtPos.findInRange(FIND_HOSTILE_STRUCTURES, range, {
+            structures = findAtPos.findInRange(FIND_HOSTILE_STRUCTURES, range, {
                 filter: (s)=>(s.structureType == STRUCTURE_TOWER || 
-                    s.structureType == STRUCTURE_SPAWN) && 
+                    s.structureType == STRUCTURE_SPAWN ||
+                    s.structureType == STRUCTURE_INVADER_CORE) && 
                     Intel.getDiplomatics(s.owner.username) != Intel.FRIEND});
                 
             if (hostiles.length > 0) {
                 hostiles = hostiles[0];
             }
             if (structure.length > 0) {
-                structure = structure[0];
+                structures = structures[0];
             }
         }
         
         if (hostiles)
         {
             creep.memory.target = hostiles.id;
-        } else if (structure) {
-            creep.memory.target = structure.id;
+        } else if (structures) {
+            creep.memory.target = structures.id;
         } else {
             //no targets - move home
             delete creep.memory.target;
@@ -295,7 +297,8 @@ module.exports = {
         
         //search for new leader
         var leader = _.find(Game.creeps, (s) => {
-            return s.memory.grp == creep.memory.grp &&
+            return s.memory.grp != null && 
+                s.memory.grp == creep.memory.grp &&
                 s.memory.grp_lead == 'self';
         });
         

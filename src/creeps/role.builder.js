@@ -87,8 +87,15 @@ module.exports = {
             return; 
         }
         
+        // standard move
         if (!creep.pos.inRangeTo(target, 3)) {
             baseCreep.moveTo(creep, target, {range: 3});
+            return;
+        }
+
+        // creep stands on edge, move closer
+        if (creep.pos.x == 0 || creep.pos.x == 49 || creep.pos.y == 0 || creep.pos.y == 49) {
+            baseCreep.moveTo(creep, target);
             return;
         }
 

@@ -255,10 +255,6 @@ module.exports = {
             res: resource
         };
         moduleLogistics.insertOrUpdate(room, task, false, force_new);
-        
-        /*if (task.type == "l") {
-            console.log(room.name + "/" + Game.time + ": l task inserted");
-        }*/
     }, 
     
     removeTaskGroup: function(room, taskgroup)
@@ -284,7 +280,7 @@ module.exports = {
         }
         
         // sort task by volume and priority
-        var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*2000);
+        var tasks = _.sortBy(room.memory.ltasks, (s) => -s.vol+s.acc+s.utx-s.prio*30000);
         
         // get task with open items and filter
         var task = _.find(tasks, (s) => { return s.vol-s.acc-s.utx > 0 && filter(s);});

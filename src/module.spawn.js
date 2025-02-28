@@ -10,7 +10,7 @@ module.exports = {
         // first, spawn from spawn list
         // soldiers, replacement creeps
         if (haulerCount > 0 && minerCount > 0 && room.memory.spawnList && room.memory.spawnList.length > 0) {
-            var ret = this.spawn(
+            let ret = this.spawn(
                 room,
                 room.memory.spawnList[0].role,
                 room.memory.spawnList[0].mem || {},
@@ -26,12 +26,13 @@ module.exports = {
         this.memCleanup();
 
         // then, spawn room creeps
-        var upgraderCount = counts.upgrader || 0;
-        var builderCount = counts.builder || 0;
+        let upgraderCount = counts.upgrader || 0;
+        let builderCount = counts.builder || 0;
+        let queenCount = counts.queen || 0;
 
-        var sourceCount = room.sources.length;
-        var mineralCount = (room.mineral && (room.mineral.mineralAmount > 0 || room.mineral.ticksToRegeneration <= 50)) ? 1 : 0;
-        var extractor_count = room.find(FIND_STRUCTURES, {
+        let sourceCount = room.sources.length;
+        let mineralCount = (room.mineral && (room.mineral.mineralAmount > 0 || room.mineral.ticksToRegeneration <= 50)) ? 1 : 0;
+        let extractor_count = room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType == STRUCTURE_EXTRACTOR;
             },
@@ -51,9 +52,10 @@ module.exports = {
         if (room.memory.stats.add_creeps >= 0 && !room.memory.stats.builders_needed) {
             room.memory.stats.builders_needed = room.memory.stats.add_creeps+1;
         }
-        delete room.memory.stats.add_creeps;
 
-        if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || this.max_haulers)) {
+        if (room.storage && queenCount < 1) {
+            this.spawn(room, "queen", {}, true);
+        } else if (minerCount > 0 && haulerCount < (room.memory.stats.haulers_needed || this.max_haulers)) {
             this.spawn(room, "hauler");
         } else if (
             minerCount < sourceCount * minerMultiplyer + extractor_count &&
@@ -67,7 +69,7 @@ module.exports = {
         }
     },
 
-    spawn: function (room, role, memory = {}) {
+    spawn: function (room, role, memory = {}, force = false) {
         let data = { memory: { ...{ role: role }, ...memory } };
 
         var roomCreeps = room.find(FIND_MY_CREEPS);
@@ -89,7 +91,7 @@ module.exports = {
         let name = baseCreep.getName(room, role);
 
         // find free spawn and spawn
-        let spawn = this.getFreeSpawn(room);
+        let spawn = this.getFreeSpawn(room, force);
         if (!spawn) return false;
         let ret = spawn.spawnCreep(body, name, data);
 
@@ -100,12 +102,16 @@ module.exports = {
         }
     },
 
-    getFreeSpawn: function(room) {
+    getFreeSpawn: function(room, force = false) {
         var spawns = room.find(FIND_MY_SPAWNS, {
             filter: (spawn) => {
                 return spawn.spawning == null;
             },
         });
+
+        if (force && spawns.legth >= 1) {
+            return spawns[0];
+        }
 
         // check if no renewing creep is nearby
         for(let spawn of spawns) {

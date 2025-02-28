@@ -21,6 +21,7 @@ var roleHarvester = require('creeps_role.harvester');
 var roleUpgrader = require('creeps_role.upgrader');
 var roleBuilder = require('creeps_role.builder');
 var roleHauler = require('creeps_role.hauler');
+var roleQueen = require('creeps_role.queen');
 var roleScout = require('creeps_role.scout');
 var rolePioneer = require('creeps_role.pioneer');
 var roleClaimer = require('creeps_role.claimer');
@@ -54,6 +55,7 @@ profiler.registerObject(roleHarvester, 'roleHarvester');
 profiler.registerObject(roleUpgrader, 'roleUpgrader');
 profiler.registerObject(roleBuilder, 'roleBuilder');
 profiler.registerObject(roleHauler, 'roleHauler');
+profiler.registerObject(roleQueen, 'roleQueen');
 profiler.registerObject(roleScout, 'roleScout');
 profiler.registerObject(rolePioneer, 'rolePioneer');
 profiler.registerObject(roleClaimer, 'roleClaimer');
@@ -124,6 +126,8 @@ module.exports.loop = moduleMemory.wrapper(() => {
                 roleBuilder.run(creep);
             } else if(creep.memory.role == 'hauler') {
                 roleHauler.run(creep);
+            } else if(creep.memory.role == 'queen') {
+                roleQueen.run(creep);
             } else if (creep.memory.role == 'scout') {
                 roleScout.run(creep);
             } else if (creep.memory.role == 'pioneer') {

@@ -245,7 +245,7 @@ module.exports = {
 				target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 					filter: (structure) => {
 						return (structure.structureType == STRUCTURE_EXTENSION ||
-							structure.structureType == STRUCTURE_SPAWN) &&
+							!creep.home.storage && structure.structureType == STRUCTURE_SPAWN) && // dont drop at spawn when queen present
 							structure.store.getFreeCapacity(task.res) > 0;
 					}
 				});
