@@ -94,7 +94,8 @@ module.exports = {
         }
 
         // creep stands on edge, move closer
-        if (creep.pos.x == 0 || creep.pos.x == 49 || creep.pos.y == 0 || creep.pos.y == 49) {
+        // OR creep is not in same room, move closer
+        if (creep.pos.x == 0 || creep.pos.x == 49 || creep.pos.y == 0 || creep.pos.y == 49 || troom.name != creep.room.name) {
             baseCreep.moveTo(creep, target);
             return;
         }

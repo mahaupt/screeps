@@ -55,17 +55,9 @@ module.exports = {
                 ops.mem.timeout = Game.time + this.core_timeout;
                 // multi level - wait longer
             }
-
-            // send creeps home
-            let miners = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
-            for(let m of miners) {
-                m.killSelf = true;
-                m.renewSelf = true;
-            }
-
+            this.sendCreepsHome(ops);
             return;
         }
-        delete ops.mem.soldier_spawned;
 
         if (intel[Intel.RESERVATION_OWNER] === "Invader") {
             // invader reserved, wait until reservation gone
@@ -154,26 +146,35 @@ module.exports = {
     {
         let troom = Game.rooms[ops.target];
         if (!troom) return; // visibility check
-        if (troom.memory.attacked_time+10 > Game.time) {
-            ops.mem.timeout = Game.time + this.attack_timeout;
-            var msg = "Ops." + ops.type + "(" + ops.target + "): attack on harvester detected. Pausing...";
-            Game.notify(msg);
+
+        // find invaders
+        let invaders = troom.find(FIND_HOSTILE_CREEPS, {filter: (h) => h.owner.username == "Invader"});
+        if (invaders.length > 0) {
+            ops.mem.timeout = Game.time + invaders[0].ticksToLive;
+            troom.memory.attacked_time = Game.time + invaders[0].ticksToLive;
+            this.sendCreepsHome(ops);
             return;
         }
 
-        // find invaders
-        let hostiles = troom.find(FIND_HOSTILE_CREEPS, {filter: (h) => h.owner.username == "Invader"});
-        if (hostiles.length > 0) {
-            ops.mem.timeout = Game.time + hostiles[0].ticksToLive;
-
-            // send creeps home
-            let miners = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
-            for(let m of miners) {
-                m.killSelf = true;
-                m.renewSelf = true;
+        // no invaders but general attacking check
+        if (troom.memory.attacked_time+10 >= Game.time && Game.time % 5 == 0) {
+            let hostiles = troom.find(FIND_HOSTILE_CREEPS);
+            if (hostiles.length > 0) {
+                ops.mem.timeout = Game.time + this.attack_timeout;
+                this.sendCreepsHome(ops);
+                return;
             }
         }
     }, 
+
+    sendCreepsHome(ops) {
+        // miners
+        let miners = _.filter(Memory.creeps, (s) => (s.role == "harvester" || s.role == "miner") && s.troom == ops.target);
+        for(let m of miners) {
+            m.killSelf = true;
+            m.renewSelf = true;
+        }
+    },
     
     
     init: function(ops)

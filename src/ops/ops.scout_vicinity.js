@@ -35,8 +35,7 @@ module.exports = {
         }
 
         // skip recently scouted rooms
-        let intel = Intel.get(target);
-        if (intel && intel.time+10000 > Game.time) {
+        if (Intel.lastUpdate(target)+10000 > Game.time) {
             ops.mem.nearby_id++;
             return;
         }

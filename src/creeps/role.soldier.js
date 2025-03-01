@@ -72,22 +72,14 @@ module.exports = {
         }
         
         //follow leader
-        baseCreep.moveTo(creep, leader);
+        baseCreep.moveTo(creep, leader, {range: 1});
     }, 
     
     leader: function(creep)
     {
-        //target
-        if (creep.memory.target) {
-            var target = Game.getObjectById(creep.memory.target);
-            if (target) {
-                this.attack(creep, target);
-                return;
-            } else {
-                delete creep.memory.target;
-            }
-        }
-        
+        // troom but not visible, go to room
+        // troom visible pick target and go to target
+
         //no target room - go home
         if (!creep.memory.troom) 
         {
@@ -104,61 +96,38 @@ module.exports = {
             delete creep.memory.embark;
             return;
         }
-        
-        //if target room - prepare for embarkation
-        if (!creep.memory.embark) {
-            if (baseCreep.prepareCreep(creep)) {
-                baseCreep.boostCreep(creep, this.boost_res);
-            }
+
+        // troom not visible, move to room
+        let troom = Game.rooms[creep.memory.troom];
+        if (!troom) {
+            baseCreep.moveToRoom(creep, creep.memory.troom);
             return;
         }
         
-        //in target room
-        if (creep.room.name == creep.memory.troom) 
+        //search for targets in room
+        if (!creep.memory.target && !creep.memory.passive) 
         {
-            //search for targets in room
-            if (!creep.memory.target && !creep.memory.passive) 
-            {
-                var tposition = null;
-                var trange = -1;
-                if (creep.memory.tx && creep.memory.ty) {
-                    tposition = creep.room.getPositionAt(creep.memory.tx, creep.memory.ty);
-                }
-                if (creep.memory.trange) {
-                    trange = creep.memory.trange;
-                }
-                
-                this.pickTarget(creep, tposition, trange);
+            var tposition = null;
+            var trange = -1;
+            if (creep.memory.tx && creep.memory.ty) {
+                tposition = new RoomPosition(creep.memory.tx, creep.memory.ty, creep.memory.troom);
+            }
+            if (creep.memory.trange) {
+                trange = creep.memory.trange;
             }
             
-            //move in position
-            if (creep.memory.tx && creep.memory.ty) 
-            {
-                baseCreep.moveTo(creep, creep.memory.tx, creep.memory.ty);
-                creep.say("🛡️");
+            this.pickTarget(creep, tposition, trange);
+        }
+
+        //target
+        if (creep.memory.target) {
+            let target = Game.getObjectById(creep.memory.target);
+            if (target) {
+                this.attack(creep, target);
+                return;
+            } else {
+                delete creep.memory.target;
             }
-        } 
-        else 
-        {   //move to target room
-            
-            //handle counter attack on the way
-            if (creep.memory.attacked_time + 10 > Game.time) {
-                if (!creep.memory.target && !creep.memory.passive) 
-                {   //pick closest target
-                    this.pickTarget(creep);
-                }
-            }
-            
-            //wait for fellow creeps
-            /*var follower = creep.pos.findInRange(FIND_MY_CREEPS, 5).length;
-            if (creep.memory.grp_follow && follower-1 < creep.memory.grp_follow.length) {
-                this.checkFollower(creep);
-                creep.say("Zzz");
-                return; //waiting
-            }*/
-            
-            //move
-            baseCreep.moveToRoom(creep, creep.memory.troom);
         }
     }, 
     

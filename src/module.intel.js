@@ -58,7 +58,13 @@ module.exports = {
     
     get: function(room_name) {
         return Memory.intel.list[room_name] || undefined;
-    }, 
+    },
+    
+    lastUpdate(room_name) {
+        let intel = this.get(room_name);
+        if (!intel) return -99999;
+        return intel[this.TIME];
+    },
     
     collectIntel: function(room) {
         //skip own rooms

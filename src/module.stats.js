@@ -94,11 +94,7 @@ module.exports =  {
     
     getTransportStats: function(room)
     {
-        var volume = 0;
-        for (var i in room.memory.ltasks) {
-            volume += room.memory.ltasks[i].vol;
-        }
-        
+        let volume = _.sum(room.memory.ltasks, 'vol');
         room.memory.stats.transports = volume;
         
         if (Game.time % 1000 == 10) {
@@ -119,7 +115,7 @@ module.exports =  {
                 carries += h.body.length * 2 / 3;
             }
 
-            let carryPartPerHauler = Math.round(carries / haulers);
+            let carryPartPerHauler = Math.round(carries / haulers.length);
             // take short term and long term into consideration
             let avg_transports = (room.memory.stats.transports_1k + room.memory.stats.transports_1k_30) / 2;
             let haulerNeeded = Math.round(avg_transports / (carryPartPerHauler*50));

@@ -19,12 +19,10 @@ module.exports =  {
             
             if (!creep.isAtHome) {
                 baseCreep.moveToRoom(creep, creep.memory.home);
-            }
-            else 
-            {
+            } else {
                 //idle around controller
                 creep.say("😴");
-                baseCreep.moveTo(creep, creep.room.controller);
+                baseCreep.moveTo(creep, creep.room.controller, {range: 2});
             }
             return;
         }
@@ -43,14 +41,23 @@ module.exports =  {
     
     pickTarget: function(creep) 
     {
-        if (Memory.intel.req.length > 0) {
-            creep.memory.troom = Memory.intel.req.shift();
+        let min_dist = 9999;
+        let selected_troom;
+
+        // select next troom room
+        for(let i in Memory.intel.req) {
+            let d = Game.map.getRoomLinearDistance(creep.room, Memory.intel.req[i]);
+            if (d < min_dist) {
+                min_dist = d;
+                selected_troom = i;
+            }
+        }
+        if (selected_troom) {
+            creep.memory.troom = Memory.intel.req[selected_troom];
+            Memory.intel.req.splice(selected_troom, 1);
         } else {
             creep.memory.renewSelf = true;
             creep.memory.killSelf = true;
         }
     },
-    
-    
-    
 };

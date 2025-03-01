@@ -1,39 +1,31 @@
 module.exports = {
+    cooldown: 500,
+
     run: function(ops)
     {
         this.init(ops);
+
+        // cooldown
+        if (ops.mem.cooldown > Game.time) return;
+        ops.mem.cooldown = Game.time + this.cooldown;
         
-        //check if scout has completed
-        let intel = Intel.get(ops.target);
-        if (intel && intel[Intel.EXPIRATION]+1500 > Game.time) 
+        // check if scout has completed
+        if (Intel.lastUpdate(ops.target)+this.cooldown >= Game.time) 
         {
             // recent intel already exists, abort
             ops.finished = true;
             return;
         }
-        
-        //spawn cooldown
-        if (ops.mem.cooldown > Game.time) return;
-        ops.mem.cooldown = Game.time + 500;
-        
+
+        let intel = Intel.get(ops.target);
         
         // SOURCE ROOM NOT AVBL - ABORT
         if (Ops.checkSrcRoomAvbl(ops)) return;
         
-        
-        //check if scout is still on its way
-        var scout = _.find(Memory.creeps, (s) => s.role == "scout" && s.troom == ops.target);
+        //check if scout is still alive
+        let scouts = _.filter(Memory.creeps, (s) => s.role == "scout");
+        let scout = _.find(scouts, (s) => s.troom == ops.target);
         if (scout) return;
-        
-        
-        //skip if room is my own
-        if (Game.rooms[ops.target] && 
-            Game.rooms[ops.target].my)
-        {
-            ops.finished = true;
-            return;
-        }
-        
         
         //get room path and look for hostiles
         let path = Game.map.findRoute(ops.source, ops.target);
@@ -44,9 +36,7 @@ module.exports = {
             return;
         }
         
-        
         //if not completed, spawn new scout
-        let scouts = _.sum(Memory.creeps, (s) => s.role == "scout");
         if (scouts.length < 2) 
         {
             //spawn new scout
@@ -54,7 +44,7 @@ module.exports = {
         } 
         else 
         {
-            //add to task list
+            // too many scouts - add to task list
             var index = Memory.intel.req.indexOf(ops.target);
             if (index < 0) {
                 Memory.intel.req.push(ops.target);
